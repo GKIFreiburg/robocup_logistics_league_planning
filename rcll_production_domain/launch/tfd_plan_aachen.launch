@@ -1,0 +1,10 @@
+<launch>
+
+   <arg name="domain" default="$(find rcll_ros)/pddl/rcll_domain_production_durations.pddl" />
+   <arg name="problem" default="$(find rcll_ros)/pddl/rcll_problem_production_durations.pddl" />
+
+   <node pkg="tfd_modules" type="tfd_plan" name="tfd_plan" args="$(arg domain) $(arg problem)" required="true">
+      <rosparam command="load" file="$(find rcll_production_domain)/config/tfd_modules_params.yaml" />
+   </node>
+
+</launch>
