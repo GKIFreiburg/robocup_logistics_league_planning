@@ -195,18 +195,31 @@
 										(at start (cs-buffered ?m ?capcol)) (at start (cs-prepared-for ?m CS_MOUNT))
 										(at start (wp-usable ?wp)) (at start (wp-at ?wp ?m INPUT))
 										(at start (wp-cap-color ?wp CAP_NONE)))
-		:effect (and (at start (not (mps-state ?m PROCESSING))) (at end (mps-state ?m READY-AT-OUTPUT))
-								 (at start (not (wp-at ?wp ?m INPUT))) (at end (wp-at ?wp ?m OUTPUT))
-								 (at end (not (wp-cap-color ?wp CAP_NONE))) (at end (wp-cap-color ?wp ?capcol))
-								 (at end (cs-can-perform ?m CS_RETRIEVE)))
+		:effect 
+		(and 
+			(at start (mps-state ?m PROCESSING))
+			(at end (not (mps-state ?m PROCESSING)))
+			(at end (mps-state ?m READY-AT-OUTPUT))
+			(at start (not (wp-at ?wp ?m INPUT)))
+			(at end (wp-at ?wp ?m OUTPUT))
+			(at end (not (wp-cap-color ?wp CAP_NONE)))
+			(at end (wp-cap-color ?wp ?capcol))
+			(at end (cs-can-perform ?m CS_RETRIEVE))
+		)
 	)
 
 	(:durative-action cs-retrieve-cap
 		:parameters (?m - mps ?cc - cap-carrier ?capcol - cap-color)
 		:duration (= ?duration 1)
-		:condition (and (at start (mps-type ?m CS)) (at start (mps-state ?m PROCESSING))
-										(at start (cs-prepared-for ?m CS_RETRIEVE))
-										(at start (wp-at ?cc ?m INPUT))  (at start (wp-cap-color ?cc ?capcol)))
+		:condition 
+		(and 
+			(at start (mps-type ?m CS))
+			(at start (mps-state ?m PROCESSING))
+			(at start (cs-prepared-for ?m CS_RETRIEVE))
+			(at start (wp-at ?cc ?m INPUT))
+			(at start (wp-cap-color ?cc ?capcol))
+			(at start (not (= ?capcol CAP_NONE)))
+		)
 		:effect (and (at start (not (mps-state ?m PROCESSING))) (at end (mps-state ?m READY-AT-OUTPUT))
 								 (at start (not (wp-at ?cc ?m INPUT))) (at end (wp-at ?cc ?m OUTPUT))
 								 (at start (not (wp-cap-color ?cc ?capcol))) (at end (wp-cap-color ?cc CAP_NONE))

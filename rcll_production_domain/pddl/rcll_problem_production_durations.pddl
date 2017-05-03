@@ -303,15 +303,13 @@
 	 (= (path-length START INPUT C-RS1 OUTPUT) 27.4246)
 	 (= (path-length START INPUT C-RS2 INPUT) 26.6464)
 	 (= (path-length START INPUT C-RS2 OUTPUT) 16.9367)
-
 	)
 
 	(:goal 
 		(and 
-			(wp-base-color wp1 BASE_BLACK)
-			;(mps-state C-CS1 PREPARED)
-			(cs-buffered C-CS1 CAP_GREY)
-			;(wp-cap-color wp1 CAP_GREY)
+			;(wp-base-color wp1 BASE_BLACK)
+			;(cs-buffered C-CS1 CAP_GREY)
+			(wp-cap-color wp1 CAP_GREY)
 			;(order-fulfilled o1)
 		)
 	)
