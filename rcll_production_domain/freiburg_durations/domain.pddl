@@ -5,12 +5,13 @@
 		:object-fluents
 		:typing
 		:adl
+;		:derived-predicates
 	)
 
 	(:types
 		robot - object
 		location - object
-		input material output - location
+		input output - location
 		machine - object
 		base_station ring_station cap_station delivery_station - machine
 		product - object
@@ -27,6 +28,7 @@
 		ds - delivery_station
 
 		; locations
+		start - location
 		bs_out - output
 		rs1_in - input
 		rs1_out - output
@@ -66,7 +68,8 @@
 		
 		; robots
 		(robot-at ?r - robot ?l - location)
-		(robot-at-init ?r)
+		(robot-at-init ?r - robot)
+		(robot-precedes ?r1 ?r2 - robot)
 	)
 
 	(:functions
@@ -74,7 +77,7 @@
 		(material-required ?s - step) - number
 	)
 
-	(:durative-action initialize-material
+	(:durative-action dispense-material
 		:parameters (?m - base_station ?o - output)
 		:duration (= ?duration 1)
 		:condition (and
@@ -90,7 +93,7 @@
 		)
 	)
 
-	(:durative-action initialize-product
+	(:durative-action dispense-product
 		:parameters (?m - base_station ?p - product ?s - step ?o - output)
 		:duration (= ?duration 1)
 		:condition (and
@@ -313,6 +316,7 @@
 		:duration (= ?duration 1)
 		:condition (and
 			(at start (robot-at ?r ?l1))
+			(at end (location-clear ?l2))
 		)
 		:effect (and
 			(at start (not (robot-at ?r ?l1)))
@@ -321,16 +325,27 @@
 	)
 
 	(:durative-action move-in
-		:parameters (?r - robot ?l - location)
-		:duration (= ?duration 1)
+		:parameters (?r - robot)
+		:duration (= ?duration 10)
 		:condition (and
 			(at start (robot-at-init ?r))
+			(at start (robot-clear ?r))
+			(at start (location-clear start))
 		)
 		:effect (and
-			(at start (not (robot-at-init ?r)))
-			(at end (robot-at ?r ?l))
+			(at end (not (robot-at-init ?r)))
+			(at end (robot-at ?r start))
 		)
 	)
 	
+  (:derived
+    (location-clear ?l - location)
+    (not (exists (?_r - robot) (robot-at ?_r ?l)))
+  )
+  
+  (:derived
+    (robot-clear ?r - robot)
+    (not (exists (?_r - robot) (and (robot-precedes ?_r ?r) (robot-at-init ?_r))))
+  )
 )
 
