@@ -1,0 +1,11 @@
+NEWP	5
+rings	blue	green	rs1
+rings	yellow	orange	rs2
+caps	black	cs1
+caps	white	cs2
+prod1	red	green	-	white
+prod2	black	yellow	-	white
+prod3	black	blue	blue	white
+prod4	black	orange	-	black
+prod5	black	green	-	black
+ENDPROBLEM
