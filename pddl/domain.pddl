@@ -309,7 +309,7 @@
 	)
 
 	(:durative-action move
-		:parameters (?r - robot ?l1 - output ?l2 - input)
+		:parameters (?r - robot ?l1 ?l2 - location)
 		:duration (= ?duration 1)
 		:condition (and
 			(at start (robot-at ?r ?l1))
