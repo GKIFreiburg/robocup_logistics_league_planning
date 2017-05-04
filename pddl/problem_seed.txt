@@ -1,4 +1,4 @@
-NUMPROB	1
+NUMPROB	10
 MAX_PROD	10
 rings	blue	green	rs1
 rings	yellow	orange	rs2
