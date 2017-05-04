@@ -330,7 +330,6 @@
 			(at start (not (robot-at-init ?r)))
 			(at end (robot-at ?r ?l))
 		)
-	)
-	
+	)	
 )
 
