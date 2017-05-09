@@ -1,0 +1,108 @@
+NEWP	2
+rings	blue	green	rs1
+rings	yellow	orange	rs2
+caps	black	cs1
+caps	silver	cs2
+prod1	black	blue	yellow	black
+prod2	red	-	-	black
+ENDPROBLEM
+NEWP	1
+rings	blue	green	rs1
+rings	yellow	orange	rs2
+caps	black	cs1
+caps	silver	cs2
+prod1	white	orange	-	black
+ENDPROBLEM
+NEWP	8
+rings	blue	green	rs1
+rings	yellow	orange	rs2
+caps	black	cs1
+caps	silver	cs2
+prod1	black	yellow	-	black
+prod2	black	yellow	-	white
+prod3	black	-	-	white
+prod4	black	blue	green	black
+prod5	red	orange	yellow	white
+prod6	red	orange	-	white
+prod7	black	-	-	white
+prod8	black	yellow	orange	white
+ENDPROBLEM
+NEWP	1
+rings	blue	green	rs1
+rings	yellow	orange	rs2
+caps	black	cs1
+caps	silver	cs2
+prod1	black	yellow	-	black
+ENDPROBLEM
+NEWP	5
+rings	blue	green	rs1
+rings	yellow	orange	rs2
+caps	black	cs1
+caps	silver	cs2
+prod1	black	-	-	white
+prod2	white	-	-	black
+prod3	black	-	-	black
+prod4	white	yellow	yellow	black
+prod5	white	-	-	black
+ENDPROBLEM
+NEWP	9
+rings	blue	green	rs1
+rings	yellow	orange	rs2
+caps	black	cs1
+caps	silver	cs2
+prod1	black	orange	-	white
+prod2	black	-	-	black
+prod3	red	orange	-	white
+prod4	white	orange	orange	white
+prod5	white	green	-	black
+prod6	red	-	-	white
+prod7	red	blue	-	black
+prod8	black	green	-	black
+prod9	white	yellow	-	white
+ENDPROBLEM
+NEWP	4
+rings	blue	green	rs1
+rings	yellow	orange	rs2
+caps	black	cs1
+caps	silver	cs2
+prod1	red	yellow	yellow	white
+prod2	white	-	-	black
+prod3	red	-	-	black
+prod4	red	green	-	white
+ENDPROBLEM
+NEWP	9
+rings	blue	green	rs1
+rings	yellow	orange	rs2
+caps	black	cs1
+caps	silver	cs2
+prod1	red	-	-	white
+prod2	black	green	yellow	black
+prod3	white	orange	orange	black
+prod4	white	-	-	black
+prod5	white	green	-	white
+prod6	white	orange	-	white
+prod7	white	green	-	black
+prod8	white	green	green	black
+prod9	black	green	yellow	white
+ENDPROBLEM
+NEWP	8
+rings	blue	green	rs1
+rings	yellow	orange	rs2
+caps	black	cs1
+caps	silver	cs2
+prod1	black	yellow	-	black
+prod2	red	blue	-	white
+prod3	white	blue	-	white
+prod4	red	yellow	-	white
+prod5	red	blue	orange	black
+prod6	red	yellow	-	white
+prod7	red	-	-	black
+prod8	black	green	yellow	black
+ENDPROBLEM
+NEWP	1
+rings	blue	green	rs1
+rings	yellow	orange	rs2
+caps	black	cs1
+caps	silver	cs2
+prod1	red	blue	yellow	white
+ENDPROBLEM

@@ -1,7 +1,7 @@
 <launch>
-
+	<arg name="pname" default="p01" />
    <arg name="domain" default="$(find rcll_production_domain)/freiburg_durations/domain.pddl" />
-   <arg name="problem" default="$(find rcll_production_domain)/freiburg_durations/p01.pddl" />
+   <arg name="problem" default="$(find rcll_production_domain)/freiburg_durations/$(arg pname).pddl" />
 
    <node pkg="tfd_modules" type="tfd_plan" name="tfd_plan" args="$(arg domain) $(arg problem)" required="true">
       <rosparam command="load" file="$(find rcll_production_domain)/config/tfd_modules_params.yaml" />

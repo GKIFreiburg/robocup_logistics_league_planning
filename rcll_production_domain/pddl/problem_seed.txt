@@ -3,4 +3,4 @@ MAX_PROD	10
 rings	blue	green	rs1
 rings	yellow	orange	rs2
 caps	black	cs1
-caps	white	cs2
+caps	silver	cs2
