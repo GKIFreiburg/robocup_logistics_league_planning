@@ -5,7 +5,6 @@
 		:object-fluents
 		:typing
 		:adl
-		:derived-predicates
 	)
 
 	(:types
@@ -60,6 +59,8 @@
 		
 		; products
 		(product-at ?p - product ?l - location)
+		(product-precedes ?p1 ?p2 - product)
+		(product-active ?p - product)
 		
 		; materials
 		(material-at ?l - location)
@@ -77,6 +78,9 @@
 		(material-required ?s - step) - number
 		; paths
 		(path-length ?l1 ?l2 - location) - number
+		; products
+		(product-count) - number
+		(max-product-count) - number
 	)
 
 	(:durative-action dispense-material
@@ -89,7 +93,7 @@
 		:effect (and
 			(at start (processing bs))
 			(at end (not (processing bs)))
-			(at start (conveyor-full bs))
+			(at end (conveyor-full bs))
 			(at end (material-at bs_out))
 		)
 	)
@@ -104,13 +108,17 @@
 			(at start (not (step-completed ?s)))
 			(at start (not (conveyor-full bs)))
 			(at start (not (processing bs)))
+			(at start (< (product-count) (max-product-count)))
+			(at start (can-start-product ?p))
 		)
 		:effect (and
 			(at start (processing bs))
 			(at end (not (processing bs)))
-			(at start (conveyor-full bs))
+			(at end (conveyor-full bs))
 			(at end (product-at ?p bs_out))
+			(at end (product-active ?p))
 			(at end (step-completed ?s))
+			(at end (increase (product-count) 1))
 		)
 	)
 
@@ -134,6 +142,23 @@
 			(at end (product-at ?p ?o))
 			(at end (step-completed ?s))
 			(at end (decrease (material-load ?m) (material-required ?s)))
+		)
+	)
+
+	(:durative-action move-to-buffer
+		:parameters (?r - robot ?l - location ?i - input ?m - cap_station)
+		:duration (= ?duration (path-length ?l ?i))
+		:condition (and
+			(at start (robot-at ?r ?l))
+			(at start (robot-can-pickup ?r))
+			(at start (input-location ?i ?m))
+			(at end (no-robot-at-location ?i))
+			(at end (not (conveyor-full ?m)))
+			(at end (not (cap-buffered ?m)))
+		)
+		:effect (and
+			(at start (not (robot-at ?r ?l)))
+			(at end (robot-at ?r ?i))
 		)
 	)
 
@@ -196,6 +221,7 @@
 			(at start (not (product-at ?p ds_in)))
 			(at end (not (conveyor-full ds)))
 			(at end (step-completed ?s))
+			(at end (decrease (product-count) 1))
 		)
 	)
 
@@ -312,19 +338,6 @@
 		)
 	)
 
-	(:durative-action move
-		:parameters (?r - robot ?l1 ?l2 - location)
-		:duration (= ?duration (path-length ?l1 ?l2))
-		:condition (and
-			(at start (robot-at ?r ?l1))
-			(at end (no-robot-at-location ?l2))
-		)
-		:effect (and
-			(at start (not (robot-at ?r ?l1)))
-			(at end (robot-at ?r ?l2))
-		)
-	)
-
 	(:durative-action move-in
 		:parameters (?r - robot)
 		:duration (= ?duration 10)
@@ -355,6 +368,11 @@
   (:derived
     (robot-can-enter ?r - robot)
     (not (exists (?_r - robot) (and (robot-precedes ?_r ?r) (robot-at-init ?_r))))
+  )
+
+  (:derived
+    (can-start-product ?p - product)
+    (not (exists (?_p - product) (and (product-precedes ?_p ?p) (not (product-active ?_p)))))
   )
 )
 
