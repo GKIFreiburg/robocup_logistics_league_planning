@@ -1,27 +1,26 @@
 (define (problem p01)
 (:domain rcll-production-steps)
 (:objects
-	r1 
-;	r2 
-;	r3
-	 - robot
+	r1 - robot
+	r2 - robot
+;	r3 - robot	
 	
 	; products
 	p1 - product
 	init_p1 ring1_p1 cap_p1 delivery_p1 - step
-	p2 - product
+;	p2 - product
 	init_p2 ring1_p2 cap_p2 delivery_p2 - step
-	p3 - product
+;	p3 - product
 	init_p3 cap_p3 delivery_p3 - step
-	p4 - product
+;	p4 - product
 	init_p4 ring1_p4 ring2_p4 cap_p4 delivery_p4 - step
-	p5 - product
+;	p5 - product
 	init_p5 ring1_p5 ring2_p5 cap_p5 delivery_p5 - step
-	p6 - product
+;	p6 - product
 	init_p6 ring1_p6 cap_p6 delivery_p6 - step
-	p7 - product
+;	p7 - product
 	init_p7 cap_p7 delivery_p7 - step
-	p8 - product
+;	p8 - product
 	init_p8 ring1_p8 ring2_p8 cap_p8 delivery_p8 - step
 )
 
@@ -32,17 +31,9 @@
 	(robot-at-init r3)
 	(robot-precedes r1 r2)
 	(robot-precedes r2 r3)
-	
-	(= (product-count) 0)
-	(= (max-product-count) 1)
-
-	(product-precedes p1 p2)
-	(product-precedes p2 p3)
-	(product-precedes p3 p4)
-	(product-precedes p4 p5)
-	(product-precedes p5 p6)
-	(product-precedes p6 p7)
-	(product-precedes p7 p8)
+	(robot-can-pickup r1)
+	(robot-can-pickup r2)
+	(robot-can-pickup r3)
 	
 ;p1
 	(initial-step init_p1)
@@ -339,15 +330,20 @@
 		;(forall (?s - step)(step-completed s))
 		;(step-completed init_p1)
 		;(> (material-load rs2) 0)
-		(step-completed ring1_p1)
+		;(step-completed ring1_p1)
 		;(cap-buffered cs1)
-		(not (material-at cs1_out))
-		(not (robot-holding-material r1))
-		(robot-holding-product r1 p1)
+		;(not (material-at cs1_out))
+		;(not (robot-holding-material r1))
+		;(robot-holding-product r1 p1)
 		;(product-at p1 cs1_in)
 		;(step-completed cap_p1)
-		;(step-completed delivery_p1)
+		;(material-at cs1_in)
+		;(cap-buffered cs1)
+		;(robot-at r1 start)
+		;(robot-at r2 start)
+		;(robot-at r3 start)
 		
+		(step-completed delivery_p1)
 		;(step-completed delivery_p2)
 		;(step-completed delivery_p3)
 		;(step-completed delivery_p4)
