@@ -290,6 +290,7 @@
 			(at start (robot-at ?r ?o))
 			(at start (not (robot-holding-something ?r)))
 			(over all (not (location-occupied ?i)))
+			(over all (not (input-full ?i)))
 		)
 		:effect (and
 			(at start (not (robot-at ?r ?o)))
