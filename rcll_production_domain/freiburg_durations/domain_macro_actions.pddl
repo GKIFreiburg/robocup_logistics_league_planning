@@ -11,6 +11,8 @@
 		robot - object
 		location - object
 		input output - location
+		ds_input rs_input cs_input - input
+		bs_output rs_output cs_output - output
 		machine - object
 		base_station ring_station cap_station delivery_station - machine
 		product - object
@@ -28,16 +30,16 @@
 
 		; locations
 		start - location
-		bs_out - output
-		rs1_in - input
-		rs1_out - output
-		rs2_in - input
-		rs2_out - output
-		cs1_in - input
-		cs1_out - output
-		cs2_in - input
-		cs2_out - output
-		ds_in - input
+		bs_out - bs_output
+		rs1_in - rs_input
+		rs1_out - rs_output
+		rs2_in - rs_input
+		rs2_out - rs_output
+		cs1_in - cs_input
+		cs1_out - cs_output
+		cs2_in - cs_input
+		cs2_out - cs_output
+		ds_in - ds_input
 	)
 
 	(:predicates
@@ -45,7 +47,8 @@
 		(input-location ?il - input ?m - machine)
 		(output-location ?ol - output ?m - machine)
 		(processing ?m - machine)
-		(conveyor-full ?m - machine)
+		(input-full ?i - input)
+		(output-full ?o - output)
 		
 		; cap_station stations
 		(cap-buffered ?m - cap_station)
@@ -59,8 +62,6 @@
 		
 		; products
 		(product-at ?p - product ?l - location)
-		(product-precedes ?p1 ?p2 - product)
-		(product-active ?p - product)
 		
 		; materials
 		(material-at ?l - location)
@@ -71,29 +72,29 @@
 		(robot-precedes ?r1 ?r2 - robot)
 		(robot-holding-material ?r - robot)
 		(robot-holding-product ?r - robot ?p - product)
+		(robot-holding-something ?r - robot)
+		(robot-recently-moved ?r - robot)
+		(processing ?r - robot)
 	)
 
 	(:functions
-		(material-load ?m - ring_station) - number
+		(material-stored ?m - ring_station) - number
 		(material-required ?s - step) - number
 		; paths
 		(path-length ?l1 ?l2 - location) - number
-		; products
-		(product-count) - number
-		(max-product-count) - number
 	)
 
 	(:durative-action dispense-material
 		:parameters ()
 		:duration (= ?duration 15)
 		:condition (and
-			(at start (not (conveyor-full bs)))
+			(at start (not (output-full bs_out)))
 			(at start (not (processing bs)))
 		)
 		:effect (and
 			(at start (processing bs))
 			(at end (not (processing bs)))
-			(at end (conveyor-full bs))
+			(at start (output-full bs_out))
 			(at end (material-at bs_out))
 		)
 	)
@@ -106,24 +107,20 @@
 			(at start (step-at-machine ?s bs))
 			(at start (initial-step ?s))
 			(at start (not (step-completed ?s)))
-			(at start (not (conveyor-full bs)))
+			(at start (not (output-full bs_out)))
 			(at start (not (processing bs)))
-			(at start (< (product-count) (max-product-count)))
-			(at start (can-start-product ?p))
 		)
 		:effect (and
 			(at start (processing bs))
 			(at end (not (processing bs)))
-			(at end (conveyor-full bs))
+			(at start (output-full bs_out))
 			(at end (product-at ?p bs_out))
-			(at end (product-active ?p))
 			(at end (step-completed ?s))
-			(at end (increase (product-count) 1))
 		)
 	)
 
 	(:durative-action mount-ring
-		:parameters (?m - ring_station ?p - product ?s - step ?i - input ?o - output)
+		:parameters (?m - ring_station ?p - product ?s - step ?i - rs_input ?o - rs_output)
 		:duration (= ?duration 60)
 		:condition (and
 			(at start (product-at ?p ?i))
@@ -132,50 +129,38 @@
 			(at start (not (step-completed ?s)))
 			(at start (input-location ?i ?m))
 			(at start (output-location ?o ?m))
+			(at start (not (output-full ?o)))
 			(at start (not (processing ?m)))
-			(at start (>= (material-load ?m) (material-required ?s)))
+			(at start (>= (material-stored ?m) (material-required ?s)))
 		)
 		:effect (and
 			(at start (processing ?m))
-			(at end (not (processing ?m)))
 			(at start (not (product-at ?p ?i)))
+			(at start (output-full ?o))
+			(at end (not (input-full ?i)))	
+			(at end (not (processing ?m)))
 			(at end (product-at ?p ?o))
 			(at end (step-completed ?s))
-			(at end (decrease (material-load ?m) (material-required ?s)))
-		)
-	)
-
-	(:durative-action move-to-buffer
-		:parameters (?r - robot ?l - location ?i - input ?m - cap_station)
-		:duration (= ?duration (path-length ?l ?i))
-		:condition (and
-			(at start (robot-at ?r ?l))
-			(at start (robot-can-pickup ?r))
-			(at start (input-location ?i ?m))
-			(at end (no-robot-at-location ?i))
-			(at end (not (conveyor-full ?m)))
-			(at end (not (cap-buffered ?m)))
-		)
-		:effect (and
-			(at start (not (robot-at ?r ?l)))
-			(at end (robot-at ?r ?i))
+			(at end (decrease (material-stored ?m) (material-required ?s)))
 		)
 	)
 
 	(:durative-action buffer-cap
-		:parameters (?r - robot ?m - cap_station ?i - input ?o - output)
+		:parameters (?m - cap_station ?i - cs_input ?o - cs_output)
 		:duration (= ?duration 25)
 		:condition (and
-			(over all (robot-at ?r ?i))
 			(at start (input-location ?i ?m))
 			(at start (output-location ?o ?m))
-			(at start (not (conveyor-full ?m)))
+			(at start (material-at ?i))
 			(at start (not (processing ?m)))
 			(at start (not (cap-buffered ?m)))
+			(at start (not (output-full ?o)))
 		)
 		:effect (and
 			(at start (processing ?m))
-			(at start (conveyor-full ?m))
+			(at start (not (material-at ?i)))
+			(at start (output-full ?o))
+			(at end (not (input-full ?i)))
 			(at end (not (processing ?m)))
 			(at end (material-at ?o))
 			(at end (cap-buffered ?m))
@@ -183,7 +168,7 @@
 	)
 
 	(:durative-action mount-cap
-		:parameters (?m - cap_station ?p - product ?s - step ?i - input ?o - output)
+		:parameters (?m - cap_station ?p - product ?s - step ?i - cs_input ?o - cs_output)
 		:duration (= ?duration 25)
 		:condition (and
 			(at start (product-at ?p ?i))
@@ -194,11 +179,14 @@
 			(at start (output-location ?o ?m))
 			(at start (not (processing ?m)))
 			(at start (cap-buffered ?m))
+			(at start (not (output-full ?o)))
 		)
 		:effect (and
 			(at start (processing ?m))
-			(at end (not (processing ?m)))
 			(at start (not (product-at ?p ?i)))
+			(at start (output-full ?o))
+			(at end (not (input-full ?i)))
+			(at end (not (processing ?m)))
 			(at end (product-at ?p ?o))
 			(at end (not (cap-buffered ?m)))
 			(at end (step-completed ?s))
@@ -217,11 +205,10 @@
 		)
 		:effect (and
 			(at start (processing ds))
-			(at end (not (processing ds)))
 			(at start (not (product-at ?p ds_in)))
-			(at end (not (conveyor-full ds)))
+			(at end (not (processing ds)))
+			(at end (not (input-full ds_in)))
 			(at end (step-completed ?s))
-			(at end (decrease (product-count) 1))
 		)
 	)
 
@@ -236,43 +223,54 @@
 			(at start (processing ds))
 			(at end (not (processing ds)))
 			(at end (not (material-at ds_in)))
-			(at end (not (conveyor-full ds)))
+			(at end (not (input-full ds_in)))
 		)
 	)
 
-	(:durative-action transport-material-discard
-		:parameters (?r - robot ?o - output)
-		:duration (= ?duration (path-length ?o ds_in))
+	(:durative-action insert-cap
+		:parameters (?r - robot ?m - cap_station ?i - cs_input)
+		:duration (= ?duration 30)
 		:condition (and
-			(at start (robot-at ?r ?o))
-			(at start (robot-holding-material ?r))
-			(at end (no-robot-at-location ds_in))
-			(at end (not (conveyor-full ds)))
+			(over all (not (processing ?m)))
+			(over all (robot-at ?r ?i))
+			(at start (not (processing ?m)))
+			(at start (not (robot-holding-something ?r)))
+			(at start (input-location ?i ?m))
+			(at start (not (input-full ?i)))
+			(at start (not (cap-buffered ?m)))
 		)
 		:effect (and
-			(at start (not (robot-at ?r ?o)))
-			(at start (not (material-at ?o)))
-			(at end (robot-at ?r ds_in))
-			(at end (material-at ds_in))
-			(at end (conveyor-full ds))
+			(at start (input-full ?m))
+			(at start (processing ?r))
+			(at end (not (processing ?r)))
+			(at end (material-at ?i))
+			(at end (not (robot-recently-moved ?r)))
 		)
 	)
 
-	(:durative-action transport-material-load
-		:parameters (?r - robot ?o - output ?i - input ?m - ring_station)
+	(:durative-action transport-material
+		:parameters (?r - robot ?o - output ?i - rs_input ?m - ring_station)
 		:duration (= ?duration (path-length ?o ?i))
 		:condition (and
+			(at start (not (processing ?r)))
 			(at start (input-location ?i ?m))
 			(at start (robot-at ?r ?o))
-			(at start (robot-holding-material ?r))
-			(at end (no-robot-at-location ?i))
-			(at end (< (material-load ?m) 3))
+			(at start (material-at ?o))
+			(at start (not (robot-holding-something ?r)))
+			(over all (< (material-stored ?m) 3))
+			(over all (not (location-occupied ?i)))
 		)
 		:effect (and
+			(at start (processing ?r))
 			(at start (not (robot-at ?r ?o)))
+			(at start (not (material-at ?o)))
+			(at start (not (output-full ?o)))
+			(at start (not (location-occupied ?o)))
+			(at end (location-occupied ?i))
+			(at end (not (processing ?r)))
 			(at end (robot-at ?r ?i))
-			(at end (not (robot-holding-material ?r)))
-			(at end (increase (material-load ?m) 1))
+			(at end (not (robot-recently-moved ?r)))
+			(at end (increase (material-stored ?m) 1))
 		)
 	)
 
@@ -280,7 +278,8 @@
 		:parameters (?r - robot ?p - product ?o - output ?i - input ?m - machine ?s1 ?s2 - step)
 		:duration (= ?duration (path-length ?o ?i))
 		:condition (and
-			(at start (robot-holding-product ?r ?p))
+			(at start (not (processing ?r)))
+			(at start (product-at ?p ?o))
 			(at start (has-step ?p ?s1))
 			(at start (has-step ?p ?s2))
 			(at start (step-at-machine ?s2 ?m))
@@ -289,52 +288,42 @@
 			(at start (input-location ?i ?m))
 			(at start (not (step-completed ?s2)))
 			(at start (robot-at ?r ?o))
-			(at end (no-robot-at-location ?i))
-			(at end (not (conveyor-full ?m)))
+			(at start (not (robot-holding-something ?r)))
+			(over all (not (location-occupied ?i)))
 		)
 		:effect (and
 			(at start (not (robot-at ?r ?o)))
+			(at start (processing ?r))
+			(at start (not (product-at ?p ?o)))
+			(at start (not (output-full ?o)))
+			(at start (not (location-occupied ?o)))
+			(at end (location-occupied ?i))
+			(at end (not (processing ?r)))
 			(at end (robot-at ?r ?i))
+			(at end (not (robot-recently-moved ?r)))
 			(at end (product-at ?p ?i))
-			(at end (conveyor-full ?m))
+			(at end (input-full ?i))
 		)
 	)
 
-	(:durative-action move-pickup-material
-		:parameters (?r - robot ?i - location ?o - output ?m - machine)
-		:duration (= ?duration (path-length ?i ?o))
+	(:durative-action move
+		:parameters (?r - robot ?l1 ?l2 - location)
+		:duration (= ?duration (path-length ?l1 ?l2))
 		:condition (and
-			(at start (output-location ?o ?m))
-			(at start (robot-at ?r ?i))
-			(at start (robot-can-pickup ?r))
-			(at end (no-robot-at-location ?o))
-			(at start (material-at ?o))
+			(at start (not (processing ?r)))
+			(at start (robot-at ?r ?l1))
+			(at start (not (robot-holding-something ?r)))
+			(at start (not (robot-recently-moved ?r)))
+			(over all (not (location-occupied ?l2)))
 		)
 		:effect (and
-			(at start (not (robot-at ?r ?i)))
-			(at end (robot-at ?r ?o))
-			(at end (robot-holding-material ?r))
-			(at end (not (material-at ?o)))
-			(at end (not (conveyor-full ?m)))
-		)
-	)
-
-	(:durative-action move-pickup-product
-		:parameters (?r - robot ?i - location ?o - output ?p - product ?m - machine)
-		:duration (= ?duration (path-length ?i ?o))
-		:condition (and
-			(at start (output-location ?o ?m))
-			(at start (robot-at ?r ?i))
-			(at start (robot-can-pickup ?r))
-			(at end (no-robot-at-location ?o))
-			(at end (product-at ?p ?o))
-		)
-		:effect (and
-			(at start (not (robot-at ?r ?i)))
-			(at end (robot-at ?r ?o))
-			(at end (robot-holding-product ?r ?p))
-			(at end (not (product-at ?p ?o)))
-			(at end (not (conveyor-full ?m)))
+			(at start (not (robot-at ?r ?l1)))
+			(at start (processing ?r))
+			(at start (not (location-occupied ?l1)))
+			(at end (location-occupied ?l2))
+			(at end (not (processing ?r)))
+			(at end (robot-at ?r ?l2))
+			(at end (robot-recently-moved ?r))
 		)
 	)
 
@@ -342,37 +331,18 @@
 		:parameters (?r - robot)
 		:duration (= ?duration 10)
 		:condition (and
+			(at start (not (processing ?r)))
 			(at start (robot-at-init ?r))
-			(at start (robot-can-enter ?r))
-			(at end (no-robot-at-location start))
+			(at start (not (exists (?_r - robot) (and (robot-precedes ?_r ?r) (robot-at-init ?_r)))))
+			(over all (not (location-occupied start)))
 		)
 		:effect (and
 			(at end (not (robot-at-init ?r)))
+			(at start (processing ?r))
+			(at end (not (processing ?r)))
+			(at end (location-occupied start))
 			(at end (robot-at ?r start))
 		)
 	)
-		
-	(:derived
-		(robot-can-pickup ?r - robot)
-		(and 
-			(not (robot-holding-material ?r))
-	    (not (exists (?_p - product) (robot-holding-product ?r ?_p)))
-		)
-	)
-	
-  (:derived
-    (no-robot-at-location ?l - location)
-    (not (exists (?_r - robot) (robot-at ?_r ?l)))
-  )
-  
-  (:derived
-    (robot-can-enter ?r - robot)
-    (not (exists (?_r - robot) (and (robot-precedes ?_r ?r) (robot-at-init ?_r))))
-  )
-
-  (:derived
-    (can-start-product ?p - product)
-    (not (exists (?_p - product) (and (product-precedes ?_p ?p) (not (product-active ?_p)))))
-  )
 )
 

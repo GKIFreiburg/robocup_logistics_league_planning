@@ -3,25 +3,32 @@
 (:objects
 	r1 - robot
 	r2 - robot
-;	r3 - robot	
+	r3 - robot	
 	
 	; products
+	; c0
 	p1 - product
-	init_p1 ring1_p1 cap_p1 delivery_p1 - step
-;	p2 - product
+	init_p1 cap_p1 delivery_p1 - step
+
+	; c1
+	p2 - product
 	init_p2 ring1_p2 cap_p2 delivery_p2 - step
-;	p3 - product
-	init_p3 cap_p3 delivery_p3 - step
-;	p4 - product
-	init_p4 ring1_p4 ring2_p4 cap_p4 delivery_p4 - step
-;	p5 - product
+	p3 - product
+	init_p3 ring1_p2 cap_p3 delivery_p3 - step
+	p4 - product
+	init_p4 ring1_p4 cap_p4 delivery_p4 - step
+
+	;c2
+	p5 - product
 	init_p5 ring1_p5 ring2_p5 cap_p5 delivery_p5 - step
-;	p6 - product
-	init_p6 ring1_p6 cap_p6 delivery_p6 - step
-;	p7 - product
-	init_p7 cap_p7 delivery_p7 - step
-;	p8 - product
+	p6 - product
+	init_p6 ring1_p6 ring2_p6 cap_p6 delivery_p6 - step
+	p7 - product
+	init_p7 ring1_p7 ring2_p7 cap_p7 delivery_p7 - step
+	p8 - product
 	init_p8 ring1_p8 ring2_p8 cap_p8 delivery_p8 - step
+	p9 - product
+	init_p9 ring1_p9 ring2_p9 cap_p9 delivery_p9 - step
 )
 
 (:init
@@ -30,68 +37,66 @@
 	(robot-at-init r2)
 	(robot-at-init r3)
 	(robot-precedes r1 r2)
+	(robot-precedes r1 r3)
 	(robot-precedes r2 r3)
-	(robot-can-pickup r1)
-	(robot-can-pickup r2)
-	(robot-can-pickup r3)
 	
-;p1
+;p1 c0
 	(initial-step init_p1)
 	(has-step p1 init_p1)
 	(step-at-machine init_p1 bs)
-	(step-precedes init_p1 ring1_p1)
-	(has-step p1 ring1_p1)
-	(step-at-machine ring1_p1 rs2)
-	(= (material-required ring1_p1) 1)
-	(step-precedes ring1_p1 cap_p1)
+	(step-precedes init_p1 cap_p1)
 	(has-step p1 cap_p1)
 	(step-at-machine cap_p1 cs1)
 	(step-precedes cap_p1 delivery_p1)
 	(has-step p1 delivery_p1)
 	(step-at-machine delivery_p1 ds)
-;p2
+
+;p2 c1 cc0
 	(initial-step init_p2)
 	(has-step p2 init_p2)
 	(step-at-machine init_p2 bs)
 	(step-precedes init_p2 ring1_p2)
 	(has-step p2 ring1_p2)
-	(step-at-machine ring1_p2 rs2)
-	(= (material-required ring1_p2) 1)
+	(step-at-machine ring1_p2 rs1)
+	(= (material-required ring1_p2) 0)
 	(step-precedes ring1_p2 cap_p2)
 	(has-step p2 cap_p2)
 	(step-at-machine cap_p2 cs2)
 	(step-precedes cap_p2 delivery_p2)
 	(has-step p2 delivery_p2)
 	(step-at-machine delivery_p2 ds)
-;p3
+
+;p3 c1 cc1
 	(initial-step init_p3)
 	(has-step p3 init_p3)
 	(step-at-machine init_p3 bs)
-	(step-precedes init_p3 cap_p3)
+	(step-precedes init_p3 ring1_p3)
+	(has-step p3 ring1_p3)
+	(step-at-machine ring1_p3 rs2)
+	(= (material-required ring1_p3) 1)
+	(step-precedes ring1_p3 cap_p3)
 	(has-step p3 cap_p3)
 	(step-at-machine cap_p3 cs2)
 	(step-precedes cap_p3 delivery_p3)
 	(has-step p3 delivery_p3)
 	(step-at-machine delivery_p3 ds)
-;p4
+
+;p4 c1 cc2
 	(initial-step init_p4)
 	(has-step p4 init_p4)
 	(step-at-machine init_p4 bs)
 	(step-precedes init_p4 ring1_p4)
 	(has-step p4 ring1_p4)
-	(step-at-machine ring1_p4 rs1)
-	(= (material-required ring1_p4) 1)
-	(step-precedes ring1_p4 ring2_p4)
-	(has-step p4 ring2_p4)
-	(step-at-machine ring2_p4 rs1)
-	(= (material-required ring2_p4) 2)
-	(step-precedes ring2_p4 cap_p4)
+	(step-at-machine ring1_p4 rs2)
+	(= (material-required ring1_p4) 2)
+	(step-precedes ring1_p4 cap_p4)
 	(has-step p4 cap_p4)
-	(step-at-machine cap_p4 cs1)
+	(step-at-machine cap_p4 cs2)
 	(step-precedes cap_p4 delivery_p4)
 	(has-step p4 delivery_p4)
 	(step-at-machine delivery_p4 ds)
-;p5
+
+;p5 c2 cc0 cc0
 	(initial-step init_p5)
 	(has-step p5 init_p5)
 	(step-at-machine init_p5 bs)
@@ -109,52 +114,15 @@
 	(step-precedes cap_p5 delivery_p5)
 	(has-step p5 delivery_p5)
 	(step-at-machine delivery_p5 ds)
-;p6
-	(initial-step init_p6)
-	(has-step p6 init_p6)
-	(step-at-machine init_p6 bs)
-	(step-precedes init_p6 ring1_p6)
-	(has-step p6 ring1_p6)
-	(step-at-machine ring1_p6 rs2)
-	(= (material-required ring1_p6) 2)
-	(step-precedes ring1_p6 cap_p6)
-	(has-step p6 cap_p6)
-	(step-at-machine cap_p6 cs2)
-	(step-precedes cap_p6 delivery_p6)
-	(has-step p6 delivery_p6)
-	(step-at-machine delivery_p6 ds)
-;p7
-	(initial-step init_p7)
-	(has-step p7 init_p7)
-	(step-at-machine init_p7 bs)
-	(step-precedes init_p7 cap_p7)
-	(has-step p7 cap_p7)
-	(step-at-machine cap_p7 cs2)
-	(step-precedes cap_p7 delivery_p7)
-	(has-step p7 delivery_p7)
-	(step-at-machine delivery_p7 ds)
-;p8
-	(initial-step init_p8)
-	(has-step p8 init_p8)
-	(step-at-machine init_p8 bs)
-	(step-precedes init_p8 ring1_p8)
-	(has-step p8 ring1_p8)
-	(step-at-machine ring1_p8 rs2)
-	(= (material-required ring1_p8) 1)
-	(step-precedes ring1_p8 ring2_p8)
-	(has-step p8 ring2_p8)
-	(step-at-machine ring2_p8 rs2)
-	(= (material-required ring2_p8) 2)
-	(step-precedes ring2_p8 cap_p8)
-	(has-step p8 cap_p8)
-	(step-at-machine cap_p8 cs2)
-	(step-precedes cap_p8 delivery_p8)
-	(has-step p8 delivery_p8)
-	(step-at-machine delivery_p8 ds)
+
+;p6 c2 cc0 cc0
+;p7 c2 cc0 cc1
+;p8 c2 cc0 cc2
+;p9 c2 
 
 	; stations
-	(= (material-load rs1) 0)
-	(= (material-load rs2) 0)
+	(= (material-stored rs1) 0)
+	(= (material-stored rs2) 0)
 	(output-location bs_out bs)
 	(input-location rs1_in rs1)
 	(output-location rs1_out rs1)
@@ -329,7 +297,9 @@
 	(and 
 		;(forall (?s - step)(step-completed s))
 		;(step-completed init_p1)
-		;(> (material-load rs2) 0)
+		;(= (material-stored rs2) 3)
+		;(= (material-stored rs1) 3)
+		;(product-at p1 rs2_in)
 		;(step-completed ring1_p1)
 		;(cap-buffered cs1)
 		;(not (material-at cs1_out))
@@ -343,7 +313,7 @@
 		;(robot-at r2 start)
 		;(robot-at r3 start)
 		
-		(step-completed delivery_p1)
+		;(step-completed delivery_p1)
 		;(step-completed delivery_p2)
 		;(step-completed delivery_p3)
 		;(step-completed delivery_p4)
@@ -351,14 +321,7 @@
 		;(step-completed delivery_p6)
 		;(step-completed delivery_p7)
 		;(step-completed delivery_p8)
-
-		;(forall (?l - location) (not (location-full ?l)))
-		;(= (material-load rs1) 0)
-		;(= (material-load rs2) 1)
-		;(robot-at r1 bs_out)
-		;(product-at p1 cs1_in)
-		;(robot-holding-material r1)
-		;(material-at bs_out)
+		;(step-completed delivery_p9)
 	)  
 )
 
