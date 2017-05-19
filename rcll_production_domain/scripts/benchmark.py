@@ -3,8 +3,6 @@ import os
 import sys
 import itertools
 import subprocess
-import roslaunch
-#import rospkg
 
 #package = "rcll_production_domain"
 #package_path = rospkg.RosPack().get_path(package)

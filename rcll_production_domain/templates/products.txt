@@ -1,0 +1,33 @@
+object_string: "	{name} - product"
+steps_string: "	init_{name} cap_{name}{rings} delivery_{name} - step"
+ring_steps: " ring{ring_index}_{name}"
+
+;{name}
+	(has-step {name} init_{name})
+	(initial-step init_{name})
+	(step-at-machine init_{name} bs)
+	
+	(has-step {name} ring1_{name})
+	(step-precedes init_{name} ring1_{name})
+	(step-at-machine ring1_{name} rs1)
+	(= (material-required ring1_{name}) 0)
+
+	(has-step {name} ring2_{name})
+	(step-precedes ring1_{name} ring2_{name})
+	(step-at-machine ring2_{name} rs1)
+	(= (material-required ring2_{name}) 1)
+
+	(has-step {name} ring3_{name})
+	(step-precedes ring2_{name} ring3_{name})
+	(step-at-machine ring3_{name} rs2)
+	(= (material-required ring3_{name}) 2)
+
+	(has-step {name} cap_{name})
+	(step-precedes ring3_{name} cap_{name})
+	(step-at-machine cap_{name} cs1)
+
+	(has-step {name} delivery_{name})
+	(step-precedes cap_{name} delivery_{name})
+	(step-at-machine delivery_{name} ds)
+
+
