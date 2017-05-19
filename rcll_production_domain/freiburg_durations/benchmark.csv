@@ -1,0 +1,15 @@
+domain,problem,makespan,plan time,total time
+domain_macro_actions,p_2c0,503.8481,2.802198,10.384285
+domain_macro_actions,p08,503.8481,2.802198,10.384285
+domain_macro_actions,p_3c0,733.6768,3.159741,10.993217
+domain_macro_actions,p_4c0,1002.6323,4.805147,10.660255
+domain_macro_actions,p01,396.8126,1.03284,10.45572
+domain_macro_actions,p_1c0,256.481,0.165908,10.437558
+domain_macro_actions,p_template,677.1983,7.584512,11.042182
+domain,p_2c0,523.8895,7.229987,10.169515
+domain,p08,523.8895,7.229987,10.169515
+domain,p_3c0,INF,0,30.160749
+domain,p_4c0,INF,0,30.842129
+domain,p01,468.499,3.864808,10.703089
+domain,p_1c0,271.481,1.785466,10.413946
+domain,p_template,606.2911,6.812611,10.969667
