@@ -75,6 +75,9 @@
 		(robot-holding-something ?r - robot)
 		(robot-recently-moved ?r - robot)
 		(robot-processing ?r - robot)
+		
+		; locations
+		(location-occupied ?l - location)
 	)
 
 	(:functions
@@ -240,7 +243,7 @@
 			(at start (not (cap-buffered ?m)))
 		)
 		:effect (and
-			(at start (input-full ?m))
+			(at start (input-full ?i))
 			(at start (robot-processing ?r))
 			(at end (not (robot-processing ?r)))
 			(at end (material-at ?i))

@@ -40,6 +40,9 @@
 		cs2_in - cs_input
 		cs2_out - cs_output
 		ds_in - ds_input
+		
+		; locations
+		(location-occupied ?l - location)
 	)
 
 	(:predicates
@@ -240,7 +243,7 @@
 			(at start (not (cap-buffered ?m)))
 		)
 		:effect (and
-			(at start (input-full ?m))
+			(at start (input-full ?i))
 			(at start (robot-processing ?r))
 			(at end (not (robot-processing ?r)))
 			(at end (material-at ?i))
