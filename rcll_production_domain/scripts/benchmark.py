@@ -69,8 +69,6 @@ if __name__=='__main__':
 		print('usage: benchmark.py path/to/pddl/ [result_filename]')
 		exit(0)
 	result_filename = 'benchmark.csv'
-	if len(sys.argv) >= 3:
-		result_filename = sys.argv[2]
 	pddl_path = sys.argv[1]
 	run_benchmark(pddl_path, result_filename)
 		
