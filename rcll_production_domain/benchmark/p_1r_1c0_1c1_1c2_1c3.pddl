@@ -1,9 +1,9 @@
 (define (problem p_1r_1c0_1c1_1c2_1c3)
 (:domain rcll-production-steps)
 (:objects
-	r0 - robot
+	; robots
+	r1 r2 r3 - robot
 
-	
 	; products
 	p1 - product
 	init_p1  cap_p1 delivery_p1 - step
@@ -23,8 +23,7 @@
 (:init
 	; robots
 	(robot-at-init r1)
-	(robot-at-init r2)
-	(robot-at-init r3)
+
 	(robot-precedes r1 r2)
 	(robot-precedes r1 r3)
 	(robot-precedes r2 r3)
@@ -49,12 +48,12 @@
 	
 	(has-step p2 ring1_p2)
 	(step-precedes init_p2 ring1_p2)
-	(step-at-machine ring1_p2 rs1)
-	(= (material-required ring1_p2) 1)
+	(step-at-machine ring1_p2 rs2)
+	(= (material-required ring1_p2) 2)
 
 	(has-step p2 cap_p2)
 	(step-precedes  ring1_p2 cap_p2)
-	(step-at-machine cap_p2 cs1)
+	(step-at-machine cap_p2 cs2)
 
 	(has-step p2 delivery_p2)
 	(step-precedes cap_p2 delivery_p2)
@@ -67,17 +66,17 @@
 	
 	(has-step p3 ring1_p3)
 	(step-precedes init_p3 ring1_p3)
-	(step-at-machine ring1_p3 rs2)
-	(= (material-required ring1_p3) 2)
+	(step-at-machine ring1_p3 rs1)
+	(= (material-required ring1_p3) 1)
 
 	(has-step p3 ring2_p3)
 	(step-precedes init_p3 ring2_p3)
-	(step-at-machine ring2_p3 rs1)
-	(= (material-required ring2_p3) 1)
+	(step-at-machine ring2_p3 rs2)
+	(= (material-required ring2_p3) 2)
 
 	(has-step p3 cap_p3)
 	(step-precedes  ring2_p3 cap_p3)
-	(step-at-machine cap_p3 cs1)
+	(step-at-machine cap_p3 cs2)
 
 	(has-step p3 delivery_p3)
 	(step-precedes cap_p3 delivery_p3)
@@ -91,21 +90,21 @@
 	(has-step p4 ring1_p4)
 	(step-precedes init_p4 ring1_p4)
 	(step-at-machine ring1_p4 rs1)
-	(= (material-required ring1_p4) 0)
+	(= (material-required ring1_p4) 1)
 
 	(has-step p4 ring2_p4)
 	(step-precedes init_p4 ring2_p4)
-	(step-at-machine ring2_p4 rs2)
+	(step-at-machine ring2_p4 rs1)
 	(= (material-required ring2_p4) 0)
 
 	(has-step p4 ring3_p4)
 	(step-precedes init_p4 ring3_p4)
-	(step-at-machine ring3_p4 rs1)
-	(= (material-required ring3_p4) 1)
+	(step-at-machine ring3_p4 rs2)
+	(= (material-required ring3_p4) 2)
 
 	(has-step p4 cap_p4)
 	(step-precedes  ring3_p4 cap_p4)
-	(step-at-machine cap_p4 cs1)
+	(step-at-machine cap_p4 cs2)
 
 	(has-step p4 delivery_p4)
 	(step-precedes cap_p4 delivery_p4)

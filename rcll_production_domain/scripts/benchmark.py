@@ -38,6 +38,8 @@ def run_benchmark(pddl_path, benchmark_filename):
 			f.write(benchmark_line)
 
 def run_planner(pddl_path, domain_name, problem_name):
+	if os.path.exists(plan_times_filename):
+		os.remove(plan_times_filename)
 	domain_path = os.path.join(pddl_path, domain_name+'.pddl')
 	problem_path = os.path.join(pddl_path, problem_name+'.pddl')
 	planner_cmd = cmd.format(d=domain_path, p=problem_path)

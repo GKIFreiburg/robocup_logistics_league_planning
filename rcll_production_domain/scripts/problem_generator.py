@@ -37,7 +37,7 @@ ring_init_template = """	(has-step {name} ring{index}_{name})
 	(= (material-required ring{index}_{name}) {complexity})
 
 """
-robot_template = """	r{index} - robot
+robot_template = """	(robot-at-init r{index})
 """
 
 def generate_product(ring_complexities, cap_station, product_id):
@@ -60,7 +60,7 @@ def generate_problem(orders, robot_count=3):
 	name = 'p_{robot_count}r'.format(robot_count=robot_count)
 	robots = ''
 	for i in range(robot_count):
-		robots += robot_template.format(index=i)
+		robots += robot_template.format(index=i+1)
 	products = ''
 	product_inits = ''
 	product_id = 1
@@ -74,8 +74,7 @@ def generate_problem(orders, robot_count=3):
 		product_inits += i
 		product_id += 1
 	for complexity, count in enumerate(complexity_counts):
-		if count > 0:
-			name += '_{count}c{complexity}'.format(count=count, complexity=complexity)
+		name += '_{count}c{complexity}'.format(count=count, complexity=complexity)
 	problem = problem_template.format(name=name, robots=robots, products=products, product_inits=product_inits)
 	return problem, name
 

@@ -1,17 +1,16 @@
 (define (problem {name})
 (:domain rcll-production-steps)
 (:objects
-{robots}
-	
+	; robots
+	r1 r2 r3 - robot
+
 	; products
 {products}
 )
 
 (:init
 	; robots
-	(robot-at-init r1)
-	(robot-at-init r2)
-	(robot-at-init r3)
+{robots}
 	(robot-precedes r1 r2)
 	(robot-precedes r1 r3)
 	(robot-precedes r2 r3)

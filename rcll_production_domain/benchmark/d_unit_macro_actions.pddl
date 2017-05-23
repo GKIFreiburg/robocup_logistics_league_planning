@@ -40,9 +40,6 @@
 		cs2_in - cs_input
 		cs2_out - cs_output
 		ds_in - ds_input
-		
-		; locations
-		(location-occupied ?l - location)
 	)
 
 	(:predicates
@@ -78,6 +75,9 @@
 		(robot-holding-something ?r - robot)
 		(robot-recently-moved ?r - robot)
 		(robot-processing ?r - robot)
+		
+		; locations
+		(location-occupied ?l - location)
 	)
 
 	(:functions
