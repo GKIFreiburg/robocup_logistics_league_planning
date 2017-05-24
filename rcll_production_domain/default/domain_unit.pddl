@@ -329,7 +329,7 @@
 	;
 	; (:durative-action move
 	; 	:parameters (?r - robot ?from - location ?from-side - mps-side ?to - mps ?to-side - mps-side)
-	;		:duration (= ?duration (path-length ?from ?from-side ?to ?to-side))
+	;		:duration (= ?duration 1)
 	; 	:condition (and (at start (entered-field ?r))
 	; 									(at start (at ?r ?from ?from-side))
 	; 									(at start (location-free ?to ?to-side)))
@@ -346,7 +346,7 @@
 	; actions cut the planning time by about 95%.
 	(:durative-action move-wp-put-at-input
 		:parameters (?r - robot ?from - location ?from-side - mps-side ?to - mps)
-		:duration (= ?duration (path-length ?from ?from-side ?to INPUT))
+		:duration (= ?duration 1)
 		:condition (and (at start (entered-field ?r))
 										(at start (at ?r ?from ?from-side))
 										(at start (location-free ?to INPUT))
@@ -359,7 +359,7 @@
 
 	(:durative-action move-wp-get
 		:parameters (?r - robot ?from - location ?from-side - mps-side ?to - mps ?to-side - mps-side)
-		:duration (= ?duration (path-length ?from ?from-side ?to ?to-side))
+		:duration (= ?duration 1)
 		:condition (and (at start (entered-field ?r))
 										(at start (at ?r ?from ?from-side))
 										(at start (location-free ?to ?to-side))
@@ -373,7 +373,7 @@
 
 	(:durative-action enter-field
 		:parameters (?r - robot ?team-color - team-color)
-		:duration (= ?duration 10)
+		:duration (= ?duration 1)
 		:condition (and (at start (location-free START INPUT))
 										(at start (robot-waiting ?r)))
 		:effect (and (at end (entered-field ?r))

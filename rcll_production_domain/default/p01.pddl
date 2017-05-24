@@ -23,8 +23,8 @@
 
 	(:objects
 		R-1 - robot 
-		;R-2 - robot 
-		;R-3 - robot
+		R-2 - robot 
+		R-3 - robot
 		; If adding R-2 and R-3, also add robot-waiting facts below
 		o1 - order
 		wp1 - workpiece
@@ -79,8 +79,8 @@
 	 (wp-ring3-color wp1 RING_NONE)
 	 (wp-unused wp1)
 	 (robot-waiting R-1)
-	 (robot-waiting R-2)
-	 (robot-waiting R-3)
+	 ;(robot-waiting R-2)
+	 ;(robot-waiting R-3)
 	 (mps-state C-BS IDLE)
  	 (mps-state C-CS1 IDLE)
  	 (mps-state C-CS2 IDLE)
