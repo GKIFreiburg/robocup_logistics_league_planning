@@ -1,0 +1,49 @@
+objects:
+  robot: [R1,R2,R3]
+  #order: o1
+  #workpiece: [wp1]
+  #cap-carrier: [cg1, cg2, cg3, cb1, cb2, cb3]
+  #mps: [C-BS, C-CS1, C-CS2, C-DS, C-RS1, C-RS2]
+  #team-color: CYAN
+
+init:    
+  robot-at-init: [R1, R2, R3]
+  robot-precedes: 
+    - [R1, R2]
+    - [R1, R3]
+    - [R2, R3]
+  path-length:
+    - [START, C-BS-O, 15.0]
+
+  #wp-on-shelf:
+  #  - [cg1, C-CS1, LEFT]
+  #  - [cg2, C-CS1, MIDDLE]
+  #  - [cg3, C-CS1, RIGHT]
+  #  - [cb1, C-CS2, LEFT]
+  #  - [cb2, C-CS2, MIDDLE]
+  #  - [cb3, C-CS2, RIGHT]
+
+  # rs-ring-spec:
+  #   - [C-RS1, RING_GREEN]
+  #   - [C-RS1, RING_YELLOW]
+  #   - [C-RS2, RING_BLUE]
+  #   - [C-RS2, RING_ORANGE]
+
+  # To run with a fixed order uncomment:
+  # order-complexity:
+  #   - [o1, C3]
+  # order-base-color:
+  #   - [o1, BASE_BLACK]
+  # order-ring1-color:
+  #   - [o1, RING_GREEN]
+  # order-ring2-color:
+  #   - [o1, RING_BLUE]
+  # order-ring3-color:
+  #   - [o1, RING_ORANGE]
+  # order-cap-color:
+  #   - [o1, CAP_GREY]
+
+# To set a fixed goal uncomment:
+goal:
+  robot-at: 
+  - [R1, START]

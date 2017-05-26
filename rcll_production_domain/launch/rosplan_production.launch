@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+
+<launch>
+	<arg name="num_robots" default="$(optenv NUM_ROBOTS 1)" />
+	<arg name="pddl_domain_path" default="$(find rcll_ros)/pddl/rcll_domain_production.pddl" />
+	<arg name="autostart_planning" default="$(optenv AUTOSTART_PLANNING false)" />
+	<arg name="data_path" default="$(optenv ROSPLAN_DATA_PATH /tmp)" />
+	<arg name="problem_path" default="$(optenv ROSPLAN_PROBLEM_PATH /tmp/problem.pddl)" />
+	<arg name="strl_file_path" default="$(optenv ROSPLAN_STRL_PATH /tmp/plan.strl)" />
+	<arg name="mongodb_host" default="$(optenv ROSPLAN_MONGODB_HOST localhost)" />
+	<arg name="mongodb_port" default="$(optenv ROSPLAN_MONGODB_POR 27018)" />
+	<arg name="database_path" default="$(optenv ROSPLAN_MONGODB_DBDIR /opt/rosplan_kb)" />
+	<arg name="max_dispatch_attempts" default="$(optenv ROSPLAN_MAX_DISPATCH_ATTEMPTS 2)" />
+	<arg name="popf_anytime" default="$(optenv ROSPLAN_POPF_ANYTIME false)" />
+	<arg name="popf_timeout" default="$(optenv ROSPLAN_POPF_TIMEOUT 30)" />
+
+	<include file="$(find rcll_ros)/launch/rosplan_planning_system.launch">
+		<arg name="pddl_domain_path" value="$(arg pddl_domain_path)" />
+		<arg name="data_path" value="$(arg data_path)" />
+		<arg name="problem_path" value="$(arg problem_path)" />
+		<arg name="strl_file_path" value="$(arg strl_file_path)" />
+		<arg name="mongodb_host" value="$(arg mongodb_host)" />
+		<arg name="mongodb_port" value="$(arg mongodb_port)" />
+		<arg name="database_path" value="$(arg database_path)" />
+		<arg name="max_dispatch_attempts" value="$(arg max_dispatch_attempts)" />
+		<!-- if planner command given, pass it on, otherwise don't set arg
+		     - to use default. In that case, popf_anytime will be in -->
+		<arg name="planner_command" value="$(env ROSPLAN_PLANNER_COMMAND)"
+		     if="$(eval optenv('ROSPLAN_PLANNER_COMMAND', '') != '')" />
+		<arg name="popf_anytime" value="$(arg popf_anytime)" />
+		<arg name="popf_timeout" value="$(arg popf_timeout)" />
+	</include>
+
+	<include file="$(find rcll_ros)/launch/rosplan_rcll_interface.launch">
+		<arg name="num_robots" value="$(arg num_robots)" />
+	</include>
+
+  <node name="rosplan_initial_situation" pkg="rosplan_initial_situation"
+        type="rosplan_initial_situation" respawn="false" output="screen">
+	  <rosparam command="load" file="$(find rcll_ros)/config/rcll_production_initial_situation.yaml" />
+	  <rosparam command="load" file="$(find rcll_ros)/config/rcll_production_initial_situation_3robots.yaml"
+	            if="$(eval int(arg('num_robots')) >= 3)" />
+		<param name="clear_kb" value="true" />
+		<param name="start_planning" value="false" />
+	</node>
+
+	<node name="rosplan_starter_rcll" pkg="rosplan_starter_rcll"
+	      type="rosplan_starter_rcll" respawn="false" output="screen"
+	      if="$(arg autostart_planning)">
+		<remap from="rcll/game_state" to="robot1/rcll/game_state" />
+	</node>
+
+</launch>

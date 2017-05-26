@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<launch>
+	<arg name="num_robots" default="$(optenv NUM_ROBOTS 1)" />
+
+	<include file="$(find rcll_ros)/launch/rcll_sim_integration.launch">
+		<arg name="num_robots" value="$(arg num_robots)" />
+		<arg name="navgraph_file" default="$(env FAWKES_DIR)/cfg/navgraph-generated.yaml" />
+	</include>
+
+	<include file="$(find rcll_production_domain)/launch/rosplan_production.launch">
+		<arg name="num_robots" value="$(arg num_robots)" />
+
+		<arg name="database_path" value="$(find rosplan_knowledge_base)/common/mongoDB/" />
+		<arg name="data_path" value="$(find rcll_ros)/data/" />
+		<arg name="problem_path" value="$(find rcll_ros)/data/problem.pddl" />
+		<arg name="strl_file_path" value="$(find rcll_ros)/data/plan.strl" />
+		<arg name="popf_anytime" value="false" />
+
+		<arg name="pddl_domain_path" value="$(find rcll_production_domain)/default/domain_unit.pddl" />
+<!--
+		<arg name="pddl_domain_path" value="$(find rcll_production_domain)/default/domain.pddl" />
+		<arg name="pddl_domain_path" value="$(find rcll_ros)/pddl/rcll_domain_production_durations.pddl" />
+-->
+		
+	</include>
+</launch>
