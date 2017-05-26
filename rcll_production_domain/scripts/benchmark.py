@@ -27,10 +27,10 @@ def run_benchmark(pddl_path, benchmark_filename):
 			problem_names.append(name)
 
 	print('found domains: {}'.format(str(domain_names)))
-	print('found problems: {}'.format(str(problem_names)))
+	#print('found problems: {}'.format(str(problem_names)))
 	benchmark_file = os.path.join(pddl_path, benchmark_filename)
 	with open(benchmark_file, 'w') as f:
-		f.write('domain,problem,makespan,plan time,total time\n')
+		f.write('domain,robots,c0,c1,c2,c3,first makespan,first plan time,best makespan,best plan time,timeout\n')
 	for domain, problem in itertools.product(domain_names, problem_names):
 		print('starting benchmark for {d} and {p}...'.format(d=domain, p=problem))
 		benchmark_line = run_planner(pddl_path, domain, problem)
@@ -52,6 +52,8 @@ def run_planner(pddl_path, domain_name, problem_name):
 		lines = f.readlines()
 	makespan = 'INF'
 	search_time = 0
+	first_makespan = 'INF'
+	first_search_time = 0
 	wall_time = 0
 	for line in lines:
 		if line.find('#') == 0:
@@ -62,11 +64,19 @@ def run_planner(pddl_path, domain_name, problem_name):
 		else:
 			makespan = float(values[0])
 			search_time = float(values[4])
-	return '{},{},{},{},{}\n'.format(domain_name, problem_name, makespan, search_time, wall_time)
+			if first_makespan == 'INF':
+				first_makespan = makespan
+				first_search_time = search_time
+	# p_3r_1c0_2c1_0c2_0c3
+	problem_complexity = [int(count[0]) for count in problem_name[2:].split('_')]
+	results = [domain_name]
+	results.extend(problem_complexity)
+	results.extend([first_makespan, first_search_time, makespan, search_time, wall_time])
+	return '{},{},{},{},{},{},{},{},{},{},{}\n'.format(*results)
 	
 if __name__=='__main__':
 	if len(sys.argv) < 2:
-		print('usage: benchmark.py path/to/pddl/ [result_filename]')
+		print('usage: benchmark.py path/to/pddl/')
 		exit(0)
 	result_filename = 'benchmark.csv'
 	pddl_path = sys.argv[1]
