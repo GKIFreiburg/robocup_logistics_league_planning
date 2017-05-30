@@ -1,8 +1,11 @@
 distance_function: path-length
-machine_instance_type: mps
+#machine_instance_type: machine
+#location_types : [bs_output, ds_input, rs_input, rs_output, cs_input, cs_output]
 cost_factor: 5.0
 
 static_nodes:
-  C-ins-in: START
+  C-ins-in: start
   #M-ins-in: START
   
+from_filter: [bs_in, ds_out]
+to_filter: [bs_in, ds_out, start]

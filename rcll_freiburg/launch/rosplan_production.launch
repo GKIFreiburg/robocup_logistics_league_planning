@@ -30,19 +30,15 @@
 		<arg name="popf_anytime" value="$(arg popf_anytime)" />
 		<arg name="popf_timeout" value="$(arg popf_timeout)" />
 	</include>
-<!-- 
 	<include file="$(find rcll_freiburg)/launch/rosplan_rcll_interface.launch">
 		<arg name="num_robots" value="$(arg num_robots)" />
 	</include>
- -->
 
   <node name="rosplan_initial_situation" pkg="rosplan_initial_situation"
         type="rosplan_initial_situation" respawn="false" output="screen">
 	  <rosparam command="load" file="$(find rcll_freiburg)/config/production_initial_situation.yaml" />
-	  <!-- 
-	  <rosparam command="load" file="$(find rcll_freiburg)/config/rcll_production_initial_situation_3robots.yaml"
+	  <rosparam command="load" file="$(find rcll_freiburg)/config/production_initial_situation_3robots.yaml"
 	            if="$(eval int(arg('num_robots')) >= 3)" />
-	   -->
 		<param name="clear_kb" value="true" />
 		<param name="start_planning" value="false" />
 	</node>

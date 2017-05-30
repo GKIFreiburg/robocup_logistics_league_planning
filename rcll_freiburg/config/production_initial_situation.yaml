@@ -1,8 +1,19 @@
 objects:
   robot: [r1, r2, r3]
+#  base_station: [bs]
+#  ring_station: [rs1, rs2]
+#  cap_station: [cs1, cs2]
+#  delivery_station: [ds]
+#  location: [start]
+#  bs_output: [bs_out]
+#  rs_input: [rs1_in, rs2_in]
+#  rs_output: [rs1_out, rs2_out]
+#  cs_input: [cs1_in, cs2_in]
+#  cs_output: [cs1_out, cs2_out]
+#  ds_input: [ds_in]
 
 init:    
-  robot-at-init: [r1, r2, r3]
+  robot-at-init: [r1]
   robot-precedes: 
     - [r1, r2]
     - [r1, r3]
