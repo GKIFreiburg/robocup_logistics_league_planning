@@ -1,19 +1,37 @@
 objects:
-  robot: [R1,R2,R3]
-  #order: o1
-  #workpiece: [wp1]
-  #cap-carrier: [cg1, cg2, cg3, cb1, cb2, cb3]
-  #mps: [C-BS, C-CS1, C-CS2, C-DS, C-RS1, C-RS2]
-  #team-color: CYAN
+  robot: [r1, r2, r3]
 
 init:    
-  robot-at-init: [R1, R2, R3]
+  robot-at-init: [r1, r2, r3]
   robot-precedes: 
-    - [R1, R2]
-    - [R1, R3]
-    - [R2, R3]
-  path-length:
-    - [START, C-BS-O, 15.0]
+    - [r1, r2]
+    - [r1, r3]
+    - [r2, r3]
+  input-location:
+    - [cs1_in, cs1]
+    - [cs2_in, cs2]
+    - [rs1_in, rs1]
+    - [rs2_in, rs2]
+    - [ds_in, ds]
+  output-location:
+    - [cs1_out, cs1]
+    - [cs2_out, cs2]
+    - [rs1_out, rs1]
+    - [rs2_out, rs2]
+    - [bs_out, bs]
+
+init_numerical:
+  material-stored:
+   - 
+     args: [rs1]
+     value: 0
+   - 
+     args: [rs2]
+     value: 0.0
+#  path-length:
+#   - 
+#     args: [START, bs_in]
+#     value: 15.0
 
   #wp-on-shelf:
   #  - [cg1, C-CS1, LEFT]
@@ -44,6 +62,12 @@ init:
   #   - [o1, CAP_GREY]
 
 # To set a fixed goal uncomment:
-goal:
-  robot-at: 
-  - [R1, START]
+#goal:
+#  robot-at: 
+#  - [R1, START]
+
+#goal_numerical:
+#  material-stored:
+#   - 
+#     args: [C_RS1]
+#     value: 1

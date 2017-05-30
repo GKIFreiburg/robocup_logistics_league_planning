@@ -1,0 +1,8 @@
+# = Ignored Effect Predicates =
+# Some predicates may always be sensed by a state estimator and the effects
+# denote expected outcomes rather than certain ones. In this case, you may
+# want to withhold certain predicates from being updated if they appear in
+# the effects of an action. Configure these predicates as a list.
+# Note that these predicates will not be updated and ignored for any action,
+# not for just specific ones.
+ignored_effect_predicates: [mps-state]

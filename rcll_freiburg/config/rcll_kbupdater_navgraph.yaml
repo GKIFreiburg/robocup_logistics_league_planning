@@ -1,0 +1,8 @@
+distance_function: path-length
+machine_instance_type: mps
+cost_factor: 5.0
+
+static_nodes:
+  C-ins-in: START
+  #M-ins-in: START
+  

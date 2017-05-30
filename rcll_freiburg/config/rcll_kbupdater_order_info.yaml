@@ -1,0 +1,37 @@
+# = OrderInfo Knowledge Base Updater Config =
+# The kb updater tracks information from the refbox, compares it to
+# the information in the knowledge base, and issues update as necessary.
+
+order_instance_type: order
+
+order_complexity_predicate: order-complexity
+order_base_color_predicate: order-base-color
+order_ring1_color_predicate: order-ring1-color
+order_ring2_color_predicate: order-ring2-color
+order_ring3_color_predicate: order-ring3-color
+order_cap_color_predicate: order-cap-color
+order_gate_predicate: order-gate
+order_delivery_period_begin_predicate: order-delivery-begin
+order_delivery_period_end_predicate: order-delivery-end
+
+order_id_argument: ord
+order_complexity_argument: com
+order_color_argument: col
+order_gate_argument: gate
+
+order_object_prefix: o
+gate_object_prefix: GATE-
+order_complexity_object_prefix: C
+
+# Value mapping for colors
+rs_ring_value_blue: RING_BLUE
+rs_ring_value_green: RING_GREEN
+rs_ring_value_orange: RING_ORANGE
+rs_ring_value_yellow: RING_YELLOW
+
+base_color_value_red: BASE_RED
+base_color_value_black: BASE_BLACK
+base_color_value_silver: BASE_SILVER
+
+cap_color_value_black: CAP_BLACK
+cap_color_value_grey: CAP_GREY
