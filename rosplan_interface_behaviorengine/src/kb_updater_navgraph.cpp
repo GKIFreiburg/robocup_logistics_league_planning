@@ -68,9 +68,9 @@ class ROSPlanKbUpdaterNavGraph {
 			ROS_ERROR("Failed to get prototype for function '%s'", cfg_dist_func_.c_str());
 			throw std::runtime_error("Failed to get prototype for distance function");
 		}
-		if (functions_[cfg_dist_func_].typed_parameters.size() != 4) {
+		if (functions_[cfg_dist_func_].typed_parameters.size() != 2) {
 			ROS_ERROR("Function '%s' is not a binary function, must be of form "
-			          "(name ?from-loc ?from-side ?to-loc ?to-side)",
+			          "(name ?from-loc ?from-side)",
 			          cfg_dist_func_.c_str());
 			throw std::runtime_error("Invalid distance function prototype, see log");			
 		}
