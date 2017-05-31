@@ -1,0 +1,28 @@
+# = OrderInfo Knowledge Base Updater Config =
+# The kb updater tracks information from the refbox, compares it to
+# the information in the knowledge base, and issues update as necessary.
+
+product_type: product
+step_type: step
+
+has_step_predicate: has-step
+initial_step_predicate: initial-step
+step_precedes_predicate: step-precedes
+step_at_machine_predicate: step-at-machine
+step_completed_predicate: step-completed
+material_required_function: material-required
+
+gate_prefix: gate
+
+# Value mapping for colors
+rs_ring_value_blue: blue
+rs_ring_value_green: green
+rs_ring_value_orange: orange
+rs_ring_value_yellow: yellow
+
+base_color_value_red: red
+base_color_value_black: black
+base_color_value_silver: silver
+
+cap_color_value_black: black
+cap_color_value_grey: grey
