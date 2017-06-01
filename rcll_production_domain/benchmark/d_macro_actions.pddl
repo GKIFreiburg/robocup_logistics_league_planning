@@ -56,7 +56,7 @@
 		; steps
 		(has-step ?p - product ?s - step)
 		(step-completed ?s - step)
-		(initial-step ?s1 - step)
+		(initial-step ?s - step)
 		(step-precedes ?s1 ?s2 - step)
 		(step-at-machine ?s - step ?m - machine)
 		
