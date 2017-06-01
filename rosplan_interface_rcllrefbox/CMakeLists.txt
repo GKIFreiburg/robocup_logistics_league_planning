@@ -72,9 +72,9 @@ include_directories(
 
 add_executable(rosplan_interface_rcllrefbox src/rosplan_interface_rcllrefbox.cpp)
 
-add_executable(rosplan_kb_updater_rcll_machine_info src/kb_updater_machine_info)
+#add_executable(rosplan_kb_updater_rcll_machine_info src/kb_updater_machine_info)
 
-add_executable(rosplan_kb_updater_rcll_order_info src/kb_updater_order_info)
+#add_executable(rosplan_kb_updater_rcll_order_info src/kb_updater_order_info)
 
 add_executable(rosplan_kb_updater_rcll_production_steps src/kb_updater_production_steps)
 
@@ -87,18 +87,18 @@ target_link_libraries(rosplan_interface_rcllrefbox
   ${boost_LIBRARIES}
 )
 
-target_link_libraries(rosplan_kb_updater_rcll_machine_info
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${boost_LIBRARIES}
-)
+#target_link_libraries(rosplan_kb_updater_rcll_machine_info
+#  ${catkin_LIBRARIES}
+#  ${Boost_LIBRARIES}
+#  ${boost_LIBRARIES}
+#)
 
 
-target_link_libraries(rosplan_kb_updater_rcll_order_info
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${boost_LIBRARIES}
-)
+#target_link_libraries(rosplan_kb_updater_rcll_order_info
+#  ${catkin_LIBRARIES}
+#  ${Boost_LIBRARIES}
+#  ${boost_LIBRARIES}
+#)
 
 target_link_libraries(rosplan_kb_updater_rcll_production_steps
   ${catkin_LIBRARIES}
@@ -110,7 +110,7 @@ target_link_libraries(rosplan_kb_updater_rcll_production_steps
 ## Install ##
 #############
 
-install(TARGETS rosplan_interface_rcllrefbox rosplan_kb_updater_rcll_order_info rosplan_kb_updater_rcll_machine_info
+install(TARGETS rosplan_interface_rcllrefbox rosplan_kb_updater_rcll_production_steps 
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
