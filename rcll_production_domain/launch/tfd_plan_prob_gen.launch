@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<launch>
+        <!-- Basic Simulation Integration -->
+        <include file="$(find rcll_fawkes_sim)/launch/rcll_fawkes_sim_all_3robots.launch" />
+
+	<arg name="domain" default="$(find rcll-fcfr)/rcll_production_domain/pddl/domain.pddl" />
+	<arg name="problem" default="$(find rcll-fcfr)/rcll_production_domain/pddl/p01.pddl" />
+
+	<!-- domain file -->
+	<param name="/rosplan/domain_path" value="$(arg domain)" />
+
+	<!-- knowledge base -->
+	<node name="rosplan_knowledge_base"  pkg="rosplan_knowledge_base" type="knowledgeBase" respawn="false" output="screen" />
+
+	<!-- scene database -->
+        <param name="mongodb_host" value="localhost" />
+        <param name="mongodb_port" value="27018" />
+	<node name="rosplan_scene_database" pkg="mongodb_store" type="mongodb_server.py" respawn="false" output="log">
+		<param name="database_path" value="$(find rosplan_knowledge_base)/common/mongoDB" />
+	</node>	
+	<node name="rosplan_scene_message_store" pkg="mongodb_store" type="message_store_node.py" respawn="false" output="log" />
+
+	<!-- planning system -->
+<!--
+	<node name="rosplan_planning_system" pkg="rosplan_planning_system" type="planner" respawn="false" output="screen">
+		<param name="data_path" value="$(find rcll-fcfr)/rcll_production_domain/data/" />
+		<param name="problem_path" value="$(find rcll-fcfr)/rcll_production_domain/data/problem.pddl" />
+		<param name="strl_file_path" value="$(find rcll_production_domain)/data/plan.strl" />
+-->
+		<!-- to run the planner -->
+<!--		<param name="planner_command" value="$(find )" />
+		<param name="generate_default_problem" value="true" />
+		<param name="max_dispatch_attempts" value="2" />
+
+	</node>
+
+	<node pkg="tfd_modules" type="tfd_plan" name="tfd_plan" args="$(arg domain) $(arg problem)" required="true">
+		<rosparam command="load" file="$(find rcll_production_domain)/config/tfd_modules_params.yaml" />
+	</node>
+-->
+</launch>
