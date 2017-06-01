@@ -413,10 +413,15 @@ public:
 		for (const auto& p: received_products)
 		{
 			// TODO: filter products
-//			if (p.complexity() == 0)
+			if (p.complexity() > 0)
 			{
-				accepted_products.insert(p);
+				continue;
 			}
+			if (accepted_products.size() > 3)
+			{
+				continue;
+			}
+			accepted_products.insert(p);
 		}
 
 		update_products(accepted_products);
