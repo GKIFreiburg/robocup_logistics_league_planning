@@ -25,9 +25,8 @@ if __name__=='__main__':
 	#print('planning exited; gathering results...')
 	
 	with open(plan_filename) as f:
-		print('; Plan found')
-		print('; Solution found')
-		print('; ff: found')
+		#plan = f.read()
+		print('; Plan found             {d}'.format(d=900.0))
 		print(f.read())
 	
 	exit(0)
