@@ -76,7 +76,6 @@ add_executable(rosplan_interface_rcllrefbox src/rosplan_interface_rcllrefbox.cpp
 
 #add_executable(rosplan_kb_updater_rcll_order_info src/kb_updater_order_info)
 
-add_executable(rosplan_kb_updater_rcll_production_steps src/kb_updater_production_steps)
 
 ## Add cmake target dependencies of the executable
 # add_dependencies(rosplan_interface_rcllrefbox_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -100,11 +99,6 @@ target_link_libraries(rosplan_interface_rcllrefbox
 #  ${boost_LIBRARIES}
 #)
 
-target_link_libraries(rosplan_kb_updater_rcll_production_steps
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${boost_LIBRARIES}
-)
 
 #############
 ## Install ##
