@@ -30,7 +30,7 @@ def run_benchmark(pddl_path, benchmark_filename):
 	#print('found problems: {}'.format(str(problem_names)))
 	benchmark_file = os.path.join(pddl_path, benchmark_filename)
 	with open(benchmark_file, 'w') as f:
-		f.write('domain,robots,c0,c1,c2,c3,first makespan,first plan time,best makespan,best plan time,timeout\n')
+		f.write('domain,robots,c0,m0,c1,m1,c2,m2,c3,m3,first makespan,first plan time,best makespan,best plan time,timeout\n')
 	for domain, problem in itertools.product(domain_names, problem_names):
 		print('starting benchmark for {d} and {p}...'.format(d=domain, p=problem))
 		benchmark_line = run_planner(pddl_path, domain, problem)
@@ -68,11 +68,12 @@ def run_planner(pddl_path, domain_name, problem_name):
 				first_makespan = makespan
 				first_search_time = search_time
 	# p_3r_1c0_2c1_0c2_0c3
+	# p_3r_1c0_0m_2c1_0m_0c2_0m_0c3_0m
 	problem_complexity = [int(count[0]) for count in problem_name[2:].split('_')]
 	results = [domain_name]
 	results.extend(problem_complexity)
 	results.extend([first_makespan, first_search_time, makespan, search_time, wall_time])
-	return '{},{},{},{},{},{},{},{},{},{},{}\n'.format(*results)
+	return '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n'.format(*results)
 	
 if __name__=='__main__':
 	if len(sys.argv) < 2:

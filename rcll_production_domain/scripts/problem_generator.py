@@ -45,16 +45,18 @@ def generate_product(ring_complexities, cap_station, product_id):
 	ring_steps = ''
 	pre_cap_step = 'init_{name}'.format(name=name)
 	rings = ''
+	material_requirement = 0
 	for index, complexity in enumerate(ring_complexities):
 		pre_cap_step = ring_step_template.format(index=index+1, name=name)
 		ring_steps += pre_cap_step
 		machine = complexity % 2 + 1
 		if complexity - 1 >= 0: 
 			complexity -= 1
+		material_requirement += complexity
 		rings += ring_init_template.format(name=name, index=index+1, complexity=complexity, machine=machine)
 	product_object = product_object_template.format(name = name, ring_steps=ring_steps)
 	product_init = product_init_template.format(name=name, rings=rings, pre_cap=pre_cap_step, cap_station=cap_station)
-	return product_object, product_init
+	return product_object, product_init, material_requirement
 
 def generate_problem(orders, robot_count=3):
 	name = 'p_{robot_count}r'.format(robot_count=robot_count)
@@ -64,24 +66,26 @@ def generate_problem(orders, robot_count=3):
 	products = ''
 	product_inits = ''
 	product_id = 1
-	complexity_counts = [0,0,0,0]
+	complexity_counts = [0, 0, 0, 0]
+	total_material = [0, 0, 0, 0]
 	for complexity in orders:
 		complexity_counts[int(complexity)] += 1
 		rings = random.sample(range(4), int(complexity))
 		cap = random.choice([1,2])
-		p, i = generate_product(ring_complexities = rings, cap_station=cap, product_id=product_id)
+		p, i, mats = generate_product(ring_complexities = rings, cap_station=cap, product_id=product_id)
 		products += p
 		product_inits += i
 		product_id += 1
+		total_material[int(complexity)] += mats
 	for complexity, count in enumerate(complexity_counts):
-		name += '_{count}c{complexity}'.format(count=count, complexity=complexity)
+		name += '_{count}c{complexity}_{mats}m'.format(count=count, complexity=complexity, mats=total_material[complexity])
 	problem = problem_template.format(name=name, robots=robots, products=products, product_inits=product_inits)
 	return problem, name
 
 def generate_problem_files(pddl_path):
 	# 1 to 4 products of complexity 0 to 3, 1 to 3 robots
 	for robot_count in range(1, 4):
-		for product_count in range(1,5):
+		for product_count in range(1, 4):
 			for product_complexities in itertools.combinations_with_replacement('0123', product_count):
 				problem, name = generate_problem(product_complexities, robot_count=robot_count)
 				with open(os.path.join(pddl_path, name+'.pddl'), 'w') as f:
