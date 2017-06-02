@@ -58,6 +58,7 @@ struct Product
 	{
 		return name < other.name;
 	}
+	int expected_reward;
 };
 
 typedef rosplan_knowledge_msgs::KnowledgeUpdateServiceArray Update;
@@ -336,6 +337,7 @@ public:
 	{
 		Product p;
 		p.name = "p"+std::to_string(order.id)+std::to_string(id);
+		p.expected_reward = 0;
 
 		// base step
 		p.steps.push_back(Step());
@@ -351,6 +353,9 @@ public:
 			ring.name = ring_colors_[color]+"_ring_"+p.name;
 			ring.machine = ring_colors_machines_[color];
 			ring.material = ring_colors_materials_[color];
+			p.expected_reward += ring.material * 2;	// 2 points awarded per material delivered
+			// For successfully mounting a ring requiring x meterials, y points are awarded as- (x , y): (2, 20), (1, 10), (0, 5)
+			p.expected_reward += ring.material == 2? 20 : ring.material == 1? 10 : 5;
 		}
 
 		// cap step
@@ -358,13 +363,20 @@ public:
 		Step& cap = p.steps.back();
 		cap.name = cap_colors_[order.cap_color]+"_cap_"+p.name;
 		cap.machine = cap_colors_machines_[order.cap_color];
+		// For mounting a cap, 10 points are awarded
+		p.expected_reward += 10;
 
 		// delivery step
 		p.steps.push_back(Step());
 		Step& delivery = p.steps.back();
 		delivery.name = delivery_gate_to_name(order.delivery_gate)+"_delivery_"+p.name;
 		delivery.machine = "ds";
+		// For successfully delivering a product within the alotted delivery time, 20 points are awarded
+		p.expected_reward += 20;
 
+		// For mounting the last ring on a product of complexity x, y points are awarded as - (x, y): (3, 80), (2, 30), (1, 10), (0, 0)
+		int comp = p.complexity();
+		p.expected_reward += comp == 3? 80 : comp == 2? 30 : comp == 1? 10 : 0;
 		return p;
 	}
 
