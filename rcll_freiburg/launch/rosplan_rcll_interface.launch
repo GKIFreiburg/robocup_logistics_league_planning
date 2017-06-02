@@ -47,7 +47,7 @@
 	</node>
  -->
 
-	<node name="rosplan_kbupdater_production_steps" pkg="rosplan_interface_rcllrefbox"
+	<node name="rosplan_kbupdater_production_steps" pkg="rosplan_interface_freiburg"
 		type="rosplan_kb_updater_rcll_production_steps" respawn="false" output="screen"
 		unless="$(arg disable_refbox_interface)">
 		<remap from="rcll/order_info" to="robot1/rcll/order_info" />
@@ -57,7 +57,7 @@
 			file="$(find rcll_freiburg)/config/kbupdater_production_steps.yaml" />
 	</node>
 
-	<node name="rosplan_kb_updater_navgraph" pkg="rosplan_interface_behaviorengine"
+	<node name="rosplan_kb_updater_navgraph" pkg="rosplan_interface_freiburg"
 		type="rosplan_kb_updater_navgraph" respawn="false" output="screen"
 		unless="$(arg disable_navgraph_interface)">
 		<remap from="rcll/machine_info" to="robot1/rcll/machine_info" />
