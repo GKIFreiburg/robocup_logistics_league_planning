@@ -1,0 +1,10 @@
+
+<launch>
+	<node name="action_move_in" pkg="rosplan_interface_freiburg"
+        type="action_move_in" respawn="false" output="screen">
+	  <remap from="skiller" to="robot1/skiller" />
+    <param name="robot_identifier/var_value" value="r-1" />
+		<param name="team_color" value="CYAN" />
+  </node>
+
+</launch>

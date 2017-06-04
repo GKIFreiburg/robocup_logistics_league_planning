@@ -149,6 +149,14 @@ add_executable(rosplan_kb_updater_navgraph src/kb_updater_navgraph.cpp)
 add_executable(rosplan_initial_situation src/rosplan_initial_situation.cpp)
 add_executable(action_dispense_product src/action_dispense_product.cpp)
 
+add_executable(action_move src/action_move.cpp) 
+target_link_libraries(action_move ${catkin_LIBRARIES}) 
+add_dependencies(action_move execution_generate_messages_cpp)
+
+add_executable(action_move_in src/action_move_in.cpp) 
+target_link_libraries(action_move_in ${catkin_LIBRARIES}) 
+add_dependencies(action_move_in execution_generate_messages_cpp)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
