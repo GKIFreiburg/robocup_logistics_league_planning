@@ -12,6 +12,7 @@ cxx_atleast(14)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  rosplan_planning_system
   diagnostic_msgs
   mongodb_store
   rcll_ros_msgs
@@ -114,7 +115,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES rosplan_interface_freiburg
-  CATKIN_DEPENDS diagnostic_msgs mongodb_store rcll_ros_msgs roscpp rosplan_dispatch_msgs rosplan_knowledge_msgs std_msgs std_srvs
+  CATKIN_DEPENDS rosplan_planning_system diagnostic_msgs mongodb_store rcll_ros_msgs roscpp rosplan_dispatch_msgs rosplan_knowledge_msgs std_msgs std_srvs
 #  DEPENDS system_lib
 )
 
@@ -145,6 +146,7 @@ include_directories(
 add_executable(rosplan_kb_updater_rcll_production_steps src/kb_updater_production_steps)
 add_executable(rosplan_kb_updater_navgraph src/kb_updater_navgraph.cpp)
 add_executable(rosplan_initial_situation src/rosplan_initial_situation.cpp)
+add_executable(action_dispense_product src/action_dispense_product.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -166,6 +168,9 @@ target_link_libraries(rosplan_kb_updater_navgraph
 target_link_libraries(rosplan_initial_situation
   ${catkin_LIBRARIES}
 )
+target_link_libraries(action_dispense_product
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
@@ -182,7 +187,11 @@ target_link_libraries(rosplan_initial_situation
 # )
 
 ## Mark executables and/or libraries for installation
-install(TARGETS rosplan_kb_updater_rcll_production_steps rosplan_kb_updater_navgraph rosplan_initial_situation
+install(TARGETS 
+	rosplan_kb_updater_rcll_production_steps 
+	rosplan_kb_updater_navgraph 
+	rosplan_initial_situation 
+	action_dispense_product
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

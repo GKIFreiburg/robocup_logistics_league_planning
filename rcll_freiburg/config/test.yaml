@@ -2,3 +2,12 @@
   value: [1]
 - args: [C_RS2]
   value: [2]
+
+  
+# usefull action strings
+# drive_into_field{team="CYAN", wait=0.0}
+# ppgoto{place="C-BS-O"}
+# get_product_from{"C-BS", side="output"}
+
+# prepare machine
+# rosservice call /robot1/rcll/send_prepare_machine "{machine: 'C-BS', wait: false, bs_side: 2, bs_base_color: 1, ds_gate: 0, rs_ring_color: 0, cs_operation: 0}"
