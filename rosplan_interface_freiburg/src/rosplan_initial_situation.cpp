@@ -31,6 +31,8 @@
 #include <std_msgs/String.h>
 #include <std_srvs/Empty.h>
 
+#include <rosplan_interface_freiburg/machine_interface.h>
+
 #include <map>
 #include <string>
 #include <vector>

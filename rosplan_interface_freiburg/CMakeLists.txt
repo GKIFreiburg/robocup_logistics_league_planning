@@ -113,8 +113,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES rosplan_interface_freiburg
+  INCLUDE_DIRS include
+  LIBRARIES machine_interface
   CATKIN_DEPENDS rosplan_planning_system diagnostic_msgs mongodb_store rcll_ros_msgs roscpp rosplan_dispatch_msgs rosplan_knowledge_msgs std_msgs std_srvs
 #  DEPENDS system_lib
 )
@@ -127,13 +127,14 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/rosplan_interface_freiburg.cpp
-# )
+add_library(machine_interface
+  src/machine_interface.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -169,6 +170,7 @@ target_link_libraries(rosplan_initial_situation
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_dispense_product
+  machine_interface
   ${catkin_LIBRARIES}
 )
 

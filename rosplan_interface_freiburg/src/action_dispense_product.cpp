@@ -25,6 +25,8 @@
 #include <rcll_ros_msgs/ProductColor.h>
 #include <rcll_ros_msgs/MachineInfo.h>
 
+#include <rosplan_interface_freiburg/machine_interface.h>
+
 #include <map>
 #include <string>
 #include <vector>
@@ -40,97 +42,7 @@
 			ROS_ERROR_STREAM(log_prefix_<<"can not read param "<<path);  \
 	}
 
-std::string log_prefix_;
 
-class MachineInterface
-{
-public:
-	MachineInterface(const std::string& name) :
-			name_(name), error_state_("MACHINE_NOT_FOUND")
-	{
-		ros::NodeHandle nh;
-		info_subscriber_ = nh.subscribe("rcll/machine_info", 10, &MachineInterface::machineCB, this);
-	}
-
-	void machineCB(const rcll_ros_msgs::MachineInfo::ConstPtr& msg)
-	{
-		machines_ = msg;
-		if (full_name_ == "")
-		{
-			for (const auto& machine: msg->machines)
-			{
-				if (machine.name.find(name_) != std::string::npos)
-				{
-					full_name_ = machine.name;
-				}
-			}
-		}
-	}
-
-	void connect_service_prepare_machine()
-	{
-		ros::NodeHandle nh;
-		if (!refbox_prepare_machine_.isValid())
-		{
-			refbox_prepare_machine_ = nh.serviceClient<rcll_ros_msgs::SendPrepareMachine>("rcll/send_prepare_machine", true);
-			ROS_INFO_STREAM(log_prefix_<<"Waiting for ROSPlan service "<<refbox_prepare_machine_.getService());
-			refbox_prepare_machine_.waitForExistence();
-		}
-	}
-
-	const std::string& getMachineState(const std::string& machine)
-	{
-		for (const auto& machine: machines_->machines)
-		{
-			if (machine.name == full_name_)
-			{
-				return machine.state;
-			}
-		}
-		return error_state_;
-	}
-
-	bool waitForState(const std::string& state, ros::Duration timeout=ros::Duration(30))
-	{
-		ros::Time start = ros::Time::now();
-		while(ros::ok() && start+timeout>ros::Time::now())
-		{
-			ros::spinOnce();
-			if (machines_ != NULL)
-			{
-				if (getMachineState(full_name_) == state)
-				{
-					return true;
-				}
-			}
-			ros::Rate(1).sleep();
-		}
-		return false;
-	}
-
-	bool sendPrepare(rcll_ros_msgs::SendPrepareMachine& srv, const std::string& initial_state,
-			const std::string& desired_state)
-	{
-		waitForState(initial_state);
-		srv.request.machine = full_name_;
-		connect_service_prepare_machine();
-		refbox_prepare_machine_.call(srv);
-		if (! srv.response.ok)
-		{
-			return false;
-		}
-
-		return waitForState(desired_state);
-	}
-
-private:
-	ros::Subscriber info_subscriber_;
-	rcll_ros_msgs::MachineInfo::ConstPtr machines_;
-	ros::ServiceClient refbox_prepare_machine_;
-	std::string name_;
-	std::string full_name_;
-	std::string error_state_;
-};
 
 class ActionDispenseProduct : public KCL_rosplan::RPActionInterface
 {
@@ -139,7 +51,8 @@ public:
 	{
 		ros::NodeHandle nh;
 
-		machine_ = std::make_shared<MachineInterface>("BS");
+		std::string log_prefix_ = "[DispenseProduct] ";
+		machine_ = std::make_shared<MachineInterface>("BS", log_prefix_);
 		dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionDispenseProduct::dispatchCB, this);
 
 		ros::NodeHandle nhpriv("~");
@@ -155,9 +68,9 @@ public:
 	int extractColor(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
 	{
 		//(:durative-action dispense-product
-		//	:parameters (?p - product ?s - step)
+		//	:parameters (?p - product ?s - step ?m - base_station ?o - bs_output)
 		// )
-		// (dispense-product p10 red_base_p10)
+		// (dispense-product p10 red_base_p10 bs bs_out)
 		for (const auto& arg: msg->parameters)
 		{
 			if (arg.key == "s")
@@ -205,7 +118,6 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "action_dispense_product");
 	ros::NodeHandle n;
-	log_prefix_ = "[DispenseProduct] ";
 
 	ActionDispenseProduct action;
 	action.runActionInterface();
