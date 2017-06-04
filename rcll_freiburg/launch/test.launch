@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
 
 <launch>
+	<group ns="robot1">
+		<node name="action_move" pkg="rosplan_interface_freiburg"
+			type="action_dispense_product" respawn="false">
+			<param name="pddl_action_name" value="move" />
+		</node>
+	</group>
 	
 	<group ns="robot1">
 		<node name="action_dispense_product" pkg="rosplan_interface_freiburg"
