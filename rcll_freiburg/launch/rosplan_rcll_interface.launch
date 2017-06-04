@@ -47,6 +47,32 @@
 	</node>
  -->
 
+	<!-- machine actions -->
+	<group ns="robot1">
+		<node name="action_dispense_product" pkg="rosplan_interface_freiburg"
+			type="action_dispense_product" respawn="false">
+			<param name="pddl_action_name" value="dispense-product" />
+			<param name="initial_machine_state" value="IDLE" />
+			<param name="desired_machine_state" value="READY-AT-OUTPUT" />
+		</node>
+		<node name="action_dispense_material" pkg="rosplan_interface_freiburg"
+			type="action_dispense_material" respawn="false">
+			<param name="pddl_action_name" value="dispense-material" />
+			<param name="initial_machine_state" value="IDLE" />
+			<param name="desired_machine_state" value="READY-AT-OUTPUT" />
+		</node>
+		<node name="action_buffer_cap" pkg="rosplan_interface_freiburg"
+			type="action_buffer_cap" respawn="false">
+			<param name="pddl_action_name" value="buffer-cap" />
+			<param name="desired_machine_state" value="READY-AT-OUTPUT" />
+		</node>
+		<node name="action_mount_cap" pkg="rosplan_interface_freiburg"
+			type="action_mount_cap" respawn="false">
+			<param name="pddl_action_name" value="mount-cap" />
+			<param name="desired_machine_state" value="READY-AT-OUTPUT" />
+		</node>
+	</group>
+
 	<node name="rosplan_kbupdater_production_steps" pkg="rosplan_interface_freiburg"
 		type="rosplan_kb_updater_rcll_production_steps" respawn="false" output="screen"
 		unless="$(arg disable_refbox_interface)">

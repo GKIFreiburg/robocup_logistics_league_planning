@@ -148,6 +148,9 @@ add_executable(rosplan_kb_updater_rcll_production_steps src/kb_updater_productio
 add_executable(rosplan_kb_updater_navgraph src/kb_updater_navgraph.cpp)
 add_executable(rosplan_initial_situation src/rosplan_initial_situation.cpp)
 add_executable(action_dispense_product src/action_dispense_product.cpp)
+add_executable(action_dispense_material src/action_dispense_material.cpp)
+add_executable(action_buffer_cap src/action_buffer_cap.cpp)
+add_executable(action_mount_cap src/action_buffer_cap.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -173,6 +176,18 @@ target_link_libraries(action_dispense_product
   machine_interface
   ${catkin_LIBRARIES}
 )
+target_link_libraries(action_dispense_material
+  machine_interface
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(action_buffer_cap
+  machine_interface
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(action_mount_cap
+  machine_interface
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
@@ -190,10 +205,13 @@ target_link_libraries(action_dispense_product
 
 ## Mark executables and/or libraries for installation
 install(TARGETS 
-	rosplan_kb_updater_rcll_production_steps 
-	rosplan_kb_updater_navgraph 
-	rosplan_initial_situation 
-	action_dispense_product
+  rosplan_kb_updater_rcll_production_steps 
+  rosplan_kb_updater_navgraph 
+  rosplan_initial_situation 
+  action_dispense_product
+  action_dispense_material
+  action_buffer_cap
+  action_mount_cap
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
