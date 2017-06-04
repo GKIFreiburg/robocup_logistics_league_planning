@@ -1,50 +1,50 @@
 <?xml version="1.0"?>
 
 <launch>
-	<arg name="num_robots" default="$(optenv NUM_ROBOTS 1)" />
-	<arg name="override_action_mapping" default="false" />
-	<arg name="disable_refbox_interface" default="false" />
-	<arg name="disable_navgraph_interface" default="false" />
 	
-  <!-- Parameter of action used to identify robot-specific actions -->
-<!-- 
-	<param name="robot_identifier/var_name" value="r" />
-  <param name="robot_identifier/var_type" value="robot" />
-	<node name="rosplan_be_r1" pkg="rosplan_interface_behaviorengine"
-        type="rosplan_interface_behaviorengine" respawn="false" output="screen"
-        if="$(eval int(arg('num_robots')) >= 1)" >
-	  <remap from="skiller" to="robot1/skiller" />
-    <param name="robot_identifier/var_value" value="r1" />
-  </node>
+	<group ns="robot1">
+		<node name="action_dispense_product" pkg="rosplan_interface_freiburg"
+			type="action_dispense_product" respawn="false">
+			<param name="pddl_action_name" value="dispense-product" />
+			<param name="initial_machine_state" value="IDLE" />
+			<param name="desired_machine_state" value="READY-AT-OUTPUT" />
+		</node>
+		<node name="action_dispense_material" pkg="rosplan_interface_freiburg"
+			type="action_dispense_material" respawn="false">
+			<param name="pddl_action_name" value="dispense-material" />
+			<param name="initial_machine_state" value="IDLE" />
+			<param name="desired_machine_state" value="READY-AT-OUTPUT" />
+		</node>
+		<node name="action_buffer_cap" pkg="rosplan_interface_freiburg"
+			type="action_wait_for_machine_state" respawn="false">
+			<param name="pddl_action_name" value="buffer-cap" />
+			<param name="desired_machine_state" value="READY-AT-OUTPUT" />
+			<param name="log_prefix" value="[BufferCap] " />
+			<rosparam param="machines">[cs1, cs2]</rosparam>
+		</node>
+		<node name="action_mount_cap" pkg="rosplan_interface_freiburg"
+			type="action_wait_for_machine_state" respawn="false">
+			<param name="pddl_action_name" value="mount-cap" />
+			<param name="desired_machine_state" value="READY-AT-OUTPUT" />
+			<param name="log_prefix" value="[MountCap] " />
+			<rosparam param="machines">[cs1, cs2]</rosparam>
+		</node>
+		<node name="action_mount_ring" pkg="rosplan_interface_freiburg"
+			type="action_wait_for_machine_state" respawn="false">
+			<param name="pddl_action_name" value="mount-ring" />
+			<param name="desired_machine_state" value="READY-AT-OUTPUT" />
+			<param name="log_prefix" value="[MountRing] " />
+			<rosparam param="machines">[rs1, rs2]</rosparam>
+		</node>
+		<node name="action_deliver" pkg="rosplan_interface_freiburg"
+			type="action_wait_for_machine_state" respawn="false">
+			<param name="pddl_action_name" value="deliver" />
+			<param name="desired_machine_state" value="IDLE" />
+			<param name="log_prefix" value="[Deliver] " />
+			<rosparam param="machines">[ds]</rosparam>
+		</node>
+	</group>
 
-  <node name="rosplan_be_r2" pkg="rosplan_interface_behaviorengine"
-        type="rosplan_interface_behaviorengine" respawn="false" output="screen"
-        if="$(eval int(arg('num_robots')) >= 2)" >
-	  <remap from="skiller" to="robot2/skiller" />
-    <param name="robot_identifier/var_value" value="r2" />
-  </node>
-
-  <node name="rosplan_be_r3" pkg="rosplan_interface_behaviorengine"
-        type="rosplan_interface_behaviorengine" respawn="false" output="screen"
-        if="$(eval int(arg('num_robots')) >= 3)" >
-	  <remap from="skiller" to="robot3/skiller" />
-	  <param name="robot_identifier/var_value" value="r3" />
-  </node>
-
-  <node name="rosplan_interface_rcllrefbox" pkg="rosplan_interface_rcllrefbox"
-        type="rosplan_interface_rcllrefbox" respawn="false" output="screen"
-        unless="$(arg disable_refbox_interface)">
-		<remap from="rcll/send_prepare_machine" to="/robot1/rcll/send_prepare_machine" />
-	  <rosparam command="load" file="$(find rcll_freiburg)/config/rcll_ifc_rcllrefbox.yaml" />
-	</node>
- -->
-
-	<node ns="robot1" name="action_dispense_product" pkg="rosplan_interface_freiburg"
-		type="action_dispense_product" respawn="false" output="screen">
-		<param name="pddl_action_name" value="dispense-product"/>
-		<param name="initial_machine_state" value="IDLE"/>
-		<param name="desired_machine_state" value="READY-AT-OUTPUT"/>
-	</node>
 
 </launch>
 

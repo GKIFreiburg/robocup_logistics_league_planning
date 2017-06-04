@@ -18,10 +18,17 @@
 class MachineInterface
 {
 public:
+	typedef std::shared_ptr<MachineInterface> Ptr;
+
 	/**
 	 * const std::string& name [in]: name of the machine, can be without team prefix. e.g. CS, RS1, CS2, DS
 	 */
 	MachineInterface(const std::string& name, const std::string& log_prefix);
+
+	/**
+	 * returns true if at least one machine_info msg has been received.
+	 */
+	bool hasData() const;
 
 	/**
 	 * Returns the most recent state of this machine
@@ -31,6 +38,7 @@ public:
 	/**
 	 * Blocks and waits until machine has state.
 	 * const std::string& state [in]: the state to wait for. Possible states include: IDLE, PREPARED, WAITING-AT-OUTPUT
+	 * returns true if state was received before timeout
 	 */
 	bool waitForState(const std::string& state, ros::Duration timeout=ros::Duration(30));
 

@@ -219,7 +219,7 @@ public:
 	{
 		if (element.getType() == XmlRpc::XmlRpcValue::TypeString)
 		{
-			std::string s = static_cast<std::string>(element).c_str();
+			std::string s = static_cast<std::string>(element);
 			args.push_back(s);
 			return s;
 		}

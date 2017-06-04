@@ -19,6 +19,7 @@ void MachineInterface::machineCB(const rcll_ros_msgs::MachineInfo::ConstPtr& msg
 	machines_ = msg;
 	if (full_name_ == "")
 	{
+		std::transform(name_.begin(), name_.end(), name_.begin(), ::toupper);
 		for (const auto& machine: msg->machines)
 		{
 			if (machine.name.find(name_) != std::string::npos)
@@ -38,6 +39,11 @@ void MachineInterface::connect_service_prepare_machine()
 		ROS_INFO_STREAM(log_prefix_<<"Waiting for ROSPlan service "<<refbox_prepare_machine_.getService());
 		refbox_prepare_machine_.waitForExistence();
 	}
+}
+
+bool MachineInterface::hasData() const
+{
+	return machines_ != NULL;
 }
 
 const std::string& MachineInterface::getMachineState()
