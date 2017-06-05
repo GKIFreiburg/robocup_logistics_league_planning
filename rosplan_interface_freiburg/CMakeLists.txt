@@ -149,16 +149,12 @@ add_executable(rosplan_kb_updater_navgraph src/kb_updater_navgraph.cpp)
 add_executable(rosplan_initial_situation src/rosplan_initial_situation.cpp)
 add_executable(action_dispense_product src/action_dispense_product.cpp)
 add_executable(action_dispense_material src/action_dispense_material.cpp)
-add_executable(action_buffer_cap src/action_buffer_cap.cpp)
-add_executable(action_mount_cap src/action_buffer_cap.cpp)
+add_executable(action_wait_for_machine_state src/action_wait_for_machine_state.cpp)
 
-add_executable(action_move src/action_move.cpp) 
-target_link_libraries(action_move ${catkin_LIBRARIES}) 
-add_dependencies(action_move execution_generate_messages_cpp)
+add_executable(action_move src/action_move.cpp)
+add_executable(action_move_in src/action_move_in.cpp)
+add_executable(action_insert_cap src/action_insert_cap.cpp)
 
-add_executable(action_move_in src/action_move_in.cpp) 
-target_link_libraries(action_move_in ${catkin_LIBRARIES}) 
-add_dependencies(action_move_in execution_generate_messages_cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -188,11 +184,17 @@ target_link_libraries(action_dispense_material
   machine_interface
   ${catkin_LIBRARIES}
 )
-target_link_libraries(action_buffer_cap
+target_link_libraries(action_wait_for_machine_state
   machine_interface
   ${catkin_LIBRARIES}
 )
-target_link_libraries(action_mount_cap
+target_link_libraries(action_move
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(action_move_in
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(action_insert_cap
   machine_interface
   ${catkin_LIBRARIES}
 )
@@ -218,8 +220,7 @@ install(TARGETS
   rosplan_initial_situation 
   action_dispense_product
   action_dispense_material
-  action_buffer_cap
-  action_mount_cap
+  action_wait_for_machine_state
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

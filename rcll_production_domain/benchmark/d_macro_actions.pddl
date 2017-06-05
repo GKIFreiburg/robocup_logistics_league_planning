@@ -88,17 +88,17 @@
 	)
 
 	(:durative-action dispense-material
-		:parameters ()
-		:duration (= ?duration 15)
+		:parameters (?m - base_station ?o - bs_output)
+		:duration (= ?duration 1)
 		:condition (and
-			(at start (not (output-full bs_out)))
-			(at start (not (processing bs)))
+			(at start (not (output-full ?o)))
+			(at start (not (processing ?m)))
 		)
 		:effect (and
-			(at start (processing bs))
-			(at end (not (processing bs)))
-			(at start (output-full bs_out))
-			(at end (material-at bs_out))
+			(at start (processing ?m))
+			(at end (not (processing ?m)))
+			(at start (output-full ?o))
+			(at end (material-at ?o))
 		)
 	)
 
@@ -197,27 +197,27 @@
 	)
 
 	(:durative-action deliver
-		:parameters (?p - product ?s - step)
-		:duration (= ?duration 40)
+		:parameters (?p - product ?s - step ?m - delivery_station ?i - ds_input)
+		:duration (= ?duration 1)
 		:condition (and
-			(at start (product-at ?p ds_in))
+			(at start (product-at ?p ?i))
 			(at start (has-step ?p ?s))
-			(at start (step-at-machine ?s ds))
+			(at start (step-at-machine ?s ?m))
 			(at start (not (step-completed ?s)))
-			(at start (not (processing ds)))
+			(at start (not (processing ?m)))
 		)
 		:effect (and
-			(at start (processing ds))
-			(at start (not (product-at ?p ds_in)))
-			(at end (not (processing ds)))
-			(at end (not (input-full ds_in)))
+			(at start (processing ?m))
+			(at start (not (product-at ?p ?i)))
+			(at end (not (processing ?m)))
+			(at end (not (input-full ?i)))
 			(at end (step-completed ?s))
 		)
 	)
 
 	(:durative-action discard-material
 		:parameters ()
-		:duration (= ?duration 40)
+		:duration (= ?duration 1)
 		:condition (and
 			(at start (material-at ds_in))
 			(at start (not (processing ds)))

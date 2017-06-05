@@ -34,11 +34,13 @@
 		<arg name="num_robots" value="$(arg num_robots)" />
 	</include>
 
-  <node name="rosplan_initial_situation" pkg="rosplan_initial_situation"
-        type="rosplan_initial_situation" respawn="false" output="screen">
-	  <rosparam command="load" file="$(find rcll_freiburg)/config/production_initial_situation.yaml" />
-	  <rosparam command="load" file="$(find rcll_freiburg)/config/production_initial_situation_3robots.yaml"
-	            if="$(eval int(arg('num_robots')) >= 3)" />
+	<node name="rosplan_initial_situation" pkg="rosplan_initial_situation"
+		type="rosplan_initial_situation" respawn="false" output="screen">
+		<rosparam command="load"
+			file="$(find rcll_freiburg)/config/production_initial_situation.yaml" />
+		<rosparam command="load"
+			file="$(find rcll_freiburg)/config/production_initial_situation_3robots.yaml"
+			if="$(eval int(arg('num_robots')) >= 3)" />
 		<param name="clear_kb" value="true" />
 		<param name="start_planning" value="false" />
 	</node>

@@ -19,6 +19,7 @@
  */
 
 #include <ros/ros.h>
+#include <XmlRpc.h>
 #include <rosplan_action_interface/RPActionInterface.h>
 #include <rosplan_interface_freiburg/machine_interface.h>
 
@@ -28,20 +29,40 @@
 			ROS_ERROR_STREAM(log_prefix_<<"can not read param "<<path);  \
 	}
 
-class ActionMountCap : public KCL_rosplan::RPActionInterface
+
+class ActionWaitForMachineState : public KCL_rosplan::RPActionInterface
 {
 public:
-	ActionMountCap()
+	ActionWaitForMachineState()
 	{
 		ros::NodeHandle nh;
-
-		std::string log_prefix_ = "[MountCap] ";
-		machine1_ = std::make_shared<MachineInterface>("CS1", log_prefix_);
-		machine2_ = std::make_shared<MachineInterface>("CS2", log_prefix_);
-		dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionMountCap::dispatchCB, this);
-
 		ros::NodeHandle nhpriv("~");
+		log_prefix_ = "[WaitMachine] ";
 		GET_CONFIG(nhpriv, nh, "desired_machine_state", desired_machine_state_)
+		GET_CONFIG(nhpriv, nh, "log_prefix", log_prefix_)
+		if (log_prefix_.rfind(" ") != log_prefix_.length())
+		{
+			log_prefix_ = log_prefix_+" ";
+		}
+
+		try
+		{
+			XmlRpc::XmlRpcValue list;
+			GET_CONFIG(nhpriv, nh, "machines", list)
+			for (size_t i = 0; i < list.size(); ++i)
+			{
+				auto m = list[i];
+				std::string name = static_cast<std::string>(m);
+				ROS_INFO_STREAM(log_prefix_<<"adding machine: "<<name);
+				machines_[name] = std::make_shared<MachineInterface>(name, log_prefix_);
+			}
+		} catch (XmlRpc::XmlRpcException& e)
+		{
+			ROS_ERROR_STREAM(log_prefix_<<e.getMessage());
+			exit(-1);
+		}
+
+		dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionWaitForMachineState::dispatchCB, this);
 	}
 
 	void dispatchCB(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
@@ -57,19 +78,20 @@ public:
 		{
 			if(arg.key == "m")
 			{
-				if(arg.value.find(std::to_string(1)) != std::string::npos)
+				if (! machines_[arg.value]->hasData())
 				{
-					machine1_->waitForState(desired_machine_state_);
+					ROS_ERROR_STREAM(log_prefix_<<"No machine data received.");
+					return false;
 				}
-				else if (arg.value.find(std::to_string(2)) != std::string::npos)
+				if (machines_.find(arg.value) == machines_.end())
 				{
-					machine2_->waitForState(desired_machine_state_);
+					ROS_ERROR_STREAM(log_prefix_<<"Unexpected machine identifier: "<<arg.value);
+					return false;
 				}
-				ROS_ERROR_STREAM(log_prefix_<<"Unexpected machine identifier: "<<arg.value);
-				return false;
+				return machines_[arg.value]->waitForState(desired_machine_state_);
 			}
 		}
-		return true;
+		return false;
 	}
 
 private:
@@ -77,17 +99,15 @@ private:
 	std::string log_prefix_;
 
 	ros::Subscriber dispatch_subscriber_;
-
-	std::shared_ptr<MachineInterface> machine1_;
-	std::shared_ptr<MachineInterface> machine2_;
+	std::map<std::string, MachineInterface::Ptr> machines_;
 };
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "action_mount_cap");
+	ros::init(argc, argv, "action_buffer_cap");
 	ros::NodeHandle n;
 
-	ActionMountCap action;
+	ActionWaitForMachineState action;
 	action.runActionInterface();
 
 	return 0;
