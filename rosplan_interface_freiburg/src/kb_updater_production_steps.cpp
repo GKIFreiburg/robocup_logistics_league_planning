@@ -371,6 +371,7 @@ public:
 		Step& delivery = p.steps.back();
 		delivery.name = delivery_gate_to_name(order.delivery_gate)+"_delivery_"+p.name;
 		delivery.machine = "ds";
+
 		// For successfully delivering a product within the alotted delivery time, 20 points are awarded
 		p.expected_reward += 20;
 

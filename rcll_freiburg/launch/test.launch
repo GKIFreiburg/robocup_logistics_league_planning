@@ -3,9 +3,9 @@
 <launch>
 	<group ns="robot1">
 		<param name="robot" value="r1"/>
-		<node name="action_insert_cap" pkg="rosplan_interface_freiburg"
-			type="action_insert_cap" respawn="false">
-			<param name="pddl_action_name" value="insert-cap" />
+		<node name="action_transport_product" pkg="rosplan_interface_freiburg"
+			type="action_transport_product" respawn="false">
+			<param name="pddl_action_name" value="transport-product" />
 			<param name="initial_machine_state" value="IDLE" />
 			<param name="desired_machine_state" value="PREPARED" />
 		</node>

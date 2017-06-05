@@ -9,38 +9,17 @@
 	<!-- Load domain-specific action mapping -->
   <rosparam command="load" file="$(find rcll_freiburg)/config/rcll_action_mapping.yaml"
             unless="$(arg override_action_mapping)" />
-
-  <!-- Load predicates which the interface should not touch (assert/retract) -->
-  <rosparam command="load" file="$(find rcll_freiburg)/config/rcll_ignored_effect_predicates.yaml" />
-
-  <!-- Parameter of action used to identify robot-specific actions -->
-<!-- 
-	<param name="robot_identifier/var_name" value="r" />
-  <param name="robot_identifier/var_type" value="robot" />
-  
-	<node name="rosplan_be_r1" pkg="rosplan_interface_behaviorengine"
-        type="rosplan_interface_behaviorengine" respawn="false" output="screen"
-        if="$(eval int(arg('num_robots')) >= 1)" >
-	  <remap from="skiller" to="robot1/skiller" />
-    <param name="robot_identifier/var_value" value="r1" />
-  </node>
-
-  <node name="rosplan_be_r2" pkg="rosplan_interface_behaviorengine"
-        type="rosplan_interface_behaviorengine" respawn="false" output="screen"
-        if="$(eval int(arg('num_robots')) >= 2)" >
-	  <remap from="skiller" to="robot2/skiller" />
-    <param name="robot_identifier/var_value" value="r2" />
-  </node>
-
-  <node name="rosplan_be_r3" pkg="rosplan_interface_behaviorengine"
-        type="rosplan_interface_behaviorengine" respawn="false" output="screen"
-        if="$(eval int(arg('num_robots')) >= 3)" >
-	  <remap from="skiller" to="robot3/skiller" />
-	  <param name="robot_identifier/var_value" value="r3" />
-  </node>
- -->
 	<include file="$(find rosplan_interface_freiburg)/launch/action_move.launch"/>
 	<include file="$(find rosplan_interface_freiburg)/launch/action_move_in.launch"/>
+	<group ns="robot1">
+		<param name="robot" value="r1"/>
+		<node name="action_insert_cap" pkg="rosplan_interface_freiburg"
+			type="action_insert_cap" respawn="false">
+			<param name="pddl_action_name" value="insert-cap" />
+			<param name="initial_machine_state" value="IDLE" />
+			<param name="desired_machine_state" value="PREPARED" />
+		</node>
+	</group>
 
 	<!-- machine actions -->
 	<group ns="robot1">
