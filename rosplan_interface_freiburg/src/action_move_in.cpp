@@ -220,6 +220,7 @@ public:
         std::string value_s = cfg_mappings[action];
         mappings_[action] = value_s;
 
+
         for (const auto &sp : specs_) {
             const std::string &name = sp.first;
             const RPActionSpec &spec = sp.second;
@@ -335,27 +336,6 @@ public:
 
         std::string action = "move-in";
 
-
-        /*if (name.compare("dispense-product") == 0)
-        {
-            ROS_INFO_STREAM(name);
-            cur_msg_ = *msg;
-            get_bound_params(cur_msg_, cur_bound_params_);
-
-            send_predicate_updates(rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE,
-                                   specs_[name].op.at_start_del_effects, cur_bound_params_);
-            send_predicate_updates(rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE,
-                                   specs_[name].op.at_start_add_effects, cur_bound_params_);
-            send_predicate_updates(rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE,
-                                   specs_[name].op.at_end_del_effects, cur_bound_params_);
-            send_predicate_updates(rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE,
-                                   specs_[name].op.at_end_add_effects, cur_bound_params_);
-            send_action_fb(msg->action_id, ACTION_ACHIEVED);
-            ROS_INFO_STREAM("name");
-            cur_msg_.action_id = 0;
-            return;
-        }*/
-
         if(name.compare(action) == 0)
         {
             ROS_INFO_STREAM(name);
@@ -382,94 +362,6 @@ public:
         }
 
 
-        /*if (specs_.find(name) == specs_.end()) {
-            ROS_INFO("[RPI-BE] Unknown or ignored action %s called, ignoring", name.c_str());
-            return;
-        }
-
-        std::set<std::string> params;
-        std::for_each(msg->parameters.begin(), msg->parameters.end(),
-                      [&params](const auto &kv) { params.insert(kv.key); });
-
-        std::vector<std::string> diff;
-        std::set_difference(specs_[name].required_params.begin(), specs_[name].required_params.end(),
-                            params.begin(), params.end(), std::inserter(diff, diff.begin()));
-
-        if (! diff.empty()) {
-            std::string diff_s;
-            std::for_each(diff.begin(), diff.end(), [&diff_s](const auto &s) { diff_s += " " + s; });
-            ROS_WARN("[RPI-BE] Invalid call to %s (invalid or missing args %s), failing",
-                     name.c_str(), diff_s.c_str());
-            send_action_fb(msg->action_id, ACTION_FAILED);
-            return;
-        }
-
-        if (cfg_robot_var_req_) {
-            auto var_it = std::find_if(msg->parameters.begin(), msg->parameters.end(),
-                                       [this](const auto &kv) -> bool
-            { return (kv.key == this->cfg_robot_var_name_); });
-            if (var_it == msg->parameters.end()) {
-                ROS_INFO("[RPI-BE] Command without argument '%s', ignoring", cfg_robot_var_name_.c_str());
-                return;
-            }
-            if (var_it->value != cfg_robot_var_value_) {
-                ROS_INFO("[RPI-BE] Command for %s=%s, listening for %s, ignoring",
-                         cfg_robot_var_name_.c_str(), var_it->value.c_str(),
-                         cfg_robot_var_value_.c_str());
-                return;
-            }
-        }
-
-        if (mappings_.find(name) == mappings_.end()) {
-            // No mapping, check if it is a succeed action
-            if (std::binary_search(cfg_succeed_actions_.begin(), cfg_succeed_actions_.end(), name)) {
-                ROS_INFO("[RPI-BE] Always succeeding action '%s' called", name.c_str());
-
-                cur_msg_ = *msg;
-                get_bound_params(cur_msg_, cur_bound_params_);
-
-                send_predicate_updates(rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE,
-                                       specs_[name].op.at_start_del_effects, cur_bound_params_);
-                send_predicate_updates(rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE,
-                                       specs_[name].op.at_start_add_effects, cur_bound_params_);
-                send_predicate_updates(rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE,
-                                       specs_[name].op.at_end_del_effects, cur_bound_params_);
-                send_predicate_updates(rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE,
-                                       specs_[name].op.at_end_add_effects, cur_bound_params_);
-
-                send_action_fb(msg->action_id, ACTION_ACHIEVED);
-
-                cur_msg_.action_id = 0;
-                return;
-            } else {
-                ROS_WARN("[RPI-BE] No mapping for action '%s' and not a succeed action, ignoring",
-                         name.c_str());
-                return;
-            }
-
-        } else {
-            // We have a mapping, create skill string and execute
-            std::string skill_string = map_skill(name, msg->parameters);
-
-            std::string param_str;
-            std::for_each(msg->parameters.begin(), msg->parameters.end(),
-                          [&param_str](const auto &kv) { param_str += " " + kv.key + "=" + kv.value; });
-
-            if (skill_string.empty()) {
-                ROS_ERROR("[RPI-BE] Failed to translate (%s%s)",
-                          name.c_str(), param_str.c_str());
-                send_action_fb(msg->action_id, ACTION_FAILED);
-                return;
-            }
-
-            ROS_INFO("[RPI-BE] Executing (%s%s) -> %s", name.c_str(), param_str.c_str(), skill_string.c_str());
-
-            cur_msg_ = *msg;
-            cur_skill_string_ = skill_string;
-            get_bound_params(cur_msg_, cur_bound_params_);
-
-            start_execute(skill_string);
-        }*/
     }
 
     std::string

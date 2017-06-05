@@ -219,7 +219,7 @@ public:
         std::string action = "move";
         std::string value_s = cfg_mappings[action];
         mappings_[action] = value_s;
-        ROS_INFO_STREAM(value_s);
+        //ROS_INFO_STREAM(value_s);
 
         for (const auto &sp : specs_) {
             const std::string &name = sp.first;
@@ -340,26 +340,15 @@ public:
         {
             ROS_INFO_STREAM(name);
 
-            /*ROS_INFO_STREAM("____________________");
-            for(int i = 0; i<msg->parameters.size(); i++)
-            {
-                ROS_INFO_STREAM(msg->parameters[i].key);
-                ROS_INFO_STREAM(msg->parameters[i].value);
-            }*/
 
             diagnostic_msgs::KeyValue parameter;
-            parameter.key= "team-color";
-            parameter.value= team_color_;
-            msg->parameters.push_back(parameter);
-
-            parameter.key= "from";
-            parameter.value= msg->parameters[1].value;
-            msg->parameters.push_back(parameter);
 
             std::string to = "C-";
             std::string to_side = "-";
 
-            for(int i = 0; i < msg->parameters.size(); i++)
+
+
+            for(int i = 0; i < msg->parameters[2].value.size(); i++)
             {
                 if(i < 3)
                 {
@@ -368,11 +357,9 @@ public:
                 else if (i> 3)
                 {
                     to_side+=(msg->parameters[2].value[i]);
+                    break;
                 }
             }
-
-            //ROS_INFO_STREAM(to);
-            //ROS_INFO_STREAM(to_side);
 
             parameter.key= "to";
             parameter.value= to;
@@ -381,13 +368,6 @@ public:
             parameter.key= "to-side";
             parameter.value= to_side;
             msg->parameters.push_back(parameter);
-
-            /*ROS_INFO_STREAM("____________________");
-            for(int i = 0; i<msg->parameters.size(); i++)
-            {
-                ROS_INFO_STREAM(msg->parameters[i].key);
-                ROS_INFO_STREAM(msg->parameters[i].value);
-            }*/
 
             std::string skill_string = map_skill("move", msg->parameters);
 
