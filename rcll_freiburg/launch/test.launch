@@ -2,10 +2,8 @@
 
 <launch>
 	<group ns="robot1">
-		<node name="action_move" pkg="rosplan_interface_freiburg"
-			type="action_dispense_product" respawn="false">
-			<param name="pddl_action_name" value="move" />
-		</node>
+		<include file="$(find rosplan_interface_freiburg)/launch/action_move.launch"/>
+		<include file="$(find rosplan_interface_freiburg)/launch/action_move_in.launch"/>
 	</group>
 	
 	<group ns="robot1">

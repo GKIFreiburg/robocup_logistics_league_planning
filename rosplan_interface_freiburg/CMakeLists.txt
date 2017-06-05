@@ -151,6 +151,10 @@ add_executable(action_dispense_product src/action_dispense_product.cpp)
 add_executable(action_dispense_material src/action_dispense_material.cpp)
 add_executable(action_wait_for_machine_state src/action_wait_for_machine_state.cpp)
 
+add_executable(action_move src/action_move.cpp)
+add_executable(action_move_in src/action_move_in.cpp)
+
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -181,6 +185,12 @@ target_link_libraries(action_dispense_material
 )
 target_link_libraries(action_wait_for_machine_state
   machine_interface
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(action_move
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(action_move_in
   ${catkin_LIBRARIES}
 )
 
