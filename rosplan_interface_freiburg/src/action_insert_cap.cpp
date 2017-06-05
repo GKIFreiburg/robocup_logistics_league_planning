@@ -46,6 +46,25 @@
 
 typedef actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> SkillerClient;
 
+class Shelf
+{
+public:
+	Shelf():
+		current_spot_(0)
+	{
+		spots_ = {"LEFT", "MIDDLE", "RIGHT"};
+	}
+	const std::string& getNextSpot()
+	{
+		const std::string& spot = spots_[current_spot_];
+		current_spot_ = (current_spot_+1) % spots_.size();
+		return spot;
+	}
+private:
+	unsigned int current_spot_;
+	std::vector<std::string> spots_;
+};
+
 class ActionInsertCap : public KCL_rosplan::RPActionInterface
 {
 public:
@@ -55,8 +74,11 @@ public:
 
 		skiller_client_ = std::make_shared<SkillerClient>(nh, "skiller", /* spin thread */ false);
 		std::string log_prefix_ = "[InserCap] ";
+		machine_not_found_ = "MACHINE_NOT_FOUND";
 		machines_["cs1"] = std::make_shared<MachineInterface>("cs1", log_prefix_);
 		machines_["cs2"] = std::make_shared<MachineInterface>("cs2", log_prefix_);
+		shelf_spots_["cs1"] = Shelf();
+		shelf_spots_["cs2"] = Shelf();
 		dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionInsertCap::dispatchCB, this);
 
 		ros::NodeHandle nhpriv("~");
@@ -69,47 +91,56 @@ public:
 		dispatchCallback(msg);
 	}
 
-	MachineInterface::Ptr getMachine(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
+	const std::string& getMachine(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
 	{
 		for (const auto& arg: msg->parameters)
 		{
 			if(arg.key == "m")
 			{
-				if (machines_.find(arg.value) == machines_.end())
-				{
-					ROS_ERROR_STREAM(log_prefix_<<"Unexpected machine identifier: "<<arg.value);
-					return NULL;
-				}
-				if (! machines_[arg.value]->hasData())
-				{
-					ROS_ERROR_STREAM(log_prefix_<<"No machine data received.");
-					return NULL;
-				}
-				return machines_[arg.value];
+				return arg.value;
 			}
 		}
-		return NULL;
+		return machine_not_found_;
 	}
 
 	virtual bool concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
 	{
-		rcll_ros_msgs::SendPrepareMachine srv;
-		srv.request.cs_operation = rcll_ros_msgs::SendPrepareMachine::Request::CS_OP_RETRIEVE_CAP;
-
-		MachineInterface::Ptr machine = getMachine(msg);
-		if (machine == NULL)
+		const std::string& name = getMachine(msg);
+		const auto& machine_it = machines_.find(name);
+		if (machine_it == machines_.end())
 		{
+			ROS_ERROR_STREAM(log_prefix_<<"Unexpected machine identifier: "<<name);
+			return false;
+		}
+		MachineInterface::Ptr machine = machine_it->second;
+		if (! machine->hasData())
+		{
+			ROS_ERROR_STREAM(log_prefix_<<"No machine data received.");
 			return false;
 		}
 		fawkes_msgs::ExecSkillGoal goal;
-		machine->getName();
-		// TODO: insert real machine and spot strings
-		// TODO: error handling
-		goal.skillstring = "get_product_from{place='C-CS1', shelf='LEFT'}";
-		skiller_client_->sendGoalAndWait(goal);
+		goal.skillstring = "get_product_from{place='"+machine->getName()+"', shelf='"+shelf_spots_[name].getNextSpot()+"'}";
+		{
+			const auto& state = skiller_client_->sendGoalAndWait(goal);
+			if (state != state.SUCCEEDED)
+			{
+				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
+				return false;
+			}
+		}
+		rcll_ros_msgs::SendPrepareMachine srv;
+		srv.request.cs_operation = rcll_ros_msgs::SendPrepareMachine::Request::CS_OP_RETRIEVE_CAP;
 		machine->sendPrepare(srv, initial_machine_state_, desired_machine_state_);
-		goal.skillstring = "bring_product_to{place='C-CS1', side='input'}";
-		skiller_client_->sendGoalAndWait(goal);
+
+		goal.skillstring = "bring_product_to{place='"+machine->getName()+"', side='input'}";
+		{
+			const auto& state = skiller_client_->sendGoalAndWait(goal);
+			if (state != state.SUCCEEDED)
+			{
+				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
+				return false;
+			}
+		}
 
 		return true;
 	}
@@ -118,16 +149,18 @@ private:
 	std::string initial_machine_state_;
 	std::string desired_machine_state_;
 	std::string log_prefix_;
+	std::string machine_not_found_;
 
-	ros::Subscriber dispatch_subscriber_;
 	std::map<std::string, MachineInterface::Ptr> machines_;
-	std::shared_ptr<actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> > skiller_client_;
+	std::map<std::string, Shelf> shelf_spots_;
 
+	std::shared_ptr<actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> > skiller_client_;
+	ros::Subscriber dispatch_subscriber_;
 };
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "action_dispense_product");
+	ros::init(argc, argv, "action_insert_cap");
 	ros::NodeHandle n;
 
 	ActionInsertCap action;
