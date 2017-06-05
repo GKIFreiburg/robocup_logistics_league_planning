@@ -1,3 +1,15 @@
 ; Plan found             900.0
-0.00000000: (dispense-product p10 red_base_p10 bs bs_out) [1.00000000]
+0.00000000: (move-in r1) [10.00000000]
+0.00000000: (dispense-product p10 silver_base_p10 bs bs_out) [1.00000000]
+10.00000000: (move r1 start cs2_in) [47.43120000]
+57.43120000: (insert-cap r1 cs2 cs2_in) [30.00000000]
+87.43120000: (buffer-cap cs2 cs2_in cs2_out) [25.00000000]
+87.43120000: (move r1 cs2_in cs2_out) [23.84940000]
+112.43120000: (transport-material r1 cs2_out rs1_in rs1) [24.50460000]
+136.93580000: (move r1 rs1_in bs_out) [24.45220000]
+161.38800000: (transport-product r1 p10 bs_out cs2_in cs2 silver_base_p10 black_cap_p10) [55.37300000]
+216.76100000: (mount-cap cs2 p10 black_cap_p10 cs2_in cs2_out) [25.00000000]
+216.76100000: (move r1 cs2_in cs2_out) [23.84940000]
+241.76100000: (transport-product r1 p10 cs2_out ds_in ds black_cap_p10 gate1_delivery_p10) [25.23840000]
+266.99940000: (deliver p10 gate1_delivery_p10 ds ds_in) [1.00000000]
 

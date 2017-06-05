@@ -49,20 +49,28 @@ typedef actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> SkillerClien
 class Shelf
 {
 public:
-	Shelf():
-		current_spot_(0)
+	typedef std::shared_ptr<Shelf> Ptr;
+	Shelf(const std::string& machine_name):
+		current_spot_(0), machine_name_(machine_name)
 	{
 		spots_ = {"LEFT", "MIDDLE", "RIGHT"};
 	}
 	const std::string& getNextSpot()
 	{
+		std::string key = "/machine_status/"+machine_name_+"/spot_counter";
+		if (ros::param::has(key))
+		{
+			ros::param::get(key, current_spot_);
+		}
 		const std::string& spot = spots_[current_spot_];
 		current_spot_ = (current_spot_+1) % spots_.size();
+		ros::param::set(key, current_spot_);
 		return spot;
 	}
 private:
-	unsigned int current_spot_;
+	int current_spot_;
 	std::vector<std::string> spots_;
+	std::string machine_name_;
 };
 
 class ActionInsertCap : public KCL_rosplan::RPActionInterface
@@ -77,8 +85,8 @@ public:
 		machine_not_found_ = "MACHINE_NOT_FOUND";
 		machines_["cs1"] = std::make_shared<MachineInterface>("cs1", log_prefix_);
 		machines_["cs2"] = std::make_shared<MachineInterface>("cs2", log_prefix_);
-		shelf_spots_["cs1"] = Shelf();
-		shelf_spots_["cs2"] = Shelf();
+		shelf_spots_["cs1"] = std::make_shared<Shelf>("cs1");
+		shelf_spots_["cs2"] = std::make_shared<Shelf>("cs2");
 		dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionInsertCap::dispatchCB, this);
 
 		ros::NodeHandle nhpriv("~");
@@ -118,8 +126,10 @@ public:
 			ROS_ERROR_STREAM(log_prefix_<<"No machine data received.");
 			return false;
 		}
+
 		fawkes_msgs::ExecSkillGoal goal;
-		goal.skillstring = "get_product_from{place='"+machine->getName()+"', shelf='"+shelf_spots_[name].getNextSpot()+"'}";
+		goal.skillstring = "get_product_from{place='" + machine->getName() + "', shelf='"
+				+ shelf_spots_[name]->getNextSpot() + "'}";
 		{
 			const auto& state = skiller_client_->sendGoalAndWait(goal);
 			if (state != state.SUCCEEDED)
@@ -128,6 +138,7 @@ public:
 				return false;
 			}
 		}
+
 		rcll_ros_msgs::SendPrepareMachine srv;
 		srv.request.cs_operation = rcll_ros_msgs::SendPrepareMachine::Request::CS_OP_RETRIEVE_CAP;
 		machine->sendPrepare(srv, initial_machine_state_, desired_machine_state_);
@@ -152,7 +163,7 @@ private:
 	std::string machine_not_found_;
 
 	std::map<std::string, MachineInterface::Ptr> machines_;
-	std::map<std::string, Shelf> shelf_spots_;
+	std::map<std::string, Shelf::Ptr> shelf_spots_;
 
 	std::shared_ptr<actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> > skiller_client_;
 	ros::Subscriber dispatch_subscriber_;

@@ -3,13 +3,13 @@
 (:objects
     p10 - product
     r1 r2 r3 - robot
-    red_base_p10 black_cap_p10 gate2_delivery_p10 - step
+    silver_base_p10 black_cap_p10 gate1_delivery_p10 - step
 )
 (:init
-    (has-step p10 red_base_p10)
+    (has-step p10 silver_base_p10)
     (has-step p10 black_cap_p10)
-    (has-step p10 gate2_delivery_p10)
-    (initial-step red_base_p10)
+    (has-step p10 gate1_delivery_p10)
+    (initial-step silver_base_p10)
     (input-location cs1_in cs1)
     (input-location cs2_in cs2)
     (input-location rs1_in rs1)
@@ -24,11 +24,11 @@
     (robot-precedes r1 r2)
     (robot-precedes r1 r3)
     (robot-precedes r2 r3)
-    (step-at-machine red_base_p10 bs)
+    (step-at-machine silver_base_p10 bs)
     (step-at-machine black_cap_p10 cs2)
-    (step-at-machine gate2_delivery_p10 ds)
-    (step-precedes red_base_p10 black_cap_p10)
-    (step-precedes black_cap_p10 gate2_delivery_p10)
+    (step-at-machine gate1_delivery_p10 ds)
+    (step-precedes silver_base_p10 black_cap_p10)
+    (step-precedes black_cap_p10 gate1_delivery_p10)
     (= (path-length bs_out cs1_in) 61.5629)
     (= (path-length bs_out cs1_out) 69.1358)
     (= (path-length bs_out cs2_in) 55.373)
@@ -131,5 +131,7 @@
     (= (path-length start rs2_out) 16.9367)
 )
 (:goal (and
-    (step-completed red_base_p10)
+    (step-completed silver_base_p10)
+    (step-completed black_cap_p10)
+    (step-completed gate1_delivery_p10)
 )))
