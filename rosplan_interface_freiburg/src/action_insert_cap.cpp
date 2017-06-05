@@ -80,7 +80,7 @@ public:
 	{
 		ros::NodeHandle nh;
 
-		skiller_client_ = std::make_shared<SkillerClient>(nh, "skiller", /* spin thread */ false);
+		skiller_client_ = std::make_shared<SkillerClient>(nh, "skiller", /* spin thread */ true);
 		std::string log_prefix_ = "[InserCap] ";
 		machine_not_found_ = "MACHINE_NOT_FOUND";
 		machines_["cs1"] = std::make_shared<MachineInterface>("cs1", log_prefix_);
@@ -92,11 +92,19 @@ public:
 		ros::NodeHandle nhpriv("~");
 		GET_CONFIG(nhpriv, nh, "initial_machine_state", initial_machine_state_)
 		GET_CONFIG(nhpriv, nh, "desired_machine_state", desired_machine_state_)
+		GET_CONFIG(nhpriv, nh, "robot_name", robot_name_)
+
 	}
 
 	void dispatchCB(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
 	{
-		dispatchCallback(msg);
+		for (const auto& arg: msg->parameters)
+		{
+			if(arg.key == "r" && arg.value == robot_name_)
+			{
+				dispatchCallback(msg);
+			}
+		}
 	}
 
 	const std::string& getMachine(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
@@ -131,17 +139,26 @@ public:
 		goal.skillstring = "get_product_from{place='" + machine->getName() + "', shelf='"
 				+ shelf_spots_[name]->getNextSpot() + "'}";
 		{
+			ROS_INFO_STREAM(log_prefix_<<"Sending skill "<<goal.skillstring<<"...");
 			const auto& state = skiller_client_->sendGoalAndWait(goal);
 			if (state != state.SUCCEEDED)
 			{
 				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
 				return false;
 			}
+			ROS_INFO_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" succeeded");
 		}
 
 		rcll_ros_msgs::SendPrepareMachine srv;
 		srv.request.cs_operation = rcll_ros_msgs::SendPrepareMachine::Request::CS_OP_RETRIEVE_CAP;
-		machine->sendPrepare(srv, initial_machine_state_, desired_machine_state_);
+		ROS_INFO_STREAM(
+				log_prefix_<<"sending prepare request, wait for initial state: "<<initial_machine_state_<<", wait for desired state: "<<desired_machine_state_);
+		bool success = machine->sendPrepare(srv, initial_machine_state_, desired_machine_state_);
+		if (! success)
+		{
+			ROS_ERROR_STREAM(log_prefix_<<"Send prepare failed.");
+			return false;
+		}
 
 		goal.skillstring = "bring_product_to{place='"+machine->getName()+"', side='input'}";
 		{
@@ -157,9 +174,10 @@ public:
 	}
 
 private:
+	std::string log_prefix_;
+	std::string robot_name_;
 	std::string initial_machine_state_;
 	std::string desired_machine_state_;
-	std::string log_prefix_;
 	std::string machine_not_found_;
 
 	std::map<std::string, MachineInterface::Ptr> machines_;

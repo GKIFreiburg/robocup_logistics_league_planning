@@ -39,9 +39,10 @@
 	  <param name="robot_identifier/var_value" value="r3" />
   </node>
  -->
+	<include file="$(find rosplan_interface_freiburg)/launch/action_move.launch"/>
+	<include file="$(find rosplan_interface_freiburg)/launch/action_move_in.launch"/>
 
 	<!-- machine actions -->
-	<!-- 
 	<group ns="robot1">
 		<node name="action_dispense_product" pkg="rosplan_interface_freiburg"
 			type="action_dispense_product" respawn="false">
@@ -84,7 +85,6 @@
 			<rosparam param="machines">[ds]</rosparam>
 		</node>
 	</group>
-	 -->
 
 	<node name="kbupdater_production_steps" pkg="rosplan_interface_freiburg"
 		type="rosplan_kb_updater_rcll_production_steps" respawn="false" output="screen"
