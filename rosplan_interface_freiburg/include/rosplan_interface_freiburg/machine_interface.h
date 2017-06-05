@@ -26,6 +26,11 @@ public:
 	MachineInterface(const std::string& name, const std::string& log_prefix);
 
 	/**
+	 * returns the full name as received on the machine info topic.
+	 */
+	const std::string& getName() const;
+
+	/**
 	 * returns true if at least one machine_info msg has been received.
 	 */
 	bool hasData() const;

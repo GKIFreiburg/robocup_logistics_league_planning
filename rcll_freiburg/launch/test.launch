@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 
 <launch>
+	<include file="$(find rosplan_interface_freiburg)/launch/action_move.launch"/>
+	<include file="$(find rosplan_interface_freiburg)/launch/action_move_in.launch"/>
 	<group ns="robot1">
-		<include file="$(find rosplan_interface_freiburg)/launch/action_move.launch"/>
-		<include file="$(find rosplan_interface_freiburg)/launch/action_move_in.launch"/>
 	</group>
 	
 	<group ns="robot1">

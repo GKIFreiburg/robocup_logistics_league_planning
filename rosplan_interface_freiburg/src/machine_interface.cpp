@@ -41,6 +41,11 @@ void MachineInterface::connect_service_prepare_machine()
 	}
 }
 
+const std::string& MachineInterface::getName() const
+{
+	return full_name_;
+}
+
 bool MachineInterface::hasData() const
 {
 	return machines_ != NULL;
