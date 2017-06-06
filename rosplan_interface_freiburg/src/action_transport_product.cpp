@@ -47,10 +47,10 @@
 
 typedef actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> SkillerClient;
 
-class ActionInsertCap : public KCL_rosplan::RPActionInterface
+class ActionTransportProduct : public KCL_rosplan::RPActionInterface
 {
 public:
-	ActionInsertCap()
+        ActionTransportProduct()
 	{
 		ros::NodeHandle nh;
 
@@ -61,8 +61,9 @@ public:
 		machines_["cs2"] = std::make_shared<MachineInterface>("cs2", log_prefix_);
 		machines_["rs1"] = std::make_shared<MachineInterface>("rs1", log_prefix_);
 		machines_["rs2"] = std::make_shared<MachineInterface>("rs2", log_prefix_);
+                machines_["bs"] = std::make_shared<MachineInterface>("bs", log_prefix_);
 		machines_["ds"] = std::make_shared<MachineInterface>("ds", log_prefix_);
-		dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionInsertCap::dispatchCB, this);
+                dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionTransportProduct::dispatchCB, this);
 
 		ros::NodeHandle nhpriv("~");
 		GET_CONFIG(nhpriv, nh, "initial_machine_state", initial_machine_state_)
@@ -181,7 +182,7 @@ public:
 		}
 
 		fawkes_msgs::ExecSkillGoal goal;
-		goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', shelf='output'}";
+                goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', side='output'}";
 		{
 			ROS_INFO_STREAM(log_prefix_<<"Sending skill "<<goal.skillstring<<"...");
 			const auto& state = skiller_client_->sendGoalAndWait(goal);
@@ -245,10 +246,10 @@ private:
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "action_insert_cap");
+        ros::init(argc, argv, "action_transport_product");
 	ros::NodeHandle n;
 
-	ActionInsertCap action;
+        ActionTransportProduct action;
 	action.runActionInterface();
 
 	return 0;

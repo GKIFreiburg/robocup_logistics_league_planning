@@ -60,10 +60,10 @@ public:
         sub_action_dispatch_ = n.subscribe("kcl_rosplan/action_dispatch", 10,
                                            &ROSPlanInterfaceBehaviorEngine::action_dispatch_cb, this);
         pub_action_feedback_ =
-                n.advertise<rosplan_dispatch_msgs::ActionFeedback>("kcl_rosplan/action_feedback", 10, true);
+                n.advertise<rosplan_dispatch_msgs::ActionFeedback>("/kcl_rosplan/action_feedback", 10, true);
 
         svc_update_knowledge_ =
-                n.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>("kcl_rosplan/update_knowledge_base",
+                n.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>("/kcl_rosplan/update_knowledge_base",
                                                                                 /* persistent */ true);
         ROS_INFO("[RPI-BE] Waiting for ROSPlan service update_knowledge_base");
         svc_update_knowledge_.waitForExistence();
@@ -219,7 +219,7 @@ public:
         std::string action = "move";
         std::string value_s = cfg_mappings[action];
         mappings_[action] = value_s;
-        ROS_INFO_STREAM(value_s);
+        //ROS_INFO_STREAM(value_s);
 
         for (const auto &sp : specs_) {
             const std::string &name = sp.first;
@@ -340,39 +340,40 @@ public:
         {
             ROS_INFO_STREAM(name);
 
-            /*ROS_INFO_STREAM("____________________");
-            for(int i = 0; i<msg->parameters.size(); i++)
-            {
-                ROS_INFO_STREAM(msg->parameters[i].key);
-                ROS_INFO_STREAM(msg->parameters[i].value);
-            }*/
 
             diagnostic_msgs::KeyValue parameter;
-            parameter.key= "team-color";
-            parameter.value= team_color_;
-            msg->parameters.push_back(parameter);
+            char color = (team_color_[0]);
+            std::string to;
+            to.push_back(color);
+            to += "-";
 
-            parameter.key= "from";
-            parameter.value= msg->parameters[1].value;
-            msg->parameters.push_back(parameter);
-
-            std::string to = "C-";
+            //std::string to = "C-";
             std::string to_side = "-";
 
-            for(int i = 0; i < msg->parameters.size(); i++)
+
+            int index = 0;
+            for(int i = 0; i < msg->parameters[2].value.size(); i++)
             {
-                if(i < 3)
+                if(msg->parameters[2].value[i] == '_')
+                {
+                    index = i;
+                }
+
+            }
+
+            for(int i = 0; i < msg->parameters[2].value.size(); i++)
+            {
+                if(i < index)
                 {
                     to+=(msg->parameters[2].value[i]);
                 }
-                else if (i> 3)
+                else if (i > index)
                 {
                     to_side+=(msg->parameters[2].value[i]);
+                    break;
                 }
-            }
 
-            //ROS_INFO_STREAM(to);
-            //ROS_INFO_STREAM(to_side);
+            }
 
             parameter.key= "to";
             parameter.value= to;
@@ -381,13 +382,6 @@ public:
             parameter.key= "to-side";
             parameter.value= to_side;
             msg->parameters.push_back(parameter);
-
-            /*ROS_INFO_STREAM("____________________");
-            for(int i = 0; i<msg->parameters.size(); i++)
-            {
-                ROS_INFO_STREAM(msg->parameters[i].key);
-                ROS_INFO_STREAM(msg->parameters[i].value);
-            }*/
 
             std::string skill_string = map_skill("move", msg->parameters);
 
