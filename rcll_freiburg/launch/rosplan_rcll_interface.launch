@@ -12,7 +12,7 @@
 	<include file="$(find rosplan_interface_freiburg)/launch/action_move.launch"/>
 	<include file="$(find rosplan_interface_freiburg)/launch/action_move_in.launch"/>
 	<group ns="robot1">
-		<param name="robot" value="r1"/>
+		<param name="robot_name" value="r1"/>
 		<node name="action_insert_cap" pkg="rosplan_interface_freiburg"
 			type="action_insert_cap" respawn="false">
 			<param name="pddl_action_name" value="insert-cap" />
