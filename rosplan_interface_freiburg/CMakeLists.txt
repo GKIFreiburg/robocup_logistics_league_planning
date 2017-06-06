@@ -155,6 +155,7 @@ add_executable(action_move src/action_move.cpp)
 add_executable(action_move_in src/action_move_in.cpp)
 add_executable(action_insert_cap src/action_insert_cap.cpp)
 add_executable(action_transport_product src/action_transport_product.cpp)
+add_executable(action_transport_material src/action_transport_material.cpp)
 
 
 
@@ -201,6 +202,11 @@ target_link_libraries(action_insert_cap
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_transport_product
+  machine_interface
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(action_transport_material
   machine_interface
   ${catkin_LIBRARIES}
 )

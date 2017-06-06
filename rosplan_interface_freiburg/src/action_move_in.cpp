@@ -60,10 +60,10 @@ public:
         sub_action_dispatch_ = n.subscribe("kcl_rosplan/action_dispatch", 10,
                                            &ROSPlanInterfaceBehaviorEngine::action_dispatch_cb, this);
         pub_action_feedback_ =
-                n.advertise<rosplan_dispatch_msgs::ActionFeedback>("kcl_rosplan/action_feedback", 10, true);
+                n.advertise<rosplan_dispatch_msgs::ActionFeedback>("/kcl_rosplan/action_feedback", 10, true);
 
         svc_update_knowledge_ =
-                n.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>("kcl_rosplan/update_knowledge_base",
+                n.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>("/kcl_rosplan/update_knowledge_base",
                                                                                 /* persistent */ true);
         ROS_INFO("[RPI-BE] Waiting for ROSPlan service update_knowledge_base");
         svc_update_knowledge_.waitForExistence();
