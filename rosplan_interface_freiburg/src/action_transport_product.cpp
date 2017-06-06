@@ -61,6 +61,7 @@ public:
 		machines_["cs2"] = std::make_shared<MachineInterface>("cs2", log_prefix_);
 		machines_["rs1"] = std::make_shared<MachineInterface>("rs1", log_prefix_);
 		machines_["rs2"] = std::make_shared<MachineInterface>("rs2", log_prefix_);
+                machines_["bs"] = std::make_shared<MachineInterface>("bs", log_prefix_);
 		machines_["ds"] = std::make_shared<MachineInterface>("ds", log_prefix_);
                 dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionTransportProduct::dispatchCB, this);
 
@@ -181,7 +182,7 @@ public:
 		}
 
 		fawkes_msgs::ExecSkillGoal goal;
-		goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', shelf='output'}";
+                goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', side='output'}";
 		{
 			ROS_INFO_STREAM(log_prefix_<<"Sending skill "<<goal.skillstring<<"...");
 			const auto& state = skiller_client_->sendGoalAndWait(goal);

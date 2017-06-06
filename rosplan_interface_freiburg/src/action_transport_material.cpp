@@ -122,7 +122,7 @@ public:
                 }
 
                 fawkes_msgs::ExecSkillGoal goal;
-                goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', shelf='output'}";
+                goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', side='output'}";
                 {
                         ROS_INFO_STREAM(log_prefix_<<"Sending skill "<<goal.skillstring<<"...");
                         const auto& state = skiller_client_->sendGoalAndWait(goal);

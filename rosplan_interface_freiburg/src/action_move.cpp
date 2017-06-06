@@ -351,18 +351,28 @@ public:
             std::string to_side = "-";
 
 
+            int index = 0;
+            for(int i = 0; i < msg->parameters[2].value.size(); i++)
+            {
+                if(msg->parameters[2].value[i] == '_')
+                {
+                    index = i;
+                }
+
+            }
 
             for(int i = 0; i < msg->parameters[2].value.size(); i++)
             {
-                if(i < 3)
+                if(i < index)
                 {
                     to+=(msg->parameters[2].value[i]);
                 }
-                else if (i> 3)
+                else if (i > index)
                 {
                     to_side+=(msg->parameters[2].value[i]);
                     break;
                 }
+
             }
 
             parameter.key= "to";
