@@ -2,7 +2,7 @@
 
 <launch>
 	<group ns="robot1">
-		<param name="robot" value="r1"/>
+		<param name="robot_name" value="r1"/>
 		<node name="action_transport_product" pkg="rosplan_interface_freiburg"
 			type="action_transport_product" respawn="false">
 			<param name="pddl_action_name" value="transport-product" />
