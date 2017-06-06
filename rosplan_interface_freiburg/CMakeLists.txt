@@ -154,6 +154,7 @@ add_executable(action_wait_for_machine_state src/action_wait_for_machine_state.c
 add_executable(action_move src/action_move.cpp)
 add_executable(action_move_in src/action_move_in.cpp)
 add_executable(action_insert_cap src/action_insert_cap.cpp)
+add_executable(action_transport_product src/action_transport_product.cpp)
 
 
 
@@ -196,6 +197,10 @@ target_link_libraries(action_move_in
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_insert_cap
+  machine_interface
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(action_transport_product
   machine_interface
   ${catkin_LIBRARIES}
 )

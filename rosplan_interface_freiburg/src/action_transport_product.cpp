@@ -34,6 +34,7 @@
 #include <vector>
 #include <list>
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
 
 #include <mutex>
 #include <condition_variable>
@@ -46,33 +47,6 @@
 
 typedef actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> SkillerClient;
 
-class Shelf
-{
-public:
-	typedef std::shared_ptr<Shelf> Ptr;
-	Shelf(const std::string& machine_name):
-		current_spot_(0), machine_name_(machine_name)
-	{
-		spots_ = {"LEFT", "MIDDLE", "RIGHT"};
-	}
-	const std::string& getNextSpot()
-	{
-		std::string key = "/machine_status/"+machine_name_+"/spot_counter";
-		if (ros::param::has(key))
-		{
-			ros::param::get(key, current_spot_);
-		}
-		const std::string& spot = spots_[current_spot_];
-		current_spot_ = (current_spot_+1) % spots_.size();
-		ros::param::set(key, current_spot_);
-		return spot;
-	}
-private:
-	int current_spot_;
-	std::vector<std::string> spots_;
-	std::string machine_name_;
-};
-
 class ActionInsertCap : public KCL_rosplan::RPActionInterface
 {
 public:
@@ -81,12 +55,13 @@ public:
 		ros::NodeHandle nh;
 
 		skiller_client_ = std::make_shared<SkillerClient>(nh, "skiller", /* spin thread */ true);
-                std::string log_prefix_ = "[InsertCap] ";
-		machine_not_found_ = "MACHINE_NOT_FOUND";
+		std::string log_prefix_ = "[TransportProduct] ";
+		parameter_not_found_ = "PARAMETER_NOT_FOUND";
 		machines_["cs1"] = std::make_shared<MachineInterface>("cs1", log_prefix_);
 		machines_["cs2"] = std::make_shared<MachineInterface>("cs2", log_prefix_);
-		shelf_spots_["cs1"] = std::make_shared<Shelf>("cs1");
-		shelf_spots_["cs2"] = std::make_shared<Shelf>("cs2");
+		machines_["rs1"] = std::make_shared<MachineInterface>("rs1", log_prefix_);
+		machines_["rs2"] = std::make_shared<MachineInterface>("rs2", log_prefix_);
+		machines_["ds"] = std::make_shared<MachineInterface>("ds", log_prefix_);
 		dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionInsertCap::dispatchCB, this);
 
 		ros::NodeHandle nhpriv("~");
@@ -116,11 +91,108 @@ public:
 				return arg.value;
 			}
 		}
-		return machine_not_found_;
+		return parameter_not_found_;
+	}
+
+	const std::string& getNextStep(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
+	{
+		for (const auto& arg: msg->parameters)
+		{
+			if(arg.key == "s2")
+			{
+				return arg.value;
+			}
+		}
+		return parameter_not_found_;
+	}
+
+	const std::string getOutMachine(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
+	{
+		for (const auto& arg: msg->parameters)
+		{
+			if(arg.key == "o")
+			{
+				// bs_out, cs2_out, rs1_out
+				return arg.value.substr(0, arg.value.find("_"));
+			}
+		}
+		return parameter_not_found_;
+	}
+
+	bool setupPrepareRequest(const std::string& step, rcll_ros_msgs::SendPrepareMachine::Request& request)
+	{
+		// orange_ring_p10, black_cap_p10, gate1_delivery_p10
+		std::vector<std::string> parts;
+		boost::split(parts, step, boost::is_any_of("_"));
+		if (parts.size() != 3)
+		{
+			return false;
+		}
+		const std::string& operation = parts[1];
+		const std::string& details = parts[0];
+		if (operation == "ring")
+		{
+			if (details == "blue")
+			{
+				request.rs_ring_color = rcll_ros_msgs::ProductColor::RING_BLUE;
+			}
+			else if (details == "green")
+			{
+				request.rs_ring_color = rcll_ros_msgs::ProductColor::RING_GREEN;
+			}
+			else if (details == "orange")
+			{
+				request.rs_ring_color = rcll_ros_msgs::ProductColor::RING_ORANGE;
+			}
+			else if (details == "yellow")
+			{
+				request.rs_ring_color = rcll_ros_msgs::ProductColor::RING_YELLOW;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else if (operation == "cap")
+		{
+			request.cs_operation = request.CS_OP_MOUNT_CAP;
+		}
+		else if (operation == "delivery")
+		{
+			request.ds_gate = std::stoi(details.substr(4, 5));
+		}
+		return true;
 	}
 
 	virtual bool concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
 	{
+		const std::string& name_out = getOutMachine(msg);
+		const auto& machine_out_it = machines_.find(name_out);
+		if (machine_out_it == machines_.end())
+		{
+			ROS_ERROR_STREAM(log_prefix_<<"Unexpected machine identifier: "<<name_out);
+			return false;
+		}
+		MachineInterface::Ptr machine_out = machine_out_it->second;
+		if (! machine_out->hasData())
+		{
+			ROS_ERROR_STREAM(log_prefix_<<"No machine data received.");
+			return false;
+		}
+
+		fawkes_msgs::ExecSkillGoal goal;
+		goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', shelf='output'}";
+		{
+			ROS_INFO_STREAM(log_prefix_<<"Sending skill "<<goal.skillstring<<"...");
+			const auto& state = skiller_client_->sendGoalAndWait(goal);
+			if (state != state.SUCCEEDED)
+			{
+				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
+				return false;
+			}
+			ROS_INFO_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" succeeded");
+		}
+
 		const std::string& name = getMachine(msg);
 		const auto& machine_it = machines_.find(name);
 		if (machine_it == machines_.end())
@@ -135,22 +207,8 @@ public:
 			return false;
 		}
 
-		fawkes_msgs::ExecSkillGoal goal;
-		goal.skillstring = "get_product_from{place='" + machine->getName() + "', shelf='"
-				+ shelf_spots_[name]->getNextSpot() + "'}";
-		{
-			ROS_INFO_STREAM(log_prefix_<<"Sending skill "<<goal.skillstring<<"...");
-			const auto& state = skiller_client_->sendGoalAndWait(goal);
-			if (state != state.SUCCEEDED)
-			{
-				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
-				return false;
-			}
-			ROS_INFO_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" succeeded");
-		}
-
 		rcll_ros_msgs::SendPrepareMachine srv;
-		srv.request.cs_operation = rcll_ros_msgs::SendPrepareMachine::Request::CS_OP_RETRIEVE_CAP;
+		setupPrepareRequest(getNextStep(msg), srv.request);
 		ROS_INFO_STREAM(
 				log_prefix_<<"sending prepare request, wait for initial state: "<<initial_machine_state_<<", wait for desired state: "<<desired_machine_state_);
 		bool success = machine->sendPrepare(srv, initial_machine_state_, desired_machine_state_);
@@ -169,7 +227,6 @@ public:
 				return false;
 			}
 		}
-
 		return true;
 	}
 
@@ -178,10 +235,9 @@ private:
 	std::string robot_name_;
 	std::string initial_machine_state_;
 	std::string desired_machine_state_;
-	std::string machine_not_found_;
+	std::string parameter_not_found_;
 
 	std::map<std::string, MachineInterface::Ptr> machines_;
-	std::map<std::string, Shelf::Ptr> shelf_spots_;
 
 	std::shared_ptr<actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> > skiller_client_;
 	ros::Subscriber dispatch_subscriber_;
