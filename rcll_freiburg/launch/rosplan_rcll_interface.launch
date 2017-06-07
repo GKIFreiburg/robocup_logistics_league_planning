@@ -21,12 +21,12 @@
 		</node>
 		<node name="action_move" pkg="rosplan_interface_freiburg"
         type="action_move" respawn="false" output="screen">
-    	<param name="robot_identifier/var_value" value="r-1" />
+    	<param name="robot_identifier/var_value" value="r1" />
 			<param name="team_color" value="CYAN" />
   	</node>
 		<node name="action_move_in" pkg="rosplan_interface_freiburg"
         type="action_move_in" respawn="false" output="screen">
-    	<param name="robot_identifier/var_value" value="r-1" />
+    	<param name="robot_identifier/var_value" value="r1" />
 			<param name="team_color" value="CYAN" />
   	</node>
 	</group>
