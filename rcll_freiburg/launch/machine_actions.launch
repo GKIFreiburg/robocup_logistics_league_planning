@@ -1,36 +1,6 @@
 <?xml version="1.0"?>
 
 <launch>
-	<arg name="num_robots" default="$(optenv NUM_ROBOTS 1)" />
-	<arg name="override_action_mapping" default="false" />
-	<arg name="disable_refbox_interface" default="false" />
-	<arg name="disable_navgraph_interface" default="false" />
-	
-	<!-- Load domain-specific action mapping -->
-  <rosparam command="load" file="$(find rcll_freiburg)/config/rcll_action_mapping.yaml"
-            unless="$(arg override_action_mapping)" />
-	<include file="$(find rosplan_interface_freiburg)/launch/action_move.launch"/>
-	<include file="$(find rosplan_interface_freiburg)/launch/action_move_in.launch"/>
-	<group ns="robot1">
-		<param name="robot_name" value="r1"/>
-		<node name="action_insert_cap" pkg="rosplan_interface_freiburg"
-			type="action_insert_cap" respawn="false">
-			<param name="pddl_action_name" value="insert-cap" />
-			<param name="initial_machine_state" value="IDLE" />
-			<param name="desired_machine_state" value="PREPARED" />
-		</node>
-		<node name="action_move" pkg="rosplan_interface_freiburg"
-        type="action_move" respawn="false" output="screen">
-    	<param name="robot_identifier/var_value" value="r1" />
-			<param name="team_color" value="CYAN" />
-  	</node>
-		<node name="action_move_in" pkg="rosplan_interface_freiburg"
-        type="action_move_in" respawn="false" output="screen">
-    	<param name="robot_identifier/var_value" value="r1" />
-			<param name="team_color" value="CYAN" />
-  	</node>
-	</group>
-
 	<!-- machine actions -->
 	<group ns="robot1">
 		<node name="action_dispense_product" pkg="rosplan_interface_freiburg"
@@ -81,25 +51,5 @@
 			<rosparam param="machines">[ds]</rosparam>
 		</node>
 	</group>
-
-	<node name="kbupdater_production_steps" pkg="rosplan_interface_freiburg"
-		type="rosplan_kb_updater_rcll_production_steps" respawn="false" output="screen"
-		unless="$(arg disable_refbox_interface)">
-		<remap from="rcll/order_info" to="robot1/rcll/order_info" />
-		<remap from="rcll/ring_info" to="robot1/rcll/ring_info" />
-		<remap from="rcll/machine_info" to="robot1/rcll/machine_info" />
-		<rosparam command="load"
-			file="$(find rcll_freiburg)/config/kbupdater_production_steps.yaml" />
-	</node>
-
-	<node name="kbupdater_navgraph" pkg="rosplan_interface_freiburg"
-		type="rosplan_kb_updater_navgraph" respawn="false" output="screen"
-		unless="$(arg disable_navgraph_interface)">
-		<remap from="rcll/machine_info" to="robot1/rcll/machine_info" />
-		<remap from="navgraph" to="robot1/navgraph" />
-		<remap from="get_pairwise_costs" to="robot1/navgraph/get_pairwise_costs" />
-		<rosparam command="load"
-			file="$(find rcll_freiburg)/config/rcll_kbupdater_navgraph.yaml" />
-	</node>
 </launch>
 

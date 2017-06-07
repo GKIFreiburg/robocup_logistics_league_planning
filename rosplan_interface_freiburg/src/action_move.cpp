@@ -19,40 +19,25 @@
  */
 
 #include <ros/ros.h>
-#include <actionlib/client/simple_action_client.h>
 
-#include <rosplan_dispatch_msgs/ActionFeedback.h>
-#include <rosplan_dispatch_msgs/ActionDispatch.h>
-#include <rosplan_knowledge_msgs/DomainFormula.h>
-#include <rosplan_knowledge_msgs/KnowledgeItem.h>
-#include <rosplan_knowledge_msgs/KnowledgeUpdateService.h>
-#include <rosplan_knowledge_msgs/GetDomainOperatorService.h>
-#include <rosplan_knowledge_msgs/GetDomainOperatorDetailsService.h>
-#include <rosplan_knowledge_msgs/GetDomainPredicateDetailsService.h>
-#include <diagnostic_msgs/KeyValue.h>
+#include <rosplan_action_interface/RPActionInterface.h>
 #include <fawkes_msgs/ExecSkillAction.h>
 
-#include <map>
-#include <string>
-#include <regex>
+#include <rosplan_interface_freiburg/machine_interface.h>
+#include <actionlib/client/simple_action_client.h>
 
-#define REGEX_PARAM "\\?\\(([a-zA-Z0-9_-]+)((\\|/([^/]+)/([^/]+)/)*)\\)(s|S|i|f|y|Y)"
+#define GET_CONFIG(privn, n, path, var)	  \
+	if (! privn.getParam(path, var)) {      \
+		if (! n.getParam(path, var))					\
+			ROS_ERROR_STREAM(log_prefix_<<"can not read param "<<path);  \
+	}
 
-typedef enum {
-    ACTION_ENABLED,
-    ACTION_ACHIEVED,
-    ACTION_FAILED
-} ActionStatus;
+typedef actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> SkillerClient;
 
-static std::map<ActionStatus, std::string> ActionStatus2String
-{ {ACTION_ENABLED, "action enabled"},
-    {ACTION_ACHIEVED, "action achieved"},
-    {ACTION_FAILED, "action failed"} };
-
-class ROSPlanInterfaceBehaviorEngine {
-    typedef actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> SkillerClient;
-
+class ActionMove : public KCL_rosplan::RPActionInterface
+{
 public:
+<<<<<<< HEAD
     ROSPlanInterfaceBehaviorEngine(ros::NodeHandle &n)
         : n(n),
           skiller_client_(n, "skiller", /* spin thread */ false)
@@ -711,50 +696,87 @@ public:
                                  boost::bind(&ROSPlanInterfaceBehaviorEngine::execute_done_cb, this, _1, _2),
                                  boost::bind(&ROSPlanInterfaceBehaviorEngine::execute_active_cb, this));
     }
+=======
+	ActionMove()
+	{
+		ros::NodeHandle nh;
+
+		skiller_client_ = std::make_shared<SkillerClient>(nh, "skiller", /* spin thread */true);
+		std::string log_prefix_ = "[Move] ";
+		param_not_found_ = "PARAM_NOT_FOUND";
+		dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionMove::dispatchCB, this);
+
+		ros::NodeHandle nhpriv("~");
+		GET_CONFIG(nhpriv, nh, "robot_name", robot_name_)
+		GET_CONFIG(nhpriv, nh, "team_color", team_color_)
+
+	}
+
+	void dispatchCB(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
+	{
+		for (const auto& arg: msg->parameters)
+		{
+			if(arg.key == "r" && arg.value == robot_name_)
+			{
+				dispatchCallback(msg);
+			}
+		}
+	}
+
+	const std::string& getDestination(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
+	{
+		for (const auto& arg: msg->parameters)
+		{
+			if(arg.key == "l2")
+			{
+				return arg.value;
+			}
+		}
+		return param_not_found_;
+	}
+
+	virtual bool concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
+	{
+		const std::string& destination = getDestination(msg);
+		size_t pos = destination.find("_");
+		if (pos == std::string::npos)
+		{
+			return false;
+		}
+		std::string name = team_color_.substr(0,1)+"-"+destination.substr(0, pos)+"-"+destination.substr(pos+1, 1);
+		std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+		fawkes_msgs::ExecSkillGoal goal;
+		goal.skillstring = "ppgoto{place='"+name+"'}";
+		{
+			const auto& state = skiller_client_->sendGoalAndWait(goal);
+			if (state != state.SUCCEEDED)
+			{
+				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
+				return false;
+			}
+		}
+
+		return true;
+	}
+>>>>>>> 0145cbe92ea2bcddc9aac416d4559d4ec57c5c74
 
 private:
-    ros::NodeHandle    n;
+	std::string log_prefix_;
+	std::string robot_name_;
+	std::string team_color_;
+	std::string param_not_found_;
 
-    ros::Subscriber    sub_action_dispatch_;
-    ros::Publisher     pub_action_feedback_;
-    ros::ServiceClient svc_update_knowledge_;
-
-    SkillerClient      skiller_client_;
-
-    struct RPActionSpec {
-        rosplan_knowledge_msgs::DomainFormula  params;
-        rosplan_knowledge_msgs::DomainOperator op;
-        std::set<std::string> required_params;
-    };
-    std::map<std::string, RPActionSpec> specs_;
-    std::map<std::string, rosplan_knowledge_msgs::DomainFormula> predicates_;
-
-    std::map<std::string, std::string>  mappings_;
-
-    rosplan_dispatch_msgs::ActionDispatch cur_msg_;
-    std::map<std::string, std::string>    cur_bound_params_;
-    std::string                           cur_skill_string_;
-
-    bool        cfg_robot_var_req_;
-    std::string cfg_robot_var_name_;
-    std::string cfg_robot_var_type_;
-    std::string cfg_robot_var_value_;
-    std::string team_color_;
-    std::vector<std::string> cfg_succeed_actions_;
-
-    std::vector<std::string> cfg_igneffect_preds_;
+	std::shared_ptr<actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> > skiller_client_;
+	ros::Subscriber dispatch_subscriber_;
 };
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "action_move");
+	ros::init(argc, argv, "action_move");
+	ros::NodeHandle n;
 
-    ros::NodeHandle n;
+	ActionMove action;
+	action.runActionInterface();
 
-    ROSPlanInterfaceBehaviorEngine rosplan_be(n);
-
-    ros::spin();
-
-    return 0;
+	return 0;
 }

@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+
+<launch>
+	<arg name="robot_id" default="1"/>
+	<arg name="team_color" default="$(optenv TEAM_COLOR CYAN)" />
+
+	<group ns="robot$(arg robot_id)">
+		<param name="robot_name" value="r$(arg robot_id)" />
+		<param name="team_color" value="$(arg team_color)" />
+
+		<node name="action_move" pkg="rosplan_interface_freiburg"
+			type="action_move" respawn="false" output="screen">
+			<param name="pddl_action_name" value="move" />
+		</node>
+
+		<node name="action_move_in" pkg="rosplan_interface_freiburg"
+			type="action_move_in" respawn="false" output="screen">
+			<param name="pddl_action_name" value="move-in" />
+		</node>
+
+		<node name="action_transport_product" pkg="rosplan_interface_freiburg"
+			type="action_transport_product" respawn="false" output="screen">
+			<param name="pddl_action_name" value="transport-product" />
+			<param name="initial_machine_state" value="IDLE" />
+			<param name="desired_machine_state" value="PREPARED" />
+		</node>
+
+		<node name="action_transport_material" pkg="rosplan_interface_freiburg"
+			type="action_transport_material" respawn="false" output="screen">
+			<param name="pddl_action_name" value="transport-material" />
+			<param name="initial_machine_state" value="IDLE" />
+			<param name="desired_machine_state" value="PREPARED" />
+		</node>
+
+		<node name="action_insert_cap" pkg="rosplan_interface_freiburg"
+			type="action_insert_cap" respawn="false" output="screen">
+			<param name="pddl_action_name" value="insert-cap" />
+			<param name="initial_machine_state" value="IDLE" />
+			<param name="desired_machine_state" value="PREPARED" />
+		</node>
+
+	</group>
+
+</launch>
+

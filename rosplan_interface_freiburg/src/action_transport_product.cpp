@@ -54,16 +54,16 @@ public:
 	{
 		ros::NodeHandle nh;
 
-		skiller_client_ = std::make_shared<SkillerClient>(nh, "skiller", /* spin thread */ true);
+		skiller_client_ = std::make_shared<SkillerClient>(nh, "skiller", /* spin thread */true);
 		std::string log_prefix_ = "[TransportProduct] ";
 		parameter_not_found_ = "PARAMETER_NOT_FOUND";
+		machines_["bs"] = std::make_shared<MachineInterface>("bs", log_prefix_);
 		machines_["cs1"] = std::make_shared<MachineInterface>("cs1", log_prefix_);
 		machines_["cs2"] = std::make_shared<MachineInterface>("cs2", log_prefix_);
 		machines_["rs1"] = std::make_shared<MachineInterface>("rs1", log_prefix_);
 		machines_["rs2"] = std::make_shared<MachineInterface>("rs2", log_prefix_);
-                machines_["bs"] = std::make_shared<MachineInterface>("bs", log_prefix_);
 		machines_["ds"] = std::make_shared<MachineInterface>("ds", log_prefix_);
-                dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionTransportProduct::dispatchCB, this);
+		dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionTransportProduct::dispatchCB, this);
 
 		ros::NodeHandle nhpriv("~");
 		GET_CONFIG(nhpriv, nh, "initial_machine_state", initial_machine_state_)
@@ -182,7 +182,7 @@ public:
 		}
 
 		fawkes_msgs::ExecSkillGoal goal;
-                goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', side='output'}";
+		goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', side='output'}";
 		{
 			ROS_INFO_STREAM(log_prefix_<<"Sending skill "<<goal.skillstring<<"...");
 			const auto& state = skiller_client_->sendGoalAndWait(goal);

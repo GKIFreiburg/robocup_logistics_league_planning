@@ -2,7 +2,9 @@
 
 <launch>
 	<arg name="num_robots" default="$(optenv NUM_ROBOTS 1)" />
-	<arg name="pddl_domain_path" default="$(find rcll_freiburg)/pddl/rcll_domain_production.pddl" />
+	<arg name="team_color" value="$(optenv TEAM_COLOR CYAN)" />
+	<arg name="pddl_domain_path"
+		default="$(find rcll_production_domain)/benchmark/d_macro_actions.pddl" />
 	<arg name="autostart_planning" default="$(optenv AUTOSTART_PLANNING false)" />
 	<arg name="data_path" default="$(optenv ROSPLAN_DATA_PATH /tmp)" />
 	<arg name="problem_path" default="$(optenv ROSPLAN_PROBLEM_PATH /tmp/problem.pddl)" />
@@ -23,16 +25,33 @@
 		<arg name="mongodb_port" value="$(arg mongodb_port)" />
 		<arg name="database_path" value="$(arg database_path)" />
 		<arg name="max_dispatch_attempts" value="$(arg max_dispatch_attempts)" />
-		<!-- if planner command given, pass it on, otherwise don't set arg
-		     - to use default. In that case, popf_anytime will be in -->
-		<arg name="planner_command" value="$(env ROSPLAN_PLANNER_COMMAND)"
-		     if="$(eval optenv('ROSPLAN_PLANNER_COMMAND', '') != '')" />
 		<arg name="popf_anytime" value="$(arg popf_anytime)" />
 		<arg name="popf_timeout" value="$(arg popf_timeout)" />
+		<!-- if planner command given, pass it on, otherwise don't set arg - to 
+			use default. In that case, popf_anytime will be in -->
+		<arg name="planner_command" value="$(env ROSPLAN_PLANNER_COMMAND)"
+			if="$(eval optenv('ROSPLAN_PLANNER_COMMAND', '') != '')" />
 	</include>
-	<include file="$(find rcll_freiburg)/launch/rosplan_rcll_interface.launch">
-		<arg name="num_robots" value="$(arg num_robots)" />
+
+	<include file="$(find rcll_freiburg)/launch/robot_actions.launch"
+		if="$(eval int(arg('num_robots')) >= 1)">
+		<arg name="robot_id" value="1" />
+		<arg name="team_color" value="$(arg team_color)" />
 	</include>
+
+	<include file="$(find rcll_freiburg)/launch/robot_actions.launch"
+		if="$(eval int(arg('num_robots')) >= 2)">
+		<arg name="robot_id" value="2" />
+		<arg name="team_color" value="$(arg team_color)" />
+	</include>
+
+	<include file="$(find rcll_freiburg)/launch/robot_actions.launch"
+		if="$(eval int(arg('num_robots')) >= 3)">
+		<arg name="robot_id" value="3" />
+		<arg name="team_color" value="$(arg team_color)" />
+	</include>
+
+	<include file="$(find rcll_freiburg)/launch/machine_actions.launch" />
 
 	<node name="rosplan_initial_situation" pkg="rosplan_initial_situation"
 		type="rosplan_initial_situation" respawn="false" output="screen">
@@ -44,12 +63,27 @@
 		<param name="clear_kb" value="true" />
 		<param name="start_planning" value="false" />
 	</node>
-<!-- 
-	<node name="rosplan_starter_rcll" pkg="rosplan_starter_rcll"
-	      type="rosplan_starter_rcll" respawn="false" output="screen"
-	      if="$(arg autostart_planning)">
+	<node name="kbupdater_production_steps" pkg="rosplan_interface_freiburg"
+		type="rosplan_kb_updater_rcll_production_steps" respawn="false"
+		output="screen">
+		<remap from="rcll/order_info" to="robot1/rcll/order_info" />
+		<remap from="rcll/ring_info" to="robot1/rcll/ring_info" />
+		<remap from="rcll/machine_info" to="robot1/rcll/machine_info" />
+		<rosparam command="load"
+			file="$(find rcll_freiburg)/config/kbupdater_production_steps.yaml" />
+	</node>
+	<node name="kbupdater_navgraph" pkg="rosplan_interface_freiburg"
+		type="rosplan_kb_updater_navgraph" respawn="false" output="screen">
+		<remap from="rcll/machine_info" to="robot1/rcll/machine_info" />
+		<remap from="navgraph" to="robot1/navgraph" />
+		<remap from="get_pairwise_costs" to="robot1/navgraph/get_pairwise_costs" />
+		<rosparam command="load"
+			file="$(find rcll_freiburg)/config/rcll_kbupdater_navgraph.yaml" />
+	</node>
+
+	<node name="rosplan_starter_rcll" pkg="rosplan_starter_rcll" type="rosplan_starter_rcll"
+		respawn="false" output="screen" if="$(arg autostart_planning)">
 		<remap from="rcll/game_state" to="robot1/rcll/game_state" />
 	</node>
- -->
 
 </launch>

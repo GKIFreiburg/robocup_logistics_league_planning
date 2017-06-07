@@ -124,7 +124,7 @@
 
 	(:durative-action mount-ring
 		:parameters (?m - ring_station ?p - product ?s - step ?i - rs_input ?o - rs_output)
-		:duration (= ?duration 60)
+		:duration (= ?duration 1)
 		:condition (and
 			(at start (product-at ?p ?i))
 			(at start (has-step ?p ?s))
@@ -150,7 +150,7 @@
 
 	(:durative-action buffer-cap
 		:parameters (?m - cap_station ?i - cs_input ?o - cs_output)
-		:duration (= ?duration 25)
+		:duration (= ?duration 1)
 		:condition (and
 			(at start (input-location ?i ?m))
 			(at start (output-location ?o ?m))
@@ -172,7 +172,7 @@
 
 	(:durative-action mount-cap
 		:parameters (?m - cap_station ?p - product ?s - step ?i - cs_input ?o - cs_output)
-		:duration (= ?duration 25)
+		:duration (= ?duration 1)
 		:condition (and
 			(at start (product-at ?p ?i))
 			(at start (has-step ?p ?s))
