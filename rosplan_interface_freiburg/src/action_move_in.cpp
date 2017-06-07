@@ -20,7 +20,7 @@
 
 #include <ros/ros.h>
 
-#include <rosplan_action_interface/RPActionInterface.h>
+#include <rosplan_interface_freiburg/sync_action_interface.h>
 #include <fawkes_msgs/ExecSkillAction.h>
 #include <actionlib/client/simple_action_client.h>
 
@@ -32,7 +32,7 @@
 
 typedef actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> SkillerClient;
 
-class ActionMoveIn : public KCL_rosplan::RPActionInterface
+class ActionMoveIn : public rosplan_interface_freiburg::SyncActionInterface
 {
 public:
 	ActionMoveIn()

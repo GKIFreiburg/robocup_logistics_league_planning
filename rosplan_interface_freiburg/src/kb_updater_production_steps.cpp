@@ -426,11 +426,11 @@ public:
 		for (const auto& p: received_products)
 		{
 			// TODO: filter products
-			if (p.complexity() > 0)
+			if (p.complexity() != 3)
 			{
 				continue;
 			}
-			if (accepted_products.size() > 3)
+			if (accepted_products.size() > 1)
 			{
 				continue;
 			}

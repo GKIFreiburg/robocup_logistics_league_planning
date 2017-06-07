@@ -20,7 +20,7 @@
 
 #include <ros/ros.h>
 
-#include <rosplan_action_interface/RPActionInterface.h>
+#include <rosplan_interface_freiburg/sync_action_interface.h>
 #include <rcll_ros_msgs/ProductColor.h>
 
 #include <rosplan_interface_freiburg/machine_interface.h>
@@ -42,7 +42,7 @@
 
 
 
-class ActionDispenseMaterial : public KCL_rosplan::RPActionInterface
+class ActionDispenseMaterial : public rosplan_interface_freiburg::SyncActionInterface
 {
 public:
 	ActionDispenseMaterial()

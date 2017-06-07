@@ -20,10 +20,11 @@
 
 #include <ros/ros.h>
 
-#include <rosplan_action_interface/RPActionInterface.h>
+#include <rosplan_interface_freiburg/sync_action_interface.h>
 #include <rcll_ros_msgs/SendPrepareMachine.h>
 #include <rcll_ros_msgs/ProductColor.h>
 #include <rcll_ros_msgs/MachineInfo.h>
+#include <rcll_ros_msgs/RingInfo.h>
 #include <fawkes_msgs/ExecSkillAction.h>
 
 #include <rosplan_interface_freiburg/machine_interface.h>
@@ -47,10 +48,10 @@
 
 typedef actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> SkillerClient;
 
-class ActionTransportProduct : public KCL_rosplan::RPActionInterface
+class ActionTransportProduct : public rosplan_interface_freiburg::SyncActionInterface
 {
 public:
-        ActionTransportProduct()
+	ActionTransportProduct()
 	{
 		ros::NodeHandle nh;
 
@@ -64,6 +65,7 @@ public:
 		machines_["rs2"] = std::make_shared<MachineInterface>("rs2", log_prefix_);
 		machines_["ds"] = std::make_shared<MachineInterface>("ds", log_prefix_);
 		dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionTransportProduct::dispatchCB, this);
+		sub_ring_info_ = nh.subscribe("rcll/ring_info", 10, &ActionTransportProduct::ring_info_cb, this);
 
 		ros::NodeHandle nhpriv("~");
 		GET_CONFIG(nhpriv, nh, "initial_machine_state", initial_machine_state_)
@@ -80,6 +82,14 @@ public:
 			{
 				dispatchCallback(msg);
 			}
+		}
+	}
+
+	void ring_info_cb(const rcll_ros_msgs::RingInfo::ConstPtr& msg)
+	{
+		for (const auto& ring: msg->rings)
+		{
+			ring_colors_materials_[ring.ring_color] = ring.raw_material;
 		}
 	}
 
@@ -228,6 +238,21 @@ public:
 				return false;
 			}
 		}
+
+		if (srv.request.rs_ring_color != 0)
+		{
+			// update material-stored numerical fluent
+			rosplan_knowledge_msgs::KnowledgeItem material;
+			material.knowledge_type = material.FUNCTION;
+			material.attribute_name = "material-stored";
+			diagnostic_msgs::KeyValue rs;
+			rs.key = "m";
+			rs.value = name;
+			material.values.push_back(rs);
+			lookupNumericalValue(material);
+			material.function_value -= ring_colors_materials_[srv.request.rs_ring_color];
+			updateNumericalValue(material);
+		}
 		return true;
 	}
 
@@ -239,17 +264,20 @@ private:
 	std::string parameter_not_found_;
 
 	std::map<std::string, MachineInterface::Ptr> machines_;
+	std::map<int, int> ring_colors_materials_;
 
 	std::shared_ptr<actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> > skiller_client_;
 	ros::Subscriber dispatch_subscriber_;
+	ros::Subscriber sub_ring_info_;
+
 };
 
 int main(int argc, char **argv)
 {
-        ros::init(argc, argv, "action_transport_product");
+	ros::init(argc, argv, "action_transport_product");
 	ros::NodeHandle n;
 
-        ActionTransportProduct action;
+	ActionTransportProduct action;
 	action.runActionInterface();
 
 	return 0;

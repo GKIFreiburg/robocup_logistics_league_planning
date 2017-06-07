@@ -20,7 +20,7 @@
 
 #include <ros/ros.h>
 
-#include <rosplan_action_interface/RPActionInterface.h>
+#include <rosplan_interface_freiburg/sync_action_interface.h>
 #include <rcll_ros_msgs/SendPrepareMachine.h>
 #include <rcll_ros_msgs/ProductColor.h>
 #include <rcll_ros_msgs/MachineInfo.h>
@@ -40,14 +40,14 @@
 #include <condition_variable>
 
 #define GET_CONFIG(privn, n, path, var)	  \
-        if (! privn.getParam(path, var)) {      \
-                if (! n.getParam(path, var))					\
-                        ROS_ERROR_STREAM(log_prefix_<<"can not read param "<<path);  \
-        }
+	if (! privn.getParam(path, var)) {      \
+		if (! n.getParam(path, var))					\
+			ROS_ERROR_STREAM(log_prefix_<<"can not read param "<<path);  \
+	}
 
 typedef actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> SkillerClient;
 
-class ActionTransportMaterial: public KCL_rosplan::RPActionInterface
+class ActionTransportMaterial: public rosplan_interface_freiburg::SyncActionInterface
 {
 public:
 	ActionTransportMaterial()
@@ -163,13 +163,13 @@ public:
 			ROS_INFO_STREAM(
 					log_prefix_<<"sending prepare request, wait for initial state: "<<initial_machine_state_<<", wait for desired state: "<<desired_machine_state_);
 			bool success = machine->sendPrepare(srv, initial_machine_state_, desired_machine_state_);
-			if (! success)
+			if (!success)
 			{
 				ROS_ERROR_STREAM(log_prefix_<<"Send prepare failed.");
 				return false;
 			}
 		}
-		goal.skillstring = "bring_product_to{place='" + machine->getName() + "', side='input'"+slide+"}";
+		goal.skillstring = "bring_product_to{place='" + machine->getName() + "', side='input'" + slide + "}";
 		{
 			const auto& state = skiller_client_->sendGoalAndWait(goal);
 			if (state != state.SUCCEEDED)
@@ -178,6 +178,19 @@ public:
 				return false;
 			}
 		}
+
+		// update material-stored numerical fluent
+		rosplan_knowledge_msgs::KnowledgeItem material;
+		material.knowledge_type = material.FUNCTION;
+		material.attribute_name = "material-stored";
+		diagnostic_msgs::KeyValue rs;
+		rs.key = "m";
+		rs.value = name;
+		material.values.push_back(rs);
+		lookupNumericalValue(material);
+		material.function_value += 1;
+		updateNumericalValue(material);
+
 		return true;
 	}
 

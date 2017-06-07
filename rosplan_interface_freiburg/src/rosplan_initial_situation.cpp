@@ -546,7 +546,10 @@ public:
 		srv.request.update_type = update_type;
 		if (update_type == rosplan_knowledge_msgs::KnowledgeUpdateServiceArrayRequest::ADD_GOAL)
 		{
-			ROS_ERROR("[RP-IniSit] Numerical goals are not supported by rosplan");
+			if (!pmap.empty())
+			{
+				ROS_ERROR("[RP-IniSit] Numerical goals are not supported by rosplan");
+			}
 			return;
 		}
 		for (const auto &p : pmap)

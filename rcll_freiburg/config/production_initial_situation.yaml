@@ -38,7 +38,7 @@ init_numerical:
      value: 0
    - 
      args: [rs2]
-     value: 0.0
+     value: 0
 #  path-length:
 #   - 
 #     args: [START, bs_in]

@@ -30,6 +30,7 @@
 
 		; locations
 		start - location
+		;bs_in - bs_output
 		bs_out - bs_output
 		rs1_in - rs_input
 		rs1_out - rs_output
@@ -88,43 +89,43 @@
 	)
 
 	(:durative-action dispense-material
-		:parameters ()
-		:duration (= ?duration 15)
+		:parameters (?m - base_station ?o - bs_output)
+		:duration (= ?duration 1)
 		:condition (and
-			(at start (not (output-full bs_out)))
-			(at start (not (processing bs)))
+			(at start (not (output-full ?o)))
+			(at start (not (processing ?m)))
 		)
 		:effect (and
-			(at start (processing bs))
-			(at end (not (processing bs)))
-			(at start (output-full bs_out))
-			(at end (material-at bs_out))
+			(at start (processing ?m))
+			(at end (not (processing ?m)))
+			(at start (output-full ?o))
+			(at end (material-at ?o))
 		)
 	)
 
 	(:durative-action dispense-product
-		:parameters (?p - product ?s - step)
-		:duration (= ?duration 15)
+		:parameters (?p - product ?s - step ?m - base_station ?o - bs_output)
+		:duration (= ?duration 1)
 		:condition (and
 			(at start (has-step ?p ?s))
-			(at start (step-at-machine ?s bs))
+			(at start (step-at-machine ?s ?m))
 			(at start (initial-step ?s))
 			(at start (not (step-completed ?s)))
-			(at start (not (output-full bs_out)))
-			(at start (not (processing bs)))
+			(at start (not (output-full ?o)))
+			(at start (not (processing ?m)))
 		)
 		:effect (and
-			(at start (processing bs))
-			(at end (not (processing bs)))
-			(at start (output-full bs_out))
-			(at end (product-at ?p bs_out))
+			(at start (processing ?m))
+			(at end (not (processing ?m)))
+			(at start (output-full ?o))
+			(at end (product-at ?p ?o))
 			(at end (step-completed ?s))
 		)
 	)
 
 	(:durative-action mount-ring
 		:parameters (?m - ring_station ?p - product ?s - step ?i - rs_input ?o - rs_output)
-		:duration (= ?duration 60)
+		:duration (= ?duration 1)
 		:condition (and
 			(at start (product-at ?p ?i))
 			(at start (has-step ?p ?s))
@@ -150,7 +151,7 @@
 
 	(:durative-action buffer-cap
 		:parameters (?m - cap_station ?i - cs_input ?o - cs_output)
-		:duration (= ?duration 25)
+		:duration (= ?duration 1)
 		:condition (and
 			(at start (input-location ?i ?m))
 			(at start (output-location ?o ?m))
@@ -172,7 +173,7 @@
 
 	(:durative-action mount-cap
 		:parameters (?m - cap_station ?p - product ?s - step ?i - cs_input ?o - cs_output)
-		:duration (= ?duration 25)
+		:duration (= ?duration 1)
 		:condition (and
 			(at start (product-at ?p ?i))
 			(at start (has-step ?p ?s))
@@ -197,36 +198,36 @@
 	)
 
 	(:durative-action deliver
-		:parameters (?p - product ?s - step)
-		:duration (= ?duration 40)
+		:parameters (?p - product ?s - step ?m - delivery_station ?i - ds_input)
+		:duration (= ?duration 1)
 		:condition (and
-			(at start (product-at ?p ds_in))
+			(at start (product-at ?p ?i))
 			(at start (has-step ?p ?s))
-			(at start (step-at-machine ?s ds))
+			(at start (step-at-machine ?s ?m))
 			(at start (not (step-completed ?s)))
-			(at start (not (processing ds)))
+			(at start (not (processing ?m)))
 		)
 		:effect (and
-			(at start (processing ds))
-			(at start (not (product-at ?p ds_in)))
-			(at end (not (processing ds)))
-			(at end (not (input-full ds_in)))
+			(at start (processing ?m))
+			(at start (not (product-at ?p ?i)))
+			(at end (not (processing ?m)))
+			(at end (not (input-full ?i)))
 			(at end (step-completed ?s))
 		)
 	)
 
 	(:durative-action discard-material
-		:parameters ()
-		:duration (= ?duration 40)
+		:parameters (?m - delivery_station ?i - ds_input)
+		:duration (= ?duration 1)
 		:condition (and
-			(at start (material-at ds_in))
-			(at start (not (processing ds)))
+			(at start (material-at ?i))
+			(at start (not (processing ?m)))
 		)
 		:effect (and
-			(at start (processing ds))
-			(at end (not (processing ds)))
-			(at end (not (material-at ds_in)))
-			(at end (not (input-full ds_in)))
+			(at start (processing ?m))
+			(at end (not (processing ?m)))
+			(at end (not (material-at ?i)))
+			(at end (not (input-full ?i)))
 		)
 	)
 
@@ -253,7 +254,7 @@
 
 	(:durative-action pickup-material
 		:parameters (?r - robot ?o - output ?m - machine)
-		:duration (= ?duration 5)
+		:duration (= ?duration 15)
 		:condition (and
 			(over all (robot-at ?r ?o))
 			(at start (not (processing ?m)))
@@ -275,7 +276,7 @@
 
 	(:durative-action pickup-product
 		:parameters (?r - robot ?o - output ?p - product ?m - machine)
-		:duration (= ?duration 5)
+		:duration (= ?duration 15)
 		:condition (and
 			(over all (not (processing ?m)))
 			(over all (robot-at ?r ?o))
@@ -297,7 +298,7 @@
 
 	(:durative-action insert-product
 		:parameters (?r - robot ?i - input ?p - product ?m - machine)
-		:duration (= ?duration 5)
+		:duration (= ?duration 15)
 		:condition (and
 			(over all (not (processing ?m)))
 			(over all (robot-at ?r ?i))
@@ -318,7 +319,7 @@
 
 	(:durative-action insert-material
 		:parameters (?r - robot ?i - rs_input ?m - ring_station)
-		:duration (= ?duration 5)
+		:duration (= ?duration 15)
 		:condition (and
 			(over all (not (processing ?m)))
 			(over all (robot-at ?r ?i))
@@ -338,7 +339,7 @@
 	)
 
 	(:durative-action transport-material
-		:parameters (?r - robot ?o - output ?i - input ?m - ring_station)
+		:parameters (?r - robot ?o - output ?i - rs_input ?m - ring_station)
 		:duration (= ?duration (path-length ?o ?i))
 		:condition (and
 			(at start (not (robot-processing ?r)))
@@ -413,20 +414,21 @@
 	)
 
 	(:durative-action move-in
-		:parameters (?r - robot)
+		:parameters (?r - robot ?l - location)
 		:duration (= ?duration 10)
 		:condition (and
 			(at start (not (robot-processing ?r)))
 			(at start (robot-at-init ?r))
 			(at start (not (exists (?_r - robot) (and (robot-precedes ?_r ?r) (robot-at-init ?_r)))))
-			(over all (not (location-occupied start)))
+			(at start (= ?l start))
+			(over all (not (location-occupied ?l)))
 		)
 		:effect (and
 			(at end (not (robot-at-init ?r)))
 			(at start (robot-processing ?r))
 			(at end (not (robot-processing ?r)))
-			(at end (location-occupied start))
-			(at end (robot-at ?r start))
+			(at end (location-occupied ?l))
+			(at end (robot-at ?r ?l))
 		)
 	)
 )

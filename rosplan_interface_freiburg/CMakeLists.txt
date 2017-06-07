@@ -135,6 +135,9 @@ include_directories(
 add_library(machine_interface
   src/machine_interface.cpp
 )
+add_library(action_interface
+  src/sync_action_interface.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -171,42 +174,53 @@ add_executable(action_transport_material src/action_transport_material.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(rosplan_kb_updater_rcll_production_steps
+  action_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(rosplan_kb_updater_navgraph
+  action_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(rosplan_initial_situation
+  action_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_dispense_product
+  action_interface
   machine_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_dispense_material
+  action_interface
   machine_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_wait_for_machine_state
+  action_interface
   machine_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_move
+  action_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_move_in
+  action_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_insert_cap
+  action_interface
   machine_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_transport_product
+  action_interface
   machine_interface
   ${catkin_LIBRARIES}
 )
 
 target_link_libraries(action_transport_material
+  action_interface
   machine_interface
   ${catkin_LIBRARIES}
 )
