@@ -73,6 +73,13 @@
 			<param name="log_prefix" value="[Deliver] " />
 			<rosparam param="machines">[ds]</rosparam>
 		</node>
+		<node name="action_discard" pkg="rosplan_interface_freiburg"
+			type="action_wait_for_machine_state" respawn="false">
+			<param name="pddl_action_name" value="discard" />
+			<param name="desired_machine_state" value="IDLE" />
+			<param name="log_prefix" value="[Discard] " />
+			<rosparam param="machines">[ds]</rosparam>
+		</node>
 	</group>
 
 	<node name="kbupdater_production_steps" pkg="rosplan_interface_freiburg"
