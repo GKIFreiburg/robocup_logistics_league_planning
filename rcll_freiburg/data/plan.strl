@@ -1,76 +1,27 @@
 module plan:
-input SOURCE, a0_complete, a1_complete, a2_complete, a3_complete, a4_complete, a5_complete, a6_complete, a7_complete, a8_complete, a9_complete, a10_complete, a11_complete, a12_complete
-output SINK, a0_dispatch, a1_dispatch, a2_dispatch, a3_dispatch, a4_dispatch, a5_dispatch, a6_dispatch, a7_dispatch, a8_dispatch, a9_dispatch, a10_dispatch, a11_dispatch, a12_dispatch
-signal e0, e0, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12 in
-run action0
- || action0
- || action1
- || action2
- || action3
- || action4
- || action5
- || action6
- || action7
- || action8
- || action9
- || action10
- || action11
- || action12
+input SOURCE, a6_complete, a7_complete, a8_complete, a9_complete, a10_complete, a11_complete, a12_complete, a13_complete
+output SINK, a6_dispatch, a7_dispatch, a8_dispatch, a9_dispatch, a10_dispatch, a11_dispatch, a12_dispatch, a13_dispatch
+signal e6, e6, e7, e8, e9, e10, e11, e12, e13 in
+run action6_move
+ || action6_move
+ || action7_transport-material
+ || action8_move
+ || action9_transport-product
+ || action10_mount-cap
+ || action11_move
+ || action12_transport-product
+ || action13_deliver
 end
 end module
 
-module action0:
-output e0;
-  emit a0_dispatch;
-  await a0_complete;
-emit e0;
-end module
-
-module action1:
-output e1;
-  emit a1_dispatch;
-  await a1_complete;
-emit e1;
-end module
-
-module action2:
-output e2;
-  emit a2_dispatch;
-  await a2_complete;
-emit e2;
-end module
-
-module action3:
-input e2;
-output e3;
-  await e2;
-  emit a3_dispatch;
-  await a3_complete;
-emit e3;
-end module
-
-module action4:
-output e4;
-  emit a4_dispatch;
-  await a4_complete;
-emit e4;
-end module
-
-module action5:
-output e5;
-  emit a5_dispatch;
-  await a5_complete;
-emit e5;
-end module
-
-module action6:
+module action6_move:
 output e6;
   emit a6_dispatch;
   await a6_complete;
 emit e6;
 end module
 
-module action7:
+module action7_transport-material:
 input e6;
 output e7;
   await e6;
@@ -79,7 +30,7 @@ output e7;
 emit e7;
 end module
 
-module action8:
+module action8_move:
 input e7;
 output e8;
   await e7;
@@ -88,33 +39,48 @@ output e8;
 emit e8;
 end module
 
-module action9:
+module action9_transport-product:
+input e8;
 output e9;
+  await e8;
   emit a9_dispatch;
   await a9_complete;
 emit e9;
 end module
 
-module action10:
+module action10_mount-cap:
+input e9;
 output e10;
+  await e9;
   emit a10_dispatch;
   await a10_complete;
 emit e10;
 end module
 
-module action11:
+module action11_move:
+input e9;
 output e11;
+  await e9;
   emit a11_dispatch;
   await a11_complete;
 emit e11;
 end module
 
-module action12:
-input e11;
+module action12_transport-product:
+input e10;
 output e12;
-  await e11;
+  await e10;
   emit a12_dispatch;
   await a12_complete;
 emit e12;
+end module
+
+module action13_deliver:
+input e12;
+output e13;
+  await e12;
+  emit a13_dispatch;
+  await a13_complete;
+emit e13;
 end module
 

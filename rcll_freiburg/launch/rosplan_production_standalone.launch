@@ -9,19 +9,16 @@
 	</include>
 
 	<include file="$(find rcll_freiburg)/launch/rosplan_production.launch">
-		<arg name="num_robots" value="$(arg num_robots)" />
-
 		<arg name="database_path" value="$(find rosplan_knowledge_base)/common/mongoDB/" />
 		<arg name="data_path" value="$(find rcll_freiburg)/data/" />
 		<arg name="problem_path" value="$(find rcll_freiburg)/data/problem.pddl" />
 		<arg name="strl_file_path" value="$(find rcll_freiburg)/data/plan.strl" />
-		<arg name="popf_anytime" value="false" />
 
-		<arg name="pddl_domain_path" value="$(find rcll_production_domain)/benchmark/d_macro_actions.pddl" />
 <!--
+		<arg name="pddl_domain_path" value="$(find rcll_production_domain)/benchmark/d_macro_actions.pddl" />
 		<arg name="pddl_domain_path" value="$(find rcll_production_domain)/default/domain_unit.pddl" />
 		<arg name="pddl_domain_path" value="$(find rcll_production_domain)/default/domain.pddl" />
 -->
-		
 	</include>
+	<include file="$(find rcll_freiburg)/launch/rosplan_gui.launch" />
 </launch>

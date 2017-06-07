@@ -86,6 +86,7 @@ bool MachineInterface::sendPrepare(rcll_ros_msgs::SendPrepareMachine& srv, const
 {
 	waitForState(initial_state);
 	srv.request.machine = full_name_;
+	srv.request.wait = true;
 	connect_service_prepare_machine();
 	refbox_prepare_machine_.call(srv);
 	if (! srv.response.ok)
