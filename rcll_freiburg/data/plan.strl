@@ -1,7 +1,7 @@
 module plan:
-input SOURCE, a0_complete, a1_complete, a2_complete, a3_complete, a4_complete, a5_complete, a6_complete, a7_complete, a8_complete, a9_complete, a10_complete, a11_complete, a12_complete, a13_complete, a14_complete, a15_complete, a16_complete, a17_complete, a18_complete, a19_complete, a20_complete, a21_complete, a22_complete, a23_complete
-output SINK, a0_dispatch, a1_dispatch, a2_dispatch, a3_dispatch, a4_dispatch, a5_dispatch, a6_dispatch, a7_dispatch, a8_dispatch, a9_dispatch, a10_dispatch, a11_dispatch, a12_dispatch, a13_dispatch, a14_dispatch, a15_dispatch, a16_dispatch, a17_dispatch, a18_dispatch, a19_dispatch, a20_dispatch, a21_dispatch, a22_dispatch, a23_dispatch
-signal e0, e0, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17, e18, e19, e20, e21, e22, e23 in
+input SOURCE, a0_complete, a1_complete, a2_complete, a3_complete, a4_complete, a5_complete, a6_complete, a7_complete, a8_complete, a9_complete, a10_complete, a11_complete, a12_complete
+output SINK, a0_dispatch, a1_dispatch, a2_dispatch, a3_dispatch, a4_dispatch, a5_dispatch, a6_dispatch, a7_dispatch, a8_dispatch, a9_dispatch, a10_dispatch, a11_dispatch, a12_dispatch
+signal e0, e0, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12 in
 run action0
  || action0
  || action1
@@ -16,17 +16,6 @@ run action0
  || action10
  || action11
  || action12
- || action13
- || action14
- || action15
- || action16
- || action17
- || action18
- || action19
- || action20
- || action21
- || action22
- || action23
 end
 end module
 
@@ -143,104 +132,5 @@ output e12;
   emit a12_dispatch;
   await a12_complete;
 emit e12;
-end module
-
-module action13:
-input e12;
-output e13;
-  await e12;
-  emit a13_dispatch;
-  await a13_complete;
-emit e13;
-end module
-
-module action14:
-input e13;
-output e14;
-  await e13;
-  emit a14_dispatch;
-  await a14_complete;
-emit e14;
-end module
-
-module action15:
-input e14;
-output e15;
-  await e14;
-  emit a15_dispatch;
-  await a15_complete;
-emit e15;
-end module
-
-module action16:
-input e15;
-output e16;
-  await e15;
-  emit a16_dispatch;
-  await a16_complete;
-emit e16;
-end module
-
-module action17:
-input e16;
-output e17;
-  await e16;
-  emit a17_dispatch;
-  await a17_complete;
-emit e17;
-end module
-
-module action18:
-input e17;
-output e18;
-  await e17;
-  emit a18_dispatch;
-  await a18_complete;
-emit e18;
-end module
-
-module action19:
-input e18;
-output e19;
-  await e18;
-  emit a19_dispatch;
-  await a19_complete;
-emit e19;
-end module
-
-module action20:
-input e19;
-output e20;
-  await e19;
-  emit a20_dispatch;
-  await a20_complete;
-emit e20;
-end module
-
-module action21:
-input e20;
-output e21;
-  await e20;
-  emit a21_dispatch;
-  await a21_complete;
-emit e21;
-end module
-
-module action22:
-input e21;
-output e22;
-  await e21;
-  emit a22_dispatch;
-  await a22_complete;
-emit e22;
-end module
-
-module action23:
-input e22;
-output e23;
-  await e22;
-  emit a23_dispatch;
-  await a23_complete;
-emit e23;
 end module
 
