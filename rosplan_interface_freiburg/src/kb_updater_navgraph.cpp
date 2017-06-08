@@ -439,8 +439,8 @@ public:
 		addsrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateServiceArrayRequest::ADD_KNOWLEDGE;
 
 		erase_func_values(cfg_dist_func_, remsrv);
-		std::set<std::string> from_filter = {"bs_in", "ds_out"};
-		std::set<std::string> to_filter = {"bs_in", "ds_out", "start"};
+		std::set<std::string> from_filter = {"ds_out"};
+		std::set<std::string> to_filter = {"ds_out", "start"};
 
 		for (const fawkes_msgs::NavGraphPathCost &pc : pwc_srv.response.path_costs)
 		{

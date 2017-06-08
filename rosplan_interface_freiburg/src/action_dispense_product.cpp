@@ -97,7 +97,14 @@ public:
 	virtual bool concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
 	{
 		rcll_ros_msgs::SendPrepareMachine srv;
-		srv.request.bs_side = rcll_ros_msgs::SendPrepareMachine::Request::BS_SIDE_OUTPUT;
+		if (boundParameters["o"] == "bs_out")
+		{
+			srv.request.bs_side = rcll_ros_msgs::SendPrepareMachine::Request::BS_SIDE_OUTPUT;
+		}
+		else
+		{
+			srv.request.bs_side = rcll_ros_msgs::SendPrepareMachine::Request::BS_SIDE_INPUT;
+		}
 		srv.request.bs_base_color = extractColor(msg);
 		machine_->sendPrepare(srv, initial_machine_state_, desired_machine_state_);
 

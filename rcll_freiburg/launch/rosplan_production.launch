@@ -77,7 +77,7 @@
 		<remap from="navgraph" to="robot1/navgraph" />
 		<remap from="get_pairwise_costs" to="robot1/navgraph/get_pairwise_costs" />
 		<rosparam command="load"
-			file="$(find rcll_freiburg)/config/rcll_kbupdater_navgraph.yaml" />
+			file="$(find rcll_freiburg)/config/kbupdater_navgraph.yaml" />
 	</node>
 
 	<node name="rosplan_starter_rcll" pkg="rosplan_starter_rcll" type="rosplan_starter_rcll"
