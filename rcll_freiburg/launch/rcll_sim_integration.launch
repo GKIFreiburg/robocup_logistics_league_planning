@@ -7,10 +7,10 @@
 	<arg name="navgraph_file" default="$(optenv NAVGRAPH_FILE /tmp/navgraph-generated.yaml)" />
 
 	<include file="$(find rcll_refbox_peer)/launch/rcll_refbox_peer.launch"
-	         ns="robot1" if="$(eval int(arg('num_robots')) >= 1)">
+		ns="robot1" if="$(eval int(arg('num_robots')) >= 1)">
 		<arg name="team_name" value="$(optenv TEAM_NAME Carologistics)" />
 		<arg name="team_color" value="$(optenv TEAM_COLOR CYAN)" />
-		<arg name="robot_name" value="$(optenv ROBOT_NAME_1 r1)" />
+		<arg name="robot_name" value="$(optenv ROBOT_NAME_1 r-1)" />
 		<arg name="robot_number" value="1" />
 		<arg name="crypto_key" value="$(optenv TEAM_CRYPTO_KEY randomkey)" />
 		<arg name="peer_address" value="$(optenv REFBOX_PEER_ADDRESS 127.0.0.1)" />
@@ -23,10 +23,10 @@
 	</include>
 
 	<include file="$(find rcll_refbox_peer)/launch/rcll_refbox_peer.launch"
-	         ns="robot2" if="$(eval int(arg('num_robots')) >= 2)">
+		ns="robot2" if="$(eval int(arg('num_robots')) >= 2)">
 		<arg name="team_name" value="$(optenv TEAM_NAME Carologistics)" />
 		<arg name="team_color" value="$(optenv TEAM_COLOR CYAN)" />
-		<arg name="robot_name" value="$(optenv ROBOT_NAME_2 r2)" />
+		<arg name="robot_name" value="$(optenv ROBOT_NAME_2 r-2)" />
 		<arg name="robot_number" value="2" />
 		<arg name="crypto_key" value="$(optenv TEAM_CRYPTO_KEY randomkey)" />
 		<arg name="peer_address" value="$(optenv REFBOX_PEER_ADDRESS 127.0.0.1)" />
@@ -39,10 +39,10 @@
 	</include>
 
 	<include file="$(find rcll_refbox_peer)/launch/rcll_refbox_peer.launch"
-	         ns="robot3" if="$(eval int(arg('num_robots')) >= 3)">
+		ns="robot3" if="$(eval int(arg('num_robots')) >= 3)">
 		<arg name="team_name" value="$(optenv TEAM_NAME Carologistics)" />
 		<arg name="team_color" value="$(optenv TEAM_COLOR CYAN)" />
-		<arg name="robot_name" value="$(optenv ROBOT_NAME_3 r3)" />
+		<arg name="robot_name" value="$(optenv ROBOT_NAME_3 r-3)" />
 		<arg name="robot_number" value="3" />
 		<arg name="crypto_key" value="$(optenv TEAM_CRYPTO_KEY randomkey)" />
 		<arg name="peer_address" value="$(optenv REFBOX_PEER_ADDRESS 127.0.0.1)" />
@@ -55,7 +55,7 @@
 	</include>
 
 	<include file="$(find rcll_fawkes_sim)/launch/rcll_fawkes_sim.launch"
-	         ns="robot1" if="$(eval int(arg('num_robots')) >= 1)">
+		ns="robot1" if="$(eval int(arg('num_robots')) >= 1)">
 		<arg name="robot_number" value="1" />
 		<arg name="fawkes_host" value="$(optenv FAWKES_HOST_1 127.0.0.1)" />
 		<arg name="fawkes_port" value="$(optenv FAWKES_PORT_1 1921)" />
@@ -63,7 +63,7 @@
 	</include>
 
 	<include file="$(find rcll_fawkes_sim)/launch/rcll_fawkes_sim.launch"
-	         ns="robot2" if="$(eval int(arg('num_robots')) >= 2)">
+		ns="robot2" if="$(eval int(arg('num_robots')) >= 2)">
 		<arg name="robot_number" value="2" />
 		<arg name="fawkes_host" value="$(optenv FAWKES_HOST_2 127.0.0.1)" />
 		<arg name="fawkes_port" value="$(optenv FAWKES_PORT_2 1922)" />
@@ -71,7 +71,7 @@
 	</include>
 
 	<include file="$(find rcll_fawkes_sim)/launch/rcll_fawkes_sim.launch"
-	         ns="robot3" if="$(eval int(arg('num_robots')) >= 3)">
+		ns="robot3" if="$(eval int(arg('num_robots')) >= 3)">
 		<arg name="robot_number" value="3" />
 		<arg name="fawkes_host" value="$(optenv FAWKES_HOST_3 127.0.0.1)" />
 		<arg name="fawkes_port" value="$(optenv FAWKES_PORT_3 1923)" />

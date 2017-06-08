@@ -17,6 +17,7 @@
 		base_station ring_station cap_station delivery_station - machine
 		product - object
 		step - object
+		resource_counter - object
 	)
 
 	(:constants
@@ -41,6 +42,9 @@
 		cs2_in - cs_input
 		cs2_out - cs_output
 		ds_in - ds_input
+
+		; materials
+		zero one two three - material_counter
 	)
 
 	(:predicates
@@ -51,6 +55,12 @@
 		(input-full ?i - input)
 		(output-full ?o - output)
 		
+		; ring stations
+		(material-required ?s - step ?r - material_counter)
+		(material-stored ?m - ring_station ?r - material_counter)
+		(subtract ?minuend ?subtrahend ?difference - material_counter)
+		(increase ?summand ?sum - material_counter)
+
 		; cap_station stations
 		(cap-buffered ?m - cap_station)
 		
@@ -82,8 +92,6 @@
 	)
 
 	(:functions
-		(material-stored ?m - ring_station) - number
-		(material-required ?s - step) - number
 		; paths
 		(path-length ?l1 ?l2 - location) - number
 	)
@@ -124,7 +132,7 @@
 	)
 
 	(:durative-action mount-ring
-		:parameters (?m - ring_station ?p - product ?s - step ?i - rs_input ?o - rs_output)
+		:parameters (?m - ring_station ?p - product ?s - step ?i - rs_input ?o - rs_output ?mi ?mr ?mf - material_counter)
 		:duration (= ?duration 1)
 		:condition (and
 			(at start (product-at ?p ?i))
@@ -135,12 +143,16 @@
 			(at start (output-location ?o ?m))
 			(at start (not (output-full ?o)))
 			(at start (not (processing ?m)))
-			(at start (>= (material-stored ?m) (material-required ?s)))
+			(at start (material-required ?s ?mr))
+			(at start (material-stored ?m ?mr))
+			(at start (subtract ?ms ?mr ?mf)
 		)
 		:effect (and
 			(at start (processing ?m))
 			(at start (not (product-at ?p ?i)))
 			(at start (output-full ?o))
+			(at start (not (material-stored ?m ?mi)))
+			(at start (material-stored ?m ?mf))
 			(at end (not (input-full ?i)))	
 			(at end (not (processing ?m)))
 			(at end (product-at ?p ?o))
@@ -318,7 +330,7 @@
 	)
 
 	(:durative-action insert-material
-		:parameters (?r - robot ?i - rs_input ?m - ring_station)
+		:parameters (?r - robot ?i - rs_input ?m - ring_station ?mi ?mf - material_counter)
 		:duration (= ?duration 15)
 		:condition (and
 			(over all (not (processing ?m)))
@@ -326,13 +338,15 @@
 			(at start (not (robot-processing ?r)))
 			(at start (input-location ?i ?m))
 			(at start (robot-holding-material ?r))
-			(at start (< (material-stored ?m) 3))
+			(at start (material-stored ?m ?mi))
+			(at start (increase ?mi ?mf))
 		)
 		:effect (and
 			(at start (robot-processing ?r))
 			(at end (not (robot-processing ?r)))
 			(at end (not (robot-holding-material ?r)))
-			(at end (increase (material-stored ?m) 1))
+			(at end (not (material-stored ?m ?mi)))
+			(at end (material-stored ?m ?mf))
 			(at end (not (robot-recently-moved ?r)))
 			(at end (not (robot-holding-something ?r)))
 		)
@@ -347,7 +361,6 @@
 			(at start (robot-at ?r ?o))
 			(at start (not (robot-recently-moved ?r)))
 			(at start (robot-holding-material ?r))
-			(over all (< (material-stored ?m) 3))
 			(over all (not (location-occupied ?i)))
 		)
 		:effect (and
