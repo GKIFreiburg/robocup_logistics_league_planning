@@ -14,10 +14,12 @@
 #include <rosplan_knowledge_msgs/GetDomainPredicateDetailsService.h>
 #include <diagnostic_msgs/KeyValue.h>
 
+#include <map>
+
 namespace rosplan_interface_freiburg
 {
 
-class SyncActionInterface
+class AsyncActionInterface
 {
 
 private:
@@ -38,12 +40,15 @@ protected:
 	ros::ServiceClient get_knowledge_client;
 
 	/* action status */
-	bool action_success;
+	rosplan_dispatch_msgs::ActionDispatch::ConstPtr current_action;
+
+	typedef std::map<std::string, std::string> ParamObjectMap;
+	ParamObjectMap boundParameters;
+	std::string log_prefix_;
+	ros::Duration execute_timeout_;
 
 public:
-
-	bool lookupNumericalValue(rosplan_knowledge_msgs::KnowledgeItem& num);
-	bool updateNumericalValue(rosplan_knowledge_msgs::KnowledgeItem& num);
+	typedef rosplan_knowledge_msgs::KnowledgeUpdateService::Request UpdateRequest;
 
 	/* main loop for action interface */
 	void runActionInterface();
@@ -51,8 +56,22 @@ public:
 	/* listen to and process action_dispatch topic */
 	void dispatchCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg);
 
-	/* perform or call real action implementation */
-	virtual bool concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg) =0;
+	void initialize(const std::string& log_prefix = "[Action] ");
+
+	bool isAcceptable(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg);
+	void sendStartEffects();
+	void sendEndEffects();
+
+	void publishEnabled();
+	void publishAchieved();
+	void publishFailed();
+
+	bool lookupNumericalValue(rosplan_knowledge_msgs::KnowledgeItem& num);
+	bool updateNumericalValue(rosplan_knowledge_msgs::KnowledgeItem& num);
+	bool updateEffects(const std::vector<rosplan_knowledge_msgs::DomainFormula>& effects,
+			UpdateRequest::_update_type_type operation);
+
+	virtual bool concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg) = 0;
 };
 }
 #endif // SYNC_ACTION_INTERFACE_H_

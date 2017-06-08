@@ -3,7 +3,7 @@
 <launch>
 	<arg name="num_robots" default="$(optenv NUM_ROBOTS 1)" />
 
-	<include file="$(find rcll_freiburg)/launch/rcll_sim_integration.launch">
+	<include file="$(find rcll_ros)/launch/rcll_sim_integration.launch">
 		<arg name="num_robots" value="$(arg num_robots)" />
 		<arg name="navgraph_file" default="$(env FAWKES_DIR)/cfg/navgraph-generated.yaml" />
 	</include>

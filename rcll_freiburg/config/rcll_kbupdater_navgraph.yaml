@@ -7,5 +7,5 @@ static_nodes:
   C-ins-in: start
   #M-ins-in: START
   
-from_filter: [bs_in, ds_out]
-to_filter: [bs_in, ds_out, start]
+from_filter: [ds_out]
+to_filter: [ds_out, start]

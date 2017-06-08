@@ -29,8 +29,7 @@
 		<arg name="popf_timeout" value="$(arg popf_timeout)" />
 		<!-- if planner command given, pass it on, otherwise don't set arg - to 
 			use default. In that case, popf_anytime will be in -->
-		<arg name="planner_command" value="$(env ROSPLAN_PLANNER_COMMAND)"
-			if="$(eval optenv('ROSPLAN_PLANNER_COMMAND', '') != '')" />
+		<arg name="planner_command" value="rosrun rcll_freiburg tfd_plan.py DOMAIN PROBLEM" />
 	</include>
 
 	<include file="$(find rcll_freiburg)/launch/robot_actions.launch"

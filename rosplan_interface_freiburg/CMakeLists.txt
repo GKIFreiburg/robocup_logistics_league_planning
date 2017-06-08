@@ -137,7 +137,7 @@ add_library(machine_interface
   src/machine_interface.cpp
 )
 add_library(action_interface
-  src/sync_action_interface.cpp
+  src/async_action_interface.cpp
 )
 
 ## Add cmake target dependencies of the library

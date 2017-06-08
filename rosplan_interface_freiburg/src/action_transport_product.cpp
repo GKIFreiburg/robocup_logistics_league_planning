@@ -20,7 +20,6 @@
 
 #include <ros/ros.h>
 
-#include <rosplan_interface_freiburg/sync_action_interface.h>
 #include <rcll_ros_msgs/SendPrepareMachine.h>
 #include <rcll_ros_msgs/ProductColor.h>
 #include <rcll_ros_msgs/MachineInfo.h>
@@ -36,6 +35,7 @@
 #include <list>
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
+#include <rosplan_interface_freiburg/async_action_interface.h>
 
 #include <mutex>
 #include <condition_variable>
@@ -48,7 +48,7 @@
 
 typedef actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> SkillerClient;
 
-class ActionTransportProduct : public rosplan_interface_freiburg::SyncActionInterface
+class ActionTransportProduct : public rosplan_interface_freiburg::AsyncActionInterface
 {
 public:
 	ActionTransportProduct()
@@ -195,7 +195,7 @@ public:
 		goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', side='output'}";
 		{
 			ROS_INFO_STREAM(log_prefix_<<"Sending skill "<<goal.skillstring<<"...");
-			const auto& state = skiller_client_->sendGoalAndWait(goal, ros::DURATION_MAX, ros::DURATION_MAX);
+			const auto& state = skiller_client_->sendGoalAndWait(goal, execute_timeout_);
 			if (state != state.SUCCEEDED)
 			{
 				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
@@ -231,7 +231,7 @@ public:
 
 		goal.skillstring = "bring_product_to{place='"+machine->getName()+"', side='input'}";
 		{
-			const auto& state = skiller_client_->sendGoalAndWait(goal);
+			const auto& state = skiller_client_->sendGoalAndWait(goal, execute_timeout_);
 			if (state != state.SUCCEEDED)
 			{
 				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
