@@ -131,6 +131,10 @@ void SyncActionInterface::runActionInterface()
 	std::vector<std::string>::iterator nit = predicateNames.begin();
 	for (; nit != predicateNames.end(); nit++)
 	{
+		if (*nit == "=")
+		{
+			continue;
+		}
 		if (predicates.find(*nit) != predicates.end())
 			continue;
 		rosplan_knowledge_msgs::GetDomainPredicateDetailsService predSrv;

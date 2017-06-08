@@ -195,7 +195,7 @@ public:
 		goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', side='output'}";
 		{
 			ROS_INFO_STREAM(log_prefix_<<"Sending skill "<<goal.skillstring<<"...");
-			const auto& state = skiller_client_->sendGoalAndWait(goal);
+			const auto& state = skiller_client_->sendGoalAndWait(goal, ros::DURATION_MAX, ros::DURATION_MAX);
 			if (state != state.SUCCEEDED)
 			{
 				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
