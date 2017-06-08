@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   diagnostic_msgs
   mongodb_store
   rcll_ros_msgs
+  fawkes_msgs
   roscpp
   rosplan_dispatch_msgs
   rosplan_knowledge_msgs
@@ -115,7 +116,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES machine_interface
-  CATKIN_DEPENDS rosplan_planning_system diagnostic_msgs mongodb_store rcll_ros_msgs roscpp rosplan_dispatch_msgs rosplan_knowledge_msgs std_msgs std_srvs
+  CATKIN_DEPENDS rosplan_planning_system diagnostic_msgs mongodb_store rcll_ros_msgs fawkes_msgs roscpp rosplan_dispatch_msgs rosplan_knowledge_msgs std_msgs std_srvs
 #  DEPENDS system_lib
 )
 
