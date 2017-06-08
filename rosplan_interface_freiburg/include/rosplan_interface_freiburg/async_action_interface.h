@@ -9,7 +9,7 @@
 #include <rosplan_knowledge_msgs/DomainFormula.h>
 #include <rosplan_knowledge_msgs/KnowledgeItem.h>
 #include <rosplan_knowledge_msgs/GetAttributeService.h>
-#include <rosplan_knowledge_msgs/KnowledgeUpdateService.h>
+#include <rosplan_knowledge_msgs/KnowledgeUpdateServiceArray.h>
 #include <rosplan_knowledge_msgs/GetDomainOperatorDetailsService.h>
 #include <rosplan_knowledge_msgs/GetDomainPredicateDetailsService.h>
 #include <diagnostic_msgs/KeyValue.h>
@@ -48,7 +48,7 @@ protected:
 	ros::Duration execute_timeout_;
 
 public:
-	typedef rosplan_knowledge_msgs::KnowledgeUpdateService::Request UpdateRequest;
+	typedef rosplan_knowledge_msgs::KnowledgeUpdateServiceArray::Request UpdateRequest;
 
 	/* main loop for action interface */
 	void runActionInterface();

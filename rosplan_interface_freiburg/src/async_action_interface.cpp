@@ -162,8 +162,8 @@ void AsyncActionInterface::initialize(const std::string& log_prefix)
 	action_feedback_pub = nh.advertise<rosplan_dispatch_msgs::ActionFeedback>("/kcl_rosplan/action_feedback", 10, true);
 
 	// knowledge interface
-	update_knowledge_client = nh.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>(
-			"/kcl_rosplan/update_knowledge_base");
+	update_knowledge_client = nh.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateServiceArray>(
+			"/kcl_rosplan/update_knowledge_base_array");
 	get_knowledge_client = nh.serviceClient<rosplan_knowledge_msgs::GetAttributeService>(
 			"/kcl_rosplan/get_current_knowledge");
 }
@@ -275,9 +275,9 @@ bool AsyncActionInterface::lookupNumericalValue(rosplan_knowledge_msgs::Knowledg
 
 bool AsyncActionInterface::updateNumericalValue(rosplan_knowledge_msgs::KnowledgeItem& num)
 {
-	rosplan_knowledge_msgs::KnowledgeUpdateService srv;
+	rosplan_knowledge_msgs::KnowledgeUpdateServiceArray srv;
 	srv.request.update_type = srv.request.ADD_KNOWLEDGE;
-	srv.request.knowledge = num;
+	srv.request.knowledge.push_back(num);
 	if (!update_knowledge_client.call(srv))
 	{
 		ROS_ERROR_STREAM("could not update numerical value "<<num.attribute_name);
@@ -289,25 +289,27 @@ bool AsyncActionInterface::updateNumericalValue(rosplan_knowledge_msgs::Knowledg
 bool AsyncActionInterface::updateEffects(const std::vector<rosplan_knowledge_msgs::DomainFormula>& effects,
 		UpdateRequest::_update_type_type operation)
 {
-	rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
-	updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
+	rosplan_knowledge_msgs::KnowledgeUpdateServiceArray updatePredSrv;
+	rosplan_knowledge_msgs::KnowledgeItem item;
+	item.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
 	updatePredSrv.request.update_type = operation;
 	for (const auto& effect : effects)
 	{
-		updatePredSrv.request.knowledge.attribute_name = effect.name;
-		updatePredSrv.request.knowledge.values.clear();
+		item.attribute_name = effect.name;
+		item.values.clear();
 		diagnostic_msgs::KeyValue pair;
 		for (const auto& param : effect.typed_parameters)
 		{
 			pair.key = param.key;
 			pair.value = boundParameters[param.key];
-			updatePredSrv.request.knowledge.values.push_back(pair);
+			item.values.push_back(pair);
 		}
-		if (!update_knowledge_client.call(updatePredSrv))
-		{
-			ROS_INFO_STREAM(log_prefix_<<"failed to update PDDL model in knowledge base: "<<effect.name);
-			return false;
-		}
+		updatePredSrv.request.knowledge.push_back(item);
+	}
+	if (!update_knowledge_client.call(updatePredSrv))
+	{
+		ROS_INFO_STREAM(log_prefix_<<"failed to update PDDL model in knowledge base.");
+		return false;
 	}
 	return true;
 }
