@@ -422,22 +422,72 @@ public:
 			}
 		}
 
-		std::set<Product> accepted_products;
-		for (const auto& p: received_products)
-		{
-			// TODO: filter products
-			if (p.complexity() != 3)
-			{
-				continue;
-			}
-			if (accepted_products.size() > 1)
-			{
-				continue;
-			}
-			accepted_products.insert(p);
-		}
+		std::set<Product> accepted_products = filter_product_set_1(received_products);
 
 		update_products(accepted_products);
+	}
+
+	// Original naive filter, takes as input maximum product complexity and maximum number of products, and filters accordingly
+	std::set<Product> filter_product_set_1(const std::set<Product>& received_products, const int max_complexity = 3, const int max_set_size = 1)
+	{
+		std::set<Product> accepted_products;
+		for (const auto& prod: received_products)
+		{
+			if (prod.complexity() >= max_complexity)
+			{
+				continue;
+			}
+			if (accepted_products.size() > max_set_size)
+			{
+				continue;
+			}
+			accepted_products.insert(prod);
+		}
+		return accepted_products;
+	}
+
+	//Slight improvement over filter #1, combines complexity and number of products into a weighted 'load' value - the weights need to be tweaked
+	std::set<Product> filter_product_set_2(const std::set<Product>& received_products, const int max_load = 3, const std::array<int, 4>& weights = {1, 2, 3, 4})
+	{
+		std::set<Product> accepted_products;
+		int tmp;
+		int current_load = 0;
+		for (const auto& prod: received_products)
+		{
+			tmp = prod.complexity();
+			if (weights[tmp] + current_load > max_load)
+			{
+				continue;
+			}
+			accepted_products.insert(prod);
+			current_load += weights[tmp];
+		}
+		return accepted_products;
+	}
+
+//Slightly different filter, attempts to read off expected reward values for each product order and only allows the best product from each complexity class to be produced
+	std::set<Product> filter_product_set_2(const std::set<Product>& received_products)
+	{
+		std::set<Product> accepted_products;
+		std::array<Product, 4> best_product_for_complexity;
+		std::array<int, 4> best_reward_for_complexity = {0, 0, 0, 0};
+		int tmp;
+		for (const auto& prod: received_products)
+		{
+			tmp = prod.complexity();
+			if (best_reward_for_complexity[tmp] >= prod.expected_reward)
+			{
+				continue;
+			}
+			best_product_for_complexity[tmp] = prod;
+		}
+
+		for (const auto& prod: best_product_for_complexity)
+		{
+			accepted_products.insert(prod);
+		}
+				
+		return accepted_products;
 	}
 
 private:
