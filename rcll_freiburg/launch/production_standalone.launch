@@ -8,7 +8,7 @@
 		<arg name="navgraph_file" default="$(env FAWKES_DIR)/cfg/navgraph-generated.yaml" />
 	</include>
 
-	<include file="$(find rcll_freiburg)/launch/rosplan_production.launch">
+	<include file="$(find rcll_freiburg)/launch/production.launch">
 		<arg name="database_path" value="$(find rosplan_knowledge_base)/common/mongoDB/" />
 		<arg name="data_path" value="$(find rcll_freiburg)/data/" />
 		<arg name="problem_path" value="$(find rcll_freiburg)/data/problem.pddl" />

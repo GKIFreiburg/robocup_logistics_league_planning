@@ -4,7 +4,7 @@
 	<arg name="num_robots" default="$(optenv NUM_ROBOTS 1)" />
 	<arg name="team_color" value="$(optenv TEAM_COLOR CYAN)" />
 	<arg name="pddl_domain_path"
-		default="$(find rcll_production_domain)/benchmark/d_macro_actions.pddl" />
+		default="$(find rcll_freiburg)/pddl/d_macro_actions.pddl" />
 	<arg name="autostart_planning" default="$(optenv AUTOSTART_PLANNING false)" />
 	<arg name="data_path" default="$(optenv ROSPLAN_DATA_PATH /tmp)" />
 	<arg name="problem_path" default="$(optenv ROSPLAN_PROBLEM_PATH /tmp/problem.pddl)" />
