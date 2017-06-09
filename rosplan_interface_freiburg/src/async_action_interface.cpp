@@ -203,13 +203,17 @@ bool AsyncActionInterface::isAcceptable(const rosplan_dispatch_msgs::ActionDispa
 
 void AsyncActionInterface::sendStartEffects()
 {
+	//ROS_INFO_STREAM(log_prefix_<<"sending at start DELETE");
 	updateEffects(op.at_start_del_effects, UpdateRequest::REMOVE_KNOWLEDGE);
+	//ROS_INFO_STREAM(log_prefix_<<"sending at start ADD");
 	updateEffects(op.at_start_add_effects, UpdateRequest::ADD_KNOWLEDGE);
 }
 
 void AsyncActionInterface::sendEndEffects()
 {
+	//ROS_INFO_STREAM(log_prefix_<<"sending at end DELETE");
 	updateEffects(op.at_end_del_effects, UpdateRequest::REMOVE_KNOWLEDGE);
+	//ROS_INFO_STREAM(log_prefix_<<"sending at end ADD");
 	updateEffects(op.at_end_add_effects, UpdateRequest::ADD_KNOWLEDGE);
 }
 
@@ -298,18 +302,27 @@ bool AsyncActionInterface::updateEffects(const std::vector<rosplan_knowledge_msg
 		item.attribute_name = effect.name;
 		item.values.clear();
 		diagnostic_msgs::KeyValue pair;
-		for (const auto& param : effect.typed_parameters)
+		const auto& predicate = predicates[effect.name];
+//		predicate.
+		for (size_t i = 0; i < predicate.typed_parameters.size(); i++)
 		{
-			pair.key = param.key;
+			// key from domain predicate, NOT from action params
+			const auto& param_type = predicate.typed_parameters[i];
+			const auto& param = effect.typed_parameters[i];
+			pair.key = param_type.key;
 			pair.value = boundParameters[param.key];
 			item.values.push_back(pair);
 		}
 		updatePredSrv.request.knowledge.push_back(item);
 	}
-	if (!update_knowledge_client.call(updatePredSrv))
+	if (! updatePredSrv.request.knowledge.empty())
 	{
-		ROS_INFO_STREAM(log_prefix_<<"failed to update PDDL model in knowledge base.");
-		return false;
+		if (!update_knowledge_client.call(updatePredSrv))
+		{
+			ROS_INFO_STREAM(log_prefix_<<"failed to update PDDL model in knowledge base.");
+			return false;
+		}
+		//ROS_INFO_STREAM(log_prefix_<<"updated: "<<updatePredSrv.request);
 	}
 	return true;
 }

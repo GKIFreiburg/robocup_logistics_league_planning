@@ -81,35 +81,9 @@ public:
 		}
 	}
 
-	const std::string& getMachine(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
-	{
-		for (const auto& arg : msg->parameters)
-		{
-			if (arg.key == "m")
-			{
-				return arg.value;
-			}
-		}
-		return parameter_not_found_;
-	}
-
-	const std::string getOutMachine(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
-	{
-		for (const auto& arg : msg->parameters)
-		{
-			if (arg.key == "o")
-			{
-				// bs_out, cs2_out, rs1_out
-				return arg.value.substr(0, arg.value.find("_"));
-			}
-		}
-		return parameter_not_found_;
-	}
-
 	virtual bool concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
 	{
-
-		const std::string& name_out = getOutMachine(msg);
+		const std::string& name_out = boundParameters["om"];
 		const auto& machine_out_it = machines_.find(name_out);
 		if (machine_out_it == machines_.end())
 		{
@@ -123,8 +97,13 @@ public:
 			return false;
 		}
 
+		std::string side = "output";
+		if (boundParameters["o"].find("in") != std::string::npos)
+		{
+			side = "input";
+		}
 		fawkes_msgs::ExecSkillGoal goal;
-		goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', side='output'}";
+		goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', side='"+side+"'}";
 		{
 			ROS_INFO_STREAM(log_prefix_<<"Sending skill "<<goal.skillstring<<"...");
 			const auto& state = skiller_client_->sendGoalAndWait(goal, execute_timeout_);
@@ -136,7 +115,7 @@ public:
 			ROS_INFO_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" succeeded");
 		}
 
-		const std::string& name = getMachine(msg);
+		const std::string& name = boundParameters["m"];
 		const auto& machine_it = machines_.find(name);
 		if (machine_it == machines_.end())
 		{

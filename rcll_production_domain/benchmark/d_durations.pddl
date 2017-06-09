@@ -414,10 +414,9 @@
 	)
 
 	(:durative-action move-in
-		:parameters (?r - robot ?l - location)
+		:parameters (?r - robot ?l - s_location)
 		:duration (= ?duration 10)
 		:condition (and
-			(at start (= ?l start))
 			(at start (not (robot-processing ?r)))
 			(at start (robot-at-init ?r))
 			(at start (not (exists (?_r - robot) (and (robot-precedes ?_r ?r) (robot-at-init ?_r)))))
