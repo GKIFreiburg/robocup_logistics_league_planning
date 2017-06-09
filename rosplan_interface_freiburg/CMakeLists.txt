@@ -148,9 +148,9 @@ add_library(action_interface
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(rosplan_kb_updater_rcll_production_steps src/kb_updater_production_steps)
-add_executable(rosplan_kb_updater_navgraph src/kb_updater_navgraph.cpp)
-add_executable(rosplan_initial_situation src/rosplan_initial_situation.cpp)
+add_executable(updater_production_steps src/kb_updater_production_steps)
+add_executable(updater_navgraph src/kb_updater_navgraph.cpp)
+add_executable(initial_situation src/rosplan_initial_situation.cpp)
 add_executable(action_dispense_product src/action_dispense_product.cpp)
 add_executable(action_dispense_material src/action_dispense_material.cpp)
 add_executable(action_wait_for_machine_state src/action_wait_for_machine_state.cpp)
@@ -174,15 +174,15 @@ add_executable(action_transport_material src/action_transport_material.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(rosplan_kb_updater_rcll_production_steps
+target_link_libraries(updater_production_steps
   action_interface
   ${catkin_LIBRARIES}
 )
-target_link_libraries(rosplan_kb_updater_navgraph
+target_link_libraries(updater_navgraph
   action_interface
   ${catkin_LIBRARIES}
 )
-target_link_libraries(rosplan_initial_situation
+target_link_libraries(initial_situation
   action_interface
   ${catkin_LIBRARIES}
 )
@@ -240,25 +240,35 @@ target_link_libraries(action_transport_material
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
-## Mark executables and/or libraries for installation
-install(TARGETS 
-  rosplan_kb_updater_rcll_production_steps 
-  rosplan_kb_updater_navgraph 
-  rosplan_initial_situation 
+# Mark executables and/or libraries for installation
+install(TARGETS
+  # libs
+  machine_interface
+  action_interface
+  # updaters
+  updater_production_steps 
+  updater_navgraph 
+  initial_situation
+  # actions
   action_dispense_product
   action_dispense_material
   action_wait_for_machine_state
+  action_move
+  action_move_in
+  action_insert_cap
+  action_transport_product
+  action_transport_material
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
+# Mark cpp header files for installation
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN ".svn" EXCLUDE
+)
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
