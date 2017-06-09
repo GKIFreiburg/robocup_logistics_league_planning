@@ -180,27 +180,33 @@ install(PROGRAMS
 # )
 
 # Mark other files for installation (e.g. launch and bag files, etc.)
-install(FILES
+install(DIRECTORY config
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   # config
-  FILES_MATCHING PATTERN "config/*.yaml"
+  FILES_MATCHING PATTERN "*.yaml"
   #config/updater_navgraph.yaml
   #config/updater_production_steps.yaml
   #config/production_initial_situation_3robots.yaml
   #config/production_initial_situation.yaml
   #config/tfd_modules_params.yaml
+)
   # launch
-  FILES_MATCHING PATTERN "launch/*.launch"
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  FILES_MATCHING PATTERN "*.launch"
   #launch/machine_actions.launch
   #launch/production_standalone.launch
   #launch/production.launch
   #launch/robot_actions.launch
   #launch/rosplan_gui.launch
   #launch/rosplan_planning_system.launch
+)
   # pddl
-  FILES_MATCHING PATTERN "pddl/*.pddl"
+install(DIRECTORY pddl
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  FILES_MATCHING PATTERN "*.pddl"
   #pddl/d_durations.pddl
   #pddl/d_macro_actions.pddl
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
 #############
