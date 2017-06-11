@@ -148,9 +148,11 @@ add_library(action_interface
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(updater_production_steps src/kb_updater_production_steps)
-add_executable(updater_navgraph src/kb_updater_navgraph.cpp)
-add_executable(initial_situation src/rosplan_initial_situation.cpp)
+add_executable(replanning_controller src/replanning_controller.cpp)
+add_executable(updater_production_steps src/updater_production_steps.cpp)
+add_executable(updater_navgraph src/updater_navgraph.cpp)
+add_executable(initial_situation src/initial_situation.cpp)
+
 add_executable(action_dispense_product src/action_dispense_product.cpp)
 add_executable(action_dispense_material src/action_dispense_material.cpp)
 add_executable(action_wait_for_machine_state src/action_wait_for_machine_state.cpp)
@@ -174,18 +176,19 @@ add_executable(action_transport_material src/action_transport_material.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
+target_link_libraries(replanning_controller
+  ${catkin_LIBRARIES}
+)
 target_link_libraries(updater_production_steps
-  action_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(updater_navgraph
-  action_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(initial_situation
-  action_interface
   ${catkin_LIBRARIES}
 )
+
 target_link_libraries(action_dispense_product
   action_interface
   machine_interface
@@ -219,7 +222,6 @@ target_link_libraries(action_transport_product
   machine_interface
   ${catkin_LIBRARIES}
 )
-
 target_link_libraries(action_transport_material
   action_interface
   machine_interface
@@ -245,6 +247,8 @@ install(TARGETS
   # libs
   machine_interface
   action_interface
+  # replanning
+  replanning_controller
   # updaters
   updater_production_steps 
   updater_navgraph 

@@ -42,7 +42,7 @@
 #include <mutex>
 #include <condition_variable>
 
-class ROSPlanInitialSituation
+class InitialSituation
 {
 	typedef std::vector<std::string> ArgumentList;
 	struct NumericalFluent
@@ -60,7 +60,7 @@ class ROSPlanInitialSituation
 	typedef std::map<std::string, ObjectInstanceList> ObjectMap;
 
 public:
-	ROSPlanInitialSituation(ros::NodeHandle &n) :
+	InitialSituation(ros::NodeHandle &n) :
 			n(n)
 	{
 		ros::NodeHandle privn("~");
@@ -125,7 +125,7 @@ public:
 		ros::service::waitForService("/message_store/delete", -1);
 
 		ROS_INFO("[RP-IniSit] Waiting for planning system to become ready");
-		sub_ps_state_ = n.subscribe("kcl_rosplan/system_state", 10, &ROSPlanInitialSituation::ps_state_cb, this);
+		sub_ps_state_ = n.subscribe("kcl_rosplan/system_state", 10, &InitialSituation::ps_state_cb, this);
 	}
 
 	void create_svc_update_knowledge()
@@ -621,9 +621,9 @@ private:
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "rosplan_initial_situation");
+	ros::init(argc, argv, "initial_situation");
 	ros::NodeHandle n;
-	ROSPlanInitialSituation rosplan_inisit(n);
+	InitialSituation rosplan_inisit(n);
 	ros::spin();
 
 	return 0;

@@ -41,14 +41,14 @@
 		n.getParam(path, var);                \
 	}
 
-class ROSPlanKbUpdaterNavGraph
+class UpdaterNavGraph
 {
 public:
-	ROSPlanKbUpdaterNavGraph(ros::NodeHandle &n) :
+	UpdaterNavGraph(ros::NodeHandle &n) :
 			n(n), static_nodes_sent_(false)
 	{
-		sub_navgraph_ = n.subscribe("navgraph", 10, &ROSPlanKbUpdaterNavGraph::navgraph_cb, this);
-		sub_machine_info_ = n.subscribe("rcll/machine_info", 10, &ROSPlanKbUpdaterNavGraph::machine_info_cb, this);
+		sub_navgraph_ = n.subscribe("navgraph", 10, &UpdaterNavGraph::navgraph_cb, this);
+		sub_machine_info_ = n.subscribe("rcll/machine_info", 10, &UpdaterNavGraph::machine_info_cb, this);
 
 		create_svc_update_knowledge();
 		create_svc_current_knowledge();
@@ -129,7 +129,7 @@ public:
 
 	void get_functions()
 	{
-		ros::service::waitForService("kcl_rosplan/get_domain_functions", ros::Duration(20));
+		ros::service::waitForService("/kcl_rosplan/get_domain_functions", ros::Duration(20));
 		ros::ServiceClient func_client = n.serviceClient<rosplan_knowledge_msgs::GetDomainAttributeService>(
 				"/kcl_rosplan/get_domain_functions", /* persistent */true);
 		if (!func_client.waitForExistence(ros::Duration(20)))
@@ -542,11 +542,11 @@ private:
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "rosplan_kb_updater_navgraph");
+	ros::init(argc, argv, "updater_navgraph");
 
 	ros::NodeHandle n;
 
-	ROSPlanKbUpdaterNavGraph rosplan_kb_updater(n);
+	UpdaterNavGraph rosplan_kb_updater(n);
 
 	ros::spin();
 

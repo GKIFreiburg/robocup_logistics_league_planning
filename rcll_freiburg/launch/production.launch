@@ -62,15 +62,7 @@
 		<param name="clear_kb" value="true" />
 		<param name="start_planning" value="false" />
 	</node>
-	<node name="updater_production_steps" pkg="rosplan_interface_freiburg"
-		type="updater_production_steps" respawn="false"
-		output="screen">
-		<remap from="rcll/order_info" to="robot1/rcll/order_info" />
-		<remap from="rcll/ring_info" to="robot1/rcll/ring_info" />
-		<remap from="rcll/machine_info" to="robot1/rcll/machine_info" />
-		<rosparam command="load"
-			file="$(find rcll_freiburg)/config/updater_production_steps.yaml" />
-	</node>
+
 	<node name="updater_navgraph" pkg="rosplan_interface_freiburg"
 		type="updater_navgraph" respawn="false" output="screen">
 		<remap from="rcll/machine_info" to="robot1/rcll/machine_info" />
@@ -80,9 +72,20 @@
 			file="$(find rcll_freiburg)/config/updater_navgraph.yaml" />
 	</node>
 
-	<node name="rosplan_starter_rcll" pkg="rosplan_starter_rcll" type="rosplan_starter_rcll"
-		respawn="false" output="screen" if="$(arg autostart_planning)">
-		<remap from="rcll/game_state" to="robot1/rcll/game_state" />
-	</node>
-
+	<group ns="robot1/rcll">
+		<node name="updater_production_steps" pkg="rosplan_interface_freiburg"
+			type="updater_production_steps" respawn="false" output="screen">
+			<rosparam command="load"
+				file="$(find rcll_freiburg)/config/updater_production_steps.yaml" />
+			<rosparam command="load"
+				file="$(find rcll_freiburg)/config/product_decider.yaml" />
+			<param name="robot_count" value="$(arg num_robots)"/>
+		</node>
+		
+		<node name="replanning_controller" pkg="rosplan_interface_freiburg"
+			type="replanning_controller" respawn="false" output="screen">
+			<rosparam command="load"
+				file="$(find rcll_freiburg)/config/mission_control.yaml" />
+		</node>
+	</group>
 </launch>
