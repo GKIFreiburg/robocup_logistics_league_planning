@@ -4,7 +4,7 @@ import sys
 import itertools
 import subprocess
 
-cmd = "roslaunch rcll_production_domain tfd_plan.launch domain:={d} problem:={p} --screen"
+cmd = "roslaunch rcll_freiburg tfd_plan.launch domain:={d} problem:={p}"
 plan_filename = os.path.expanduser('~/.ros/plan.best')
 dump_path = '/tmp/tfd_output'
 

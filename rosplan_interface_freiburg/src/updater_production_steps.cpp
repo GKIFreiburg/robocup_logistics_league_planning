@@ -40,6 +40,7 @@
 
 #include <set>
 
+#include "config_reader.h"
 #include "product_decider.h"
 
 #define GET_CONFIG(privn, n, path, var)	  \
@@ -111,6 +112,9 @@ public:
 		GET_CONFIG(privn, n_, "robot_count", robot_count_);
 		GET_CONFIG(privn, n_, "max_active_products", max_active_products_);
 
+		GET_CONFIG(privn, n_, "trigger_replanning", trigger_replanning_);
+		GET_CONFIG(privn, n_, "cancel_command", cancel_command_.data);
+
 		GET_CONFIG(privn, n_, "gate_prefix", gate_prefix_);
 
 		GET_CONFIG(privn, n_, "product_type", product_type_);
@@ -145,6 +149,10 @@ public:
 		{
 			{	rcll_ros_msgs::ProductColor::CAP_BLACK, "cs2"},
 			{	rcll_ros_msgs::ProductColor::CAP_GREY, "cs1"}};
+
+		config::read_predicates(privn, "default_goals", default_goals_);
+
+		planning_command_pub_ = n.advertise<std_msgs::String>("/kcl_rosplan/planning_commands", 10, false);
 
 		sub_order_info_ = n_.subscribe("order_info", 10, &UpdaterProductionSteps::order_info_cb, this);
 		sub_machine_info_ = n_.subscribe("machine_info", 10, &UpdaterProductionSteps::machine_info_cb, this);
@@ -497,9 +505,10 @@ public:
 			}
 		}
 
-		if (!new_goals.request.knowledge.empty())
+		if (!new_goals.request.knowledge.empty() && trigger_replanning_)
 		{
 			// replan
+			planning_command_pub_.publish(cancel_command_);
 		}
 	}
 
@@ -689,6 +698,7 @@ public:
 private:
 	ros::NodeHandle n_;
 
+	ros::Publisher planning_command_pub_;
 	ros::Subscriber sub_order_info_;
 	ros::Subscriber sub_machine_info_;
 	ros::Subscriber sub_ring_info_;
@@ -724,6 +734,10 @@ private:
 
 	std::string gate_prefix_;
 
+	bool trigger_replanning_;
+	std_msgs::String cancel_command_;
+	config::PredicateMap default_goals_;
+
 	std::shared_ptr<Decider> decider_;
 
 	std::map<int, std::string> ring_colors_;
@@ -748,7 +762,7 @@ private:
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "mission_control");
+	ros::init(argc, argv, "updater_production_steps");
 
 	ros::NodeHandle n;
 

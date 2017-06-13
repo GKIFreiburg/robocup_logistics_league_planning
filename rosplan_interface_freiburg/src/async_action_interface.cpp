@@ -11,7 +11,7 @@ void AsyncActionInterface::runActionInterface()
 
 	// loop
 	ros::Rate loopRate(1);
-	ROS_INFO("KCL: (%s) Ready to receive", params.name.c_str());
+	ROS_INFO_STREAM(log_prefix_<<params.name<<": Ready to receive");
 
 	while (ros::ok())
 	{
@@ -193,7 +193,7 @@ bool AsyncActionInterface::isAcceptable(const rosplan_dispatch_msgs::ActionDispa
 		}
 		if (!found[j])
 		{
-			ROS_INFO_STREAM(log_prefix_<<"aborting action dispatch; malformed parameters, missing "<<params.typed_parameters[j].key);
+			ROS_ERROR_STREAM(log_prefix_<<"aborting action dispatch; malformed parameters, missing "<<params.typed_parameters[j].key);
 			return false;
 		}
 	}
@@ -303,7 +303,6 @@ bool AsyncActionInterface::updateEffects(const std::vector<rosplan_knowledge_msg
 		item.values.clear();
 		diagnostic_msgs::KeyValue pair;
 		const auto& predicate = predicates[effect.name];
-//		predicate.
 		for (size_t i = 0; i < predicate.typed_parameters.size(); i++)
 		{
 			// key from domain predicate, NOT from action params
