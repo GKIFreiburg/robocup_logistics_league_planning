@@ -4,7 +4,7 @@ objects:
 #  ring_station: [rs1, rs2]
 #  cap_station: [cs1, cs2]
 #  delivery_station: [ds]
-#  location: [start]
+#  s_location: [start]
 #  bs_output: [bs_out]
 #  rs_input: [rs1_in, rs2_in]
 #  rs_output: [rs1_out, rs2_out]
@@ -30,6 +30,7 @@ init:
     - [rs1_out, rs1]
     - [rs2_out, rs2]
     - [bs_out, bs]
+    - [bs_in, bs]
 
 init_numerical:
   material-stored:
@@ -38,7 +39,7 @@ init_numerical:
      value: 0
    - 
      args: [rs2]
-     value: 0.0
+     value: 0
 #  path-length:
 #   - 
 #     args: [START, bs_in]

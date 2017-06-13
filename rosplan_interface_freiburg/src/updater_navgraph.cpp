@@ -41,14 +41,14 @@
 		n.getParam(path, var);                \
 	}
 
-class ROSPlanKbUpdaterNavGraph
+class UpdaterNavGraph
 {
 public:
-	ROSPlanKbUpdaterNavGraph(ros::NodeHandle &n) :
+	UpdaterNavGraph(ros::NodeHandle &n) :
 			n(n), static_nodes_sent_(false)
 	{
-		sub_navgraph_ = n.subscribe("navgraph", 10, &ROSPlanKbUpdaterNavGraph::navgraph_cb, this);
-		sub_machine_info_ = n.subscribe("rcll/machine_info", 10, &ROSPlanKbUpdaterNavGraph::machine_info_cb, this);
+		sub_navgraph_ = n.subscribe("navgraph", 10, &UpdaterNavGraph::navgraph_cb, this);
+		sub_machine_info_ = n.subscribe("rcll/machine_info", 10, &UpdaterNavGraph::machine_info_cb, this);
 
 		create_svc_update_knowledge();
 		create_svc_current_knowledge();
@@ -96,7 +96,7 @@ public:
 	void create_svc_update_knowledge()
 	{
 		svc_update_knowledge_ = n.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateServiceArray>(
-				"kcl_rosplan/update_knowledge_base_array", /* persistent */true);
+				"/kcl_rosplan/update_knowledge_base_array", /* persistent */true);
 
 		ROS_INFO("[KBU-Nav] Waiting for ROSPlan service update_knowledge_base");
 		svc_update_knowledge_.waitForExistence();
@@ -105,7 +105,7 @@ public:
 	void create_svc_current_knowledge()
 	{
 		svc_current_knowledge_ = n.serviceClient<rosplan_knowledge_msgs::GetAttributeService>(
-				"kcl_rosplan/get_current_knowledge", /* persistent */true);
+				"/kcl_rosplan/get_current_knowledge", /* persistent */true);
 		ROS_INFO("[KBU-Nav] Waiting for ROSPlan service get_current_knowledge");
 		svc_current_knowledge_.waitForExistence();
 	}
@@ -113,7 +113,7 @@ public:
 	void create_svc_current_instances()
 	{
 		svc_current_instances_ = n.serviceClient<rosplan_knowledge_msgs::GetInstanceService>(
-				"kcl_rosplan/get_current_instances", /* persistent */true);
+				"/kcl_rosplan/get_current_instances", /* persistent */true);
 		ROS_INFO("[KBU-Nav] Waiting for ROSPlan service get_current_instances");
 		svc_current_instances_.waitForExistence();
 	}
@@ -129,9 +129,9 @@ public:
 
 	void get_functions()
 	{
-		ros::service::waitForService("kcl_rosplan/get_domain_functions", ros::Duration(20));
+		ros::service::waitForService("/kcl_rosplan/get_domain_functions", ros::Duration(20));
 		ros::ServiceClient func_client = n.serviceClient<rosplan_knowledge_msgs::GetDomainAttributeService>(
-				"kcl_rosplan/get_domain_functions", /* persistent */true);
+				"/kcl_rosplan/get_domain_functions", /* persistent */true);
 		if (!func_client.waitForExistence(ros::Duration(20)))
 		{
 			ROS_ERROR("[KBU-Nav] No service provider for get_domain_functions");
@@ -439,8 +439,8 @@ public:
 		addsrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateServiceArrayRequest::ADD_KNOWLEDGE;
 
 		erase_func_values(cfg_dist_func_, remsrv);
-		std::set<std::string> from_filter = {"bs_in", "ds_out"};
-		std::set<std::string> to_filter = {"bs_in", "ds_out", "start"};
+		std::set<std::string> from_filter = {"ds_out"};
+		std::set<std::string> to_filter = {"ds_out", "start"};
 
 		for (const fawkes_msgs::NavGraphPathCost &pc : pwc_srv.response.path_costs)
 		{
@@ -542,11 +542,11 @@ private:
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "rosplan_kb_updater_navgraph");
+	ros::init(argc, argv, "updater_navgraph");
 
 	ros::NodeHandle n;
 
-	ROSPlanKbUpdaterNavGraph rosplan_kb_updater(n);
+	UpdaterNavGraph rosplan_kb_updater(n);
 
 	ros::spin();
 

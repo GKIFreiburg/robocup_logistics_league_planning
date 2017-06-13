@@ -20,9 +20,9 @@
 
 #include <ros/ros.h>
 
-#include <rosplan_action_interface/RPActionInterface.h>
 #include <fawkes_msgs/ExecSkillAction.h>
 #include <actionlib/client/simple_action_client.h>
+#include <rosplan_interface_freiburg/async_action_interface.h>
 
 #define GET_CONFIG(privn, n, path, var)	  \
 	if (! privn.getParam(path, var)) {      \
@@ -32,7 +32,7 @@
 
 typedef actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> SkillerClient;
 
-class ActionMoveIn : public KCL_rosplan::RPActionInterface
+class ActionMoveIn : public rosplan_interface_freiburg::AsyncActionInterface
 {
 public:
 	ActionMoveIn()
@@ -65,7 +65,7 @@ public:
 		fawkes_msgs::ExecSkillGoal goal;
 		goal.skillstring = "drive_into_field{team='"+team_color_+"', wait=0.0}";
 		{
-			const auto& state = skiller_client_->sendGoalAndWait(goal);
+			const auto& state = skiller_client_->sendGoalAndWait(goal, execute_timeout_);
 			if (state != state.SUCCEEDED)
 			{
 				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
