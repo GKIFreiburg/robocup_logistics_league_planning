@@ -45,7 +45,7 @@
 		</node>
 		<node name="action_discard" pkg="rosplan_interface_freiburg"
 			type="action_wait_for_machine_state" respawn="false">
-			<param name="pddl_action_name" value="discard" />
+			<param name="pddl_action_name" value="discard-material" />
 			<param name="desired_machine_state" value="IDLE" />
 			<param name="log_prefix" value="[Discard] " />
 			<rosparam param="machines">[ds]</rosparam>

@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   diagnostic_msgs
   mongodb_store
   rcll_ros_msgs
+  fawkes_msgs
   roscpp
   rosplan_dispatch_msgs
   rosplan_knowledge_msgs
@@ -115,7 +116,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES machine_interface
-  CATKIN_DEPENDS rosplan_planning_system diagnostic_msgs mongodb_store rcll_ros_msgs roscpp rosplan_dispatch_msgs rosplan_knowledge_msgs std_msgs std_srvs
+  CATKIN_DEPENDS rosplan_planning_system diagnostic_msgs mongodb_store rcll_ros_msgs fawkes_msgs roscpp rosplan_dispatch_msgs rosplan_knowledge_msgs std_msgs std_srvs
 #  DEPENDS system_lib
 )
 
@@ -135,6 +136,9 @@ include_directories(
 add_library(machine_interface
   src/machine_interface.cpp
 )
+add_library(action_interface
+  src/async_action_interface.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -144,9 +148,11 @@ add_library(machine_interface
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(rosplan_kb_updater_rcll_production_steps src/kb_updater_production_steps)
-add_executable(rosplan_kb_updater_navgraph src/kb_updater_navgraph.cpp)
-add_executable(rosplan_initial_situation src/rosplan_initial_situation.cpp)
+add_executable(replanning_controller src/replanning_controller.cpp)
+add_executable(updater_production_steps src/updater_production_steps.cpp)
+add_executable(updater_navgraph src/updater_navgraph.cpp)
+add_executable(initial_situation src/initial_situation.cpp)
+
 add_executable(action_dispense_product src/action_dispense_product.cpp)
 add_executable(action_dispense_material src/action_dispense_material.cpp)
 add_executable(action_wait_for_machine_state src/action_wait_for_machine_state.cpp)
@@ -170,43 +176,54 @@ add_executable(action_transport_material src/action_transport_material.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(rosplan_kb_updater_rcll_production_steps
+target_link_libraries(replanning_controller
   ${catkin_LIBRARIES}
 )
-target_link_libraries(rosplan_kb_updater_navgraph
+target_link_libraries(updater_production_steps
   ${catkin_LIBRARIES}
 )
-target_link_libraries(rosplan_initial_situation
+target_link_libraries(updater_navgraph
   ${catkin_LIBRARIES}
 )
+target_link_libraries(initial_situation
+  ${catkin_LIBRARIES}
+)
+
 target_link_libraries(action_dispense_product
+  action_interface
   machine_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_dispense_material
+  action_interface
   machine_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_wait_for_machine_state
+  action_interface
   machine_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_move
+  action_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_move_in
+  action_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_insert_cap
+  action_interface
   machine_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(action_transport_product
+  action_interface
   machine_interface
   ${catkin_LIBRARIES}
 )
-
 target_link_libraries(action_transport_material
+  action_interface
   machine_interface
   ${catkin_LIBRARIES}
 )
@@ -225,25 +242,37 @@ target_link_libraries(action_transport_material
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
-## Mark executables and/or libraries for installation
-install(TARGETS 
-  rosplan_kb_updater_rcll_production_steps 
-  rosplan_kb_updater_navgraph 
-  rosplan_initial_situation 
+# Mark executables and/or libraries for installation
+install(TARGETS
+  # libs
+  machine_interface
+  action_interface
+  # replanning
+  replanning_controller
+  # updaters
+  updater_production_steps 
+  updater_navgraph 
+  initial_situation
+  # actions
   action_dispense_product
   action_dispense_material
   action_wait_for_machine_state
+  action_move
+  action_move_in
+  action_insert_cap
+  action_transport_product
+  action_transport_material
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
+# Mark cpp header files for installation
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN ".svn" EXCLUDE
+)
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES

@@ -1,4 +1,5 @@
 ; Plan found             900.0
+<<<<<<< HEAD
 0.00000000: (move-in r1) [10.00000000]
 10.00000000: (dispense-product p10 black_base_p10 bs bs_out) [1.00000000]
 10.00000000: (move r1 start cs1_in) [53.62100000]
@@ -12,4 +13,5 @@
 241.60480000: (move r1 cs1_in cs1_out) [12.98560000]
 254.59040000: (transport-product r1 p10 cs1_out ds_in ds grey_cap_p10 gate3_delivery_p10) [36.29710000]
 290.88750000: (deliver p10 gate3_delivery_p10 ds ds_in) [1.00000000]
+
 

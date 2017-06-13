@@ -20,10 +20,10 @@
 
 #include <ros/ros.h>
 
-#include <rosplan_action_interface/RPActionInterface.h>
 #include <rcll_ros_msgs/SendPrepareMachine.h>
 #include <rcll_ros_msgs/ProductColor.h>
 #include <rcll_ros_msgs/MachineInfo.h>
+#include <rcll_ros_msgs/RingInfo.h>
 #include <fawkes_msgs/ExecSkillAction.h>
 
 #include <rosplan_interface_freiburg/machine_interface.h>
@@ -35,6 +35,7 @@
 #include <list>
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
+#include <rosplan_interface_freiburg/async_action_interface.h>
 
 #include <mutex>
 #include <condition_variable>
@@ -47,10 +48,10 @@
 
 typedef actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> SkillerClient;
 
-class ActionTransportProduct : public KCL_rosplan::RPActionInterface
+class ActionTransportProduct : public rosplan_interface_freiburg::AsyncActionInterface
 {
 public:
-        ActionTransportProduct()
+	ActionTransportProduct()
 	{
 		ros::NodeHandle nh;
 
@@ -64,6 +65,7 @@ public:
 		machines_["rs2"] = std::make_shared<MachineInterface>("rs2", log_prefix_);
 		machines_["ds"] = std::make_shared<MachineInterface>("ds", log_prefix_);
 		dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionTransportProduct::dispatchCB, this);
+		sub_ring_info_ = nh.subscribe("rcll/ring_info", 10, &ActionTransportProduct::ring_info_cb, this);
 
 		ros::NodeHandle nhpriv("~");
 		GET_CONFIG(nhpriv, nh, "initial_machine_state", initial_machine_state_)
@@ -83,41 +85,12 @@ public:
 		}
 	}
 
-	const std::string& getMachine(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
+	void ring_info_cb(const rcll_ros_msgs::RingInfo::ConstPtr& msg)
 	{
-		for (const auto& arg: msg->parameters)
+		for (const auto& ring: msg->rings)
 		{
-			if(arg.key == "m")
-			{
-				return arg.value;
-			}
+			ring_colors_materials_[ring.ring_color] = ring.raw_material;
 		}
-		return parameter_not_found_;
-	}
-
-	const std::string& getNextStep(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
-	{
-		for (const auto& arg: msg->parameters)
-		{
-			if(arg.key == "s2")
-			{
-				return arg.value;
-			}
-		}
-		return parameter_not_found_;
-	}
-
-	const std::string getOutMachine(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
-	{
-		for (const auto& arg: msg->parameters)
-		{
-			if(arg.key == "o")
-			{
-				// bs_out, cs2_out, rs1_out
-				return arg.value.substr(0, arg.value.find("_"));
-			}
-		}
-		return parameter_not_found_;
 	}
 
 	bool setupPrepareRequest(const std::string& step, rcll_ros_msgs::SendPrepareMachine::Request& request)
@@ -167,7 +140,7 @@ public:
 
 	virtual bool concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
 	{
-		const std::string& name_out = getOutMachine(msg);
+		const std::string& name_out = boundParameters["om"];
 		const auto& machine_out_it = machines_.find(name_out);
 		if (machine_out_it == machines_.end())
 		{
@@ -181,11 +154,16 @@ public:
 			return false;
 		}
 
+		std::string side = "output";
+		if (boundParameters["o"].find("in") != std::string::npos)
+		{
+			side = "input";
+		}
 		fawkes_msgs::ExecSkillGoal goal;
-		goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', side='output'}";
+		goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', side='"+side+"'}";
 		{
 			ROS_INFO_STREAM(log_prefix_<<"Sending skill "<<goal.skillstring<<"...");
-			const auto& state = skiller_client_->sendGoalAndWait(goal);
+			const auto& state = skiller_client_->sendGoalAndWait(goal, execute_timeout_);
 			if (state != state.SUCCEEDED)
 			{
 				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
@@ -194,7 +172,7 @@ public:
 			ROS_INFO_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" succeeded");
 		}
 
-		const std::string& name = getMachine(msg);
+		const std::string& name = boundParameters["m"];
 		const auto& machine_it = machines_.find(name);
 		if (machine_it == machines_.end())
 		{
@@ -209,7 +187,7 @@ public:
 		}
 
 		rcll_ros_msgs::SendPrepareMachine srv;
-		setupPrepareRequest(getNextStep(msg), srv.request);
+		setupPrepareRequest(boundParameters["s2"], srv.request);
 		ROS_INFO_STREAM(
 				log_prefix_<<"sending prepare request, wait for initial state: "<<initial_machine_state_<<", wait for desired state: "<<desired_machine_state_);
 		bool success = machine->sendPrepare(srv, initial_machine_state_, desired_machine_state_);
@@ -221,12 +199,27 @@ public:
 
 		goal.skillstring = "bring_product_to{place='"+machine->getName()+"', side='input'}";
 		{
-			const auto& state = skiller_client_->sendGoalAndWait(goal);
+			const auto& state = skiller_client_->sendGoalAndWait(goal, execute_timeout_);
 			if (state != state.SUCCEEDED)
 			{
 				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
 				return false;
 			}
+		}
+
+		if (srv.request.rs_ring_color != 0)
+		{
+			// update material-stored numerical fluent
+			rosplan_knowledge_msgs::KnowledgeItem material;
+			material.knowledge_type = material.FUNCTION;
+			material.attribute_name = "material-stored";
+			diagnostic_msgs::KeyValue rs;
+			rs.key = "m";
+			rs.value = name;
+			material.values.push_back(rs);
+			lookupNumericalValue(material);
+			material.function_value -= ring_colors_materials_[srv.request.rs_ring_color];
+			updateNumericalValue(material);
 		}
 		return true;
 	}
@@ -239,17 +232,20 @@ private:
 	std::string parameter_not_found_;
 
 	std::map<std::string, MachineInterface::Ptr> machines_;
+	std::map<int, int> ring_colors_materials_;
 
 	std::shared_ptr<actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> > skiller_client_;
 	ros::Subscriber dispatch_subscriber_;
+	ros::Subscriber sub_ring_info_;
+
 };
 
 int main(int argc, char **argv)
 {
-        ros::init(argc, argv, "action_transport_product");
+	ros::init(argc, argv, "action_transport_product");
 	ros::NodeHandle n;
 
-        ActionTransportProduct action;
+	ActionTransportProduct action;
 	action.runActionInterface();
 
 	return 0;

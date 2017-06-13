@@ -20,7 +20,6 @@
 
 #include <ros/ros.h>
 
-#include <rosplan_action_interface/RPActionInterface.h>
 #include <rcll_ros_msgs/SendPrepareMachine.h>
 #include <rcll_ros_msgs/ProductColor.h>
 #include <rcll_ros_msgs/MachineInfo.h>
@@ -35,19 +34,20 @@
 #include <list>
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
+#include <rosplan_interface_freiburg/async_action_interface.h>
 
 #include <mutex>
 #include <condition_variable>
 
 #define GET_CONFIG(privn, n, path, var)	  \
-        if (! privn.getParam(path, var)) {      \
-                if (! n.getParam(path, var))					\
-                        ROS_ERROR_STREAM(log_prefix_<<"can not read param "<<path);  \
-        }
+	if (! privn.getParam(path, var)) {      \
+		if (! n.getParam(path, var))					\
+			ROS_ERROR_STREAM(log_prefix_<<"can not read param "<<path);  \
+	}
 
 typedef actionlib::SimpleActionClient<fawkes_msgs::ExecSkillAction> SkillerClient;
 
-class ActionTransportMaterial: public KCL_rosplan::RPActionInterface
+class ActionTransportMaterial: public rosplan_interface_freiburg::AsyncActionInterface
 {
 public:
 	ActionTransportMaterial()
@@ -81,35 +81,9 @@ public:
 		}
 	}
 
-	const std::string& getMachine(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
-	{
-		for (const auto& arg : msg->parameters)
-		{
-			if (arg.key == "m")
-			{
-				return arg.value;
-			}
-		}
-		return parameter_not_found_;
-	}
-
-	const std::string getOutMachine(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
-	{
-		for (const auto& arg : msg->parameters)
-		{
-			if (arg.key == "o")
-			{
-				// bs_out, cs2_out, rs1_out
-				return arg.value.substr(0, arg.value.find("_"));
-			}
-		}
-		return parameter_not_found_;
-	}
-
 	virtual bool concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
 	{
-
-		const std::string& name_out = getOutMachine(msg);
+		const std::string& name_out = boundParameters["om"];
 		const auto& machine_out_it = machines_.find(name_out);
 		if (machine_out_it == machines_.end())
 		{
@@ -123,11 +97,16 @@ public:
 			return false;
 		}
 
+		std::string side = "output";
+		if (boundParameters["o"].find("in") != std::string::npos)
+		{
+			side = "input";
+		}
 		fawkes_msgs::ExecSkillGoal goal;
-		goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', side='output'}";
+		goal.skillstring = "get_product_from{place='" + machine_out->getName() + "', side='"+side+"'}";
 		{
 			ROS_INFO_STREAM(log_prefix_<<"Sending skill "<<goal.skillstring<<"...");
-			const auto& state = skiller_client_->sendGoalAndWait(goal);
+			const auto& state = skiller_client_->sendGoalAndWait(goal, execute_timeout_);
 			if (state != state.SUCCEEDED)
 			{
 				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
@@ -136,7 +115,7 @@ public:
 			ROS_INFO_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" succeeded");
 		}
 
-		const std::string& name = getMachine(msg);
+		const std::string& name = boundParameters["m"];
 		const auto& machine_it = machines_.find(name);
 		if (machine_it == machines_.end())
 		{
@@ -163,21 +142,34 @@ public:
 			ROS_INFO_STREAM(
 					log_prefix_<<"sending prepare request, wait for initial state: "<<initial_machine_state_<<", wait for desired state: "<<desired_machine_state_);
 			bool success = machine->sendPrepare(srv, initial_machine_state_, desired_machine_state_);
-			if (! success)
+			if (!success)
 			{
 				ROS_ERROR_STREAM(log_prefix_<<"Send prepare failed.");
 				return false;
 			}
 		}
-		goal.skillstring = "bring_product_to{place='" + machine->getName() + "', side='input'"+slide+"}";
+		goal.skillstring = "bring_product_to{place='" + machine->getName() + "', side='input'" + slide + "}";
 		{
-			const auto& state = skiller_client_->sendGoalAndWait(goal);
+			const auto& state = skiller_client_->sendGoalAndWait(goal, execute_timeout_);
 			if (state != state.SUCCEEDED)
 			{
 				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
 				return false;
 			}
 		}
+
+		// update material-stored numerical fluent
+		rosplan_knowledge_msgs::KnowledgeItem material;
+		material.knowledge_type = material.FUNCTION;
+		material.attribute_name = "material-stored";
+		diagnostic_msgs::KeyValue rs;
+		rs.key = "m";
+		rs.value = name;
+		material.values.push_back(rs);
+		lookupNumericalValue(material);
+		material.function_value += 1;
+		updateNumericalValue(material);
+
 		return true;
 	}
 

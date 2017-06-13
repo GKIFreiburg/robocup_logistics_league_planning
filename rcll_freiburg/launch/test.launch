@@ -1,25 +1,15 @@
 <?xml version="1.0"?>
 
 <launch>
-	<group ns="robot1">
-		<param name="robot_name" value="r1"/>
-		<node name="action_transport_product" pkg="rosplan_interface_freiburg"
-			type="action_transport_product" respawn="false" output="screen">
-			<param name="pddl_action_name" value="transport-product" />
-			<param name="initial_machine_state" value="IDLE" />
-			<param name="desired_machine_state" value="PREPARED" />
-		</node>
-		<node name="action_transport_material" pkg="rosplan_interface_freiburg"
-			type="action_transport_material" respawn="false" output="screen">
-			<param name="pddl_action_name" value="transport-material" />
-			<param name="initial_machine_state" value="IDLE" />
-			<param name="desired_machine_state" value="PREPARED" />
-		</node>
-		<node name="action_insert_cap" pkg="rosplan_interface_freiburg"
-			type="action_insert_cap" respawn="false" output="screen">
-			<param name="pddl_action_name" value="insert-cap" />
-			<param name="initial_machine_state" value="IDLE" />
-			<param name="desired_machine_state" value="PREPARED" />
+	<arg name="num_robots" default="$(optenv NUM_ROBOTS 1)" />
+	<group ns="robot1/rcll">
+		<node name="updater_production_steps" pkg="rosplan_interface_freiburg"
+			type="updater_production_steps" respawn="false" output="screen">
+			<rosparam command="load"
+				file="$(find rcll_freiburg)/config/updater_production_steps.yaml" />
+			<rosparam command="load"
+				file="$(find rcll_freiburg)/config/product_decider.yaml" />
+			<param name="robot_count" value="$(arg num_robots)"/>
 		</node>
 	</group>
 

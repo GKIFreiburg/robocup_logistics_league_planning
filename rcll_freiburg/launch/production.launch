@@ -4,7 +4,7 @@
 	<arg name="num_robots" default="$(optenv NUM_ROBOTS 1)" />
 	<arg name="team_color" value="$(optenv TEAM_COLOR CYAN)" />
 	<arg name="pddl_domain_path"
-		default="$(find rcll_production_domain)/benchmark/d_macro_actions.pddl" />
+		default="$(find rcll_freiburg)/pddl/d_macro_actions.pddl" />
 	<arg name="autostart_planning" default="$(optenv AUTOSTART_PLANNING false)" />
 	<arg name="data_path" default="$(optenv ROSPLAN_DATA_PATH /tmp)" />
 	<arg name="problem_path" default="$(optenv ROSPLAN_PROBLEM_PATH /tmp/problem.pddl)" />
@@ -29,8 +29,7 @@
 		<arg name="popf_timeout" value="$(arg popf_timeout)" />
 		<!-- if planner command given, pass it on, otherwise don't set arg - to 
 			use default. In that case, popf_anytime will be in -->
-		<arg name="planner_command" value="$(env ROSPLAN_PLANNER_COMMAND)"
-			if="$(eval optenv('ROSPLAN_PLANNER_COMMAND', '') != '')" />
+		<arg name="planner_command" value="rosrun rcll_freiburg tfd_plan.py DOMAIN PROBLEM" />
 	</include>
 
 	<include file="$(find rcll_freiburg)/launch/robot_actions.launch"
@@ -53,8 +52,8 @@
 
 	<include file="$(find rcll_freiburg)/launch/machine_actions.launch" />
 
-	<node name="rosplan_initial_situation" pkg="rosplan_initial_situation"
-		type="rosplan_initial_situation" respawn="false" output="screen">
+	<node name="initial_situation" pkg="rosplan_interface_freiburg"
+		type="initial_situation" respawn="false" output="screen">
 		<rosparam command="load"
 			file="$(find rcll_freiburg)/config/production_initial_situation.yaml" />
 		<rosparam command="load"
@@ -63,27 +62,30 @@
 		<param name="clear_kb" value="true" />
 		<param name="start_planning" value="false" />
 	</node>
-	<node name="kbupdater_production_steps" pkg="rosplan_interface_freiburg"
-		type="rosplan_kb_updater_rcll_production_steps" respawn="false"
-		output="screen">
-		<remap from="rcll/order_info" to="robot1/rcll/order_info" />
-		<remap from="rcll/ring_info" to="robot1/rcll/ring_info" />
-		<remap from="rcll/machine_info" to="robot1/rcll/machine_info" />
-		<rosparam command="load"
-			file="$(find rcll_freiburg)/config/kbupdater_production_steps.yaml" />
-	</node>
-	<node name="kbupdater_navgraph" pkg="rosplan_interface_freiburg"
-		type="rosplan_kb_updater_navgraph" respawn="false" output="screen">
+
+	<node name="updater_navgraph" pkg="rosplan_interface_freiburg"
+		type="updater_navgraph" respawn="false" output="screen">
 		<remap from="rcll/machine_info" to="robot1/rcll/machine_info" />
 		<remap from="navgraph" to="robot1/navgraph" />
 		<remap from="get_pairwise_costs" to="robot1/navgraph/get_pairwise_costs" />
 		<rosparam command="load"
-			file="$(find rcll_freiburg)/config/rcll_kbupdater_navgraph.yaml" />
+			file="$(find rcll_freiburg)/config/updater_navgraph.yaml" />
 	</node>
 
-	<node name="rosplan_starter_rcll" pkg="rosplan_starter_rcll" type="rosplan_starter_rcll"
-		respawn="false" output="screen" if="$(arg autostart_planning)">
-		<remap from="rcll/game_state" to="robot1/rcll/game_state" />
-	</node>
-
+	<group ns="robot1/rcll">
+		<node name="updater_production_steps" pkg="rosplan_interface_freiburg"
+			type="updater_production_steps" respawn="false" output="screen">
+			<rosparam command="load"
+				file="$(find rcll_freiburg)/config/updater_production_steps.yaml" />
+			<rosparam command="load"
+				file="$(find rcll_freiburg)/config/product_decider.yaml" />
+			<param name="robot_count" value="$(arg num_robots)"/>
+		</node>
+		
+		<node name="replanning_controller" pkg="rosplan_interface_freiburg"
+			type="replanning_controller" respawn="false" output="screen">
+			<rosparam command="load"
+				file="$(find rcll_freiburg)/config/mission_control.yaml" />
+		</node>
+	</group>
 </launch>

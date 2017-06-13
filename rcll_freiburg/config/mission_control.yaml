@@ -1,0 +1,10 @@
+
+wait_for_action_finish: true
+ready_state: Ready
+planning_state: Planning
+dispatching_state: Dispatching
+start_command: plan
+cancel_command: cancel
+achieved_status: achieved
+failed_status: failed
+enabled_status: enabled

@@ -19,8 +19,8 @@
  */
 
 #include <ros/ros.h>
+#include <rosplan_interface_freiburg/async_action_interface.h>
 #include <XmlRpc.h>
-#include <rosplan_action_interface/RPActionInterface.h>
 #include <rosplan_interface_freiburg/machine_interface.h>
 
 #define GET_CONFIG(privn, n, path, var)	  \
@@ -30,7 +30,7 @@
 	}
 
 
-class ActionWaitForMachineState : public KCL_rosplan::RPActionInterface
+class ActionWaitForMachineState : public rosplan_interface_freiburg::AsyncActionInterface
 {
 public:
 	ActionWaitForMachineState()

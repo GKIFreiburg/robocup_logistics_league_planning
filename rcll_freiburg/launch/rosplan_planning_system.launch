@@ -2,35 +2,30 @@
 
 <launch>
 	<arg name="pddl_domain_path" />
-  <arg name="data_path" default="$(find rcll_ros)/data/" />
-  <arg name="problem_path" default="$(find rcll_ros)/data/problem.pddl" />
-  <arg name="strl_file_path" default="$(find rcll_ros)/data/plan.strl" />
-  <arg name="mongodb_host" default="localhost" />
-  <arg name="mongodb_port" default="27018" />
-  <arg name="database_path" default="$(find rosplan_knowledge_base)/common/mongoDB/" />
-  <arg name="max_dispatch_attempts" default="2" />
-  <!-- the following configures the popf any-time version to
-       optimize for a given time. This has the advantage of allowing
-       for more time to find a higher quality solution. The
-       drawbacks are that it fails to find a plan if that is not
-       possible within the given time limit and that if will always
-       use the given time even though the plan quality does not
-       improve further.  You may disable this with the other
-       "non-timeout" command without the "-n" flag to popf.
-		-->
-  <arg name="planner_command"
-       default="$(find rosplan_planning_system)/common/bin/popf DOMAIN PROBLEM"
-       unless="$(arg popf_anytime)"/>
-  <arg name="planner_command"
-       default="timeout $(arg popf_timeout) $(find rosplan_planning_system)/common/bin/popf -n DOMAIN PROBLEM"
-       if="$(arg popf_anytime)"/>
-  <!-- if no planner command is given, the default popf can be
-       operated in two different modes:
-       - oneshot solving (popf_anytime=false): use the first solution
-       found
-       - anytime (popf_anytime=true) plan until the timeout defined by
-       popf_timeout
-  -->
+	<arg name="data_path" default="$(find rcll_ros)/data/" />
+	<arg name="problem_path" default="$(find rcll_ros)/data/problem.pddl" />
+	<arg name="strl_file_path" default="$(find rcll_ros)/data/plan.strl" />
+	<arg name="mongodb_host" default="localhost" />
+	<arg name="mongodb_port" default="27018" />
+	<arg name="database_path" default="$(find rosplan_knowledge_base)/common/mongoDB/" />
+	<arg name="max_dispatch_attempts" default="2" />
+	<!-- the following configures the popf any-time version to optimize for 
+		a given time. This has the advantage of allowing for more time to find a 
+		higher quality solution. The drawbacks are that it fails to find a plan if 
+		that is not possible within the given time limit and that if will always 
+		use the given time even though the plan quality does not improve further. 
+		You may disable this with the other "non-timeout" command without the "-n" 
+		flag to popf. -->
+	<arg name="planner_command"
+		default="$(find rosplan_planning_system)/common/bin/popf DOMAIN PROBLEM"
+		unless="$(arg popf_anytime)" />
+	<arg name="planner_command"
+		default="timeout $(arg popf_timeout) $(find rosplan_planning_system)/common/bin/popf -n DOMAIN PROBLEM"
+		if="$(arg popf_anytime)" />
+	<!-- if no planner command is given, the default popf can be operated in 
+		two different modes: - oneshot solving (popf_anytime=false): use the first 
+		solution found - anytime (popf_anytime=true) plan until the timeout defined 
+		by popf_timeout -->
 	<arg name="popf_anytime" default="true" />
 	<arg name="popf_timeout" default="30" />
 
@@ -38,28 +33,26 @@
 	<param name="/rosplan/domain_path" value="$(arg pddl_domain_path)" />
 
 	<!-- knowledge base -->
-	<node name="rosplan_knowledge_base" pkg="rosplan_knowledge_base" type="knowledgeBase" respawn="false" output="screen">
+	<node name="rosplan_knowledge_base" pkg="rosplan_knowledge_base"
+		type="knowledgeBase" respawn="false" output="screen">
 	</node>
 
 	<!-- scene database (MongoDB) -->
 	<param name="mongodb_host" value="$(arg mongodb_host)" />
 	<param name="mongodb_port" value="$(arg mongodb_port)" />
 
-	<node name="rosplan_scene_database"
-	      pkg="mongodb_store" type="mongodb_server.py"
-	      respawn="false" output="log">
+	<node name="rosplan_scene_database" pkg="mongodb_store" type="mongodb_server.py"
+		respawn="false" output="log">
 		<param name="database_path" value="$(arg database_path)" />
 	</node>
 
-	<node name="rosplan_scene_message_store"
-	      pkg="mongodb_store" type="message_store_node.py"
-	      respawn="false" output="log">
+	<node name="rosplan_scene_message_store" pkg="mongodb_store"
+		type="message_store_node.py" respawn="false" output="log">
 		<param name="local_timeout" value="300" />
-  </node>
+	</node>
 
-	<node name="rosplan_planning_system"
-	      pkg="rosplan_planning_system" type="planner"
-	      respawn="false" output="screen">
+	<node name="rosplan_planning_system" pkg="rosplan_planning_system"
+		type="planner" respawn="false" output="screen">
 
 		<param name="data_path" value="$(arg data_path)" />
 		<param name="problem_path" value="$(arg problem_path)" />

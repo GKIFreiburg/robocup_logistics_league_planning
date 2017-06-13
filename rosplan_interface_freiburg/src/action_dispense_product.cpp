@@ -20,10 +20,10 @@
 
 #include <ros/ros.h>
 
-#include <rosplan_action_interface/RPActionInterface.h>
 #include <rcll_ros_msgs/SendPrepareMachine.h>
 #include <rcll_ros_msgs/ProductColor.h>
 #include <rcll_ros_msgs/MachineInfo.h>
+#include <rosplan_interface_freiburg/async_action_interface.h>
 
 #include <rosplan_interface_freiburg/machine_interface.h>
 
@@ -44,7 +44,7 @@
 
 
 
-class ActionDispenseProduct : public KCL_rosplan::RPActionInterface
+class ActionDispenseProduct : public rosplan_interface_freiburg::AsyncActionInterface
 {
 public:
 	ActionDispenseProduct()
@@ -97,7 +97,14 @@ public:
 	virtual bool concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
 	{
 		rcll_ros_msgs::SendPrepareMachine srv;
-		srv.request.bs_side = rcll_ros_msgs::SendPrepareMachine::Request::BS_SIDE_OUTPUT;
+		if (boundParameters["o"] == "bs_out")
+		{
+			srv.request.bs_side = rcll_ros_msgs::SendPrepareMachine::Request::BS_SIDE_OUTPUT;
+		}
+		else
+		{
+			srv.request.bs_side = rcll_ros_msgs::SendPrepareMachine::Request::BS_SIDE_INPUT;
+		}
 		srv.request.bs_base_color = extractColor(msg);
 		machine_->sendPrepare(srv, initial_machine_state_, desired_machine_state_);
 
