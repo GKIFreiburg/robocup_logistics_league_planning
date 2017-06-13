@@ -13,6 +13,7 @@
 		input output - location
 		ds_input rs_input cs_input - input
 		bs_output rs_output cs_output - output
+		s_location - location
 		machine - object
 		base_station ring_station cap_station delivery_station - machine
 		product - object
@@ -29,7 +30,7 @@
 		ds - delivery_station
 
 		; locations
-		start - location
+		start - s_location
 		bs_in - bs_output
 		bs_out - bs_output
 		rs1_in - rs_input
@@ -48,8 +49,7 @@
 		(input-location ?il - input ?m - machine)
 		(output-location ?ol - output ?m - machine)
 		(processing ?m - machine)
-		(input-full ?i - input)
-		(output-full ?o - output)
+		(conveyor-full ?m - machine)
 		
 		; cap_station stations
 		(cap-buffered ?m - cap_station)
@@ -92,13 +92,13 @@
 		:parameters (?m - base_station ?o - bs_output)
 		:duration (= ?duration 1)
 		:condition (and
-			(at start (not (output-full ?o)))
+			(at start (not (conveyor-full ?m)))
 			(at start (not (processing ?m)))
 		)
 		:effect (and
 			(at start (processing ?m))
 			(at end (not (processing ?m)))
-			(at start (output-full ?o))
+			(at start (conveyor-full ?m))
 			(at end (material-at ?o))
 		)
 	)
@@ -111,13 +111,13 @@
 			(at start (step-at-machine ?s ?m))
 			(at start (initial-step ?s))
 			(at start (not (step-completed ?s)))
-			(at start (not (output-full ?o)))
+			(at start (not (conveyor-full ?m)))
 			(at start (not (processing ?m)))
 		)
 		:effect (and
 			(at start (processing ?m))
 			(at end (not (processing ?m)))
-			(at start (output-full ?o))
+			(at start (conveyor-full ?m))
 			(at end (product-at ?p ?o))
 			(at end (step-completed ?s))
 		)
@@ -133,15 +133,12 @@
 			(at start (not (step-completed ?s)))
 			(at start (input-location ?i ?m))
 			(at start (output-location ?o ?m))
-			(at start (not (output-full ?o)))
 			(at start (not (processing ?m)))
 			(at start (>= (material-stored ?m) (material-required ?s)))
 		)
 		:effect (and
 			(at start (processing ?m))
 			(at start (not (product-at ?p ?i)))
-			(at start (output-full ?o))
-			(at end (not (input-full ?i)))	
 			(at end (not (processing ?m)))
 			(at end (product-at ?p ?o))
 			(at end (step-completed ?s))
@@ -158,13 +155,10 @@
 			(at start (material-at ?i))
 			(at start (not (processing ?m)))
 			(at start (not (cap-buffered ?m)))
-			(at start (not (output-full ?o)))
 		)
 		:effect (and
 			(at start (processing ?m))
 			(at start (not (material-at ?i)))
-			(at start (output-full ?o))
-			(at end (not (input-full ?i)))
 			(at end (not (processing ?m)))
 			(at end (material-at ?o))
 			(at end (cap-buffered ?m))
@@ -183,13 +177,10 @@
 			(at start (output-location ?o ?m))
 			(at start (not (processing ?m)))
 			(at start (cap-buffered ?m))
-			(at start (not (output-full ?o)))
 		)
 		:effect (and
 			(at start (processing ?m))
 			(at start (not (product-at ?p ?i)))
-			(at start (output-full ?o))
-			(at end (not (input-full ?i)))
 			(at end (not (processing ?m)))
 			(at end (product-at ?p ?o))
 			(at end (not (cap-buffered ?m)))
@@ -211,7 +202,7 @@
 			(at start (processing ?m))
 			(at start (not (product-at ?p ?i)))
 			(at end (not (processing ?m)))
-			(at end (not (input-full ?i)))
+			(at end (not (conveyor-full ?m)))
 			(at end (step-completed ?s))
 		)
 	)
@@ -227,7 +218,7 @@
 			(at start (processing ?m))
 			(at end (not (processing ?m)))
 			(at end (not (material-at ?i)))
-			(at end (not (input-full ?i)))
+			(at end (not (conveyor-full ?m)))
 		)
 	)
 
@@ -237,16 +228,16 @@
 		:condition (and
 			(over all (not (processing ?m)))
 			(over all (robot-at ?r ?i))
+			(over all (not (conveyor-full ?m)))
 			(at start (not (robot-processing ?r)))
 			(at start (not (robot-holding-something ?r)))
 			(at start (input-location ?i ?m))
-			(at start (not (input-full ?i)))
 			(at start (not (cap-buffered ?m)))
 		)
 		:effect (and
-			(at start (input-full ?i))
 			(at start (robot-processing ?r))
 			(at end (not (robot-processing ?r)))
+			(at end (conveyor-full ?m))
 			(at end (material-at ?i))
 			(at end (not (robot-recently-moved ?r)))
 		)
@@ -269,7 +260,7 @@
 			(at end (robot-holding-material ?r))
 			(at end (robot-holding-something ?r))
 			(at end (not (material-at ?o)))
-			(at end (not (output-full ?o)))
+			(at end (not (conveyor-full ?m)))
 			(at end (not (robot-recently-moved ?r)))
 		)
 	)
@@ -291,7 +282,7 @@
 			(at end (robot-holding-product ?r ?p))
 			(at end (robot-holding-something ?r))
 			(at end (not (product-at ?p ?o)))
-			(at end (not (output-full ?o)))
+			(at end (not (conveyor-full ?m)))
 			(at end (not (robot-recently-moved ?r)))
 		)
 	)
@@ -305,13 +296,14 @@
 			(at start (not (robot-processing ?r)))
 			(at start (input-location ?i ?m))
 			(at start (robot-holding-product ?r ?p))
+			(at start (not (conveyor-full ?m)))
 		)
 		:effect (and
 			(at start (robot-processing ?r))
 			(at end (not (robot-processing ?r)))
 			(at end (not (robot-holding-product ?r ?p)))
 			(at end (product-at ?p ?i))
-			(at end (input-full ?i))
+			(at end (conveyor-full ?m))
 			(at end (not (robot-recently-moved ?r)))
 			(at end (not (robot-holding-something ?r)))
 		)
@@ -354,7 +346,6 @@
 			(at start (robot-processing ?r))
 			(at start (not (robot-at ?r ?o)))
 			(at start (not (material-at ?o)))
-			(at start (not (output-full ?o)))
 			(at start (not (location-occupied ?o)))
 			(at end (location-occupied ?i))
 			(at end (not (robot-processing ?r)))

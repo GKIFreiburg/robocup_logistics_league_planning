@@ -12,6 +12,9 @@ step_at_machine_predicate: step-at-machine
 step_completed_predicate: step-completed
 material_required_function: material-required
 
+trigger_replanning: false
+cancel_command: cancel
+
 gate_prefix: gate
 
 # Value mapping for colors
@@ -26,3 +29,10 @@ base_color_value_silver: silver
 
 cap_color_value_black: black
 cap_color_value_grey: grey
+
+# default goals, if no products are selected
+default_goals:
+  cap-buffered: 
+    - [cs1]
+    - [cs2]
+  

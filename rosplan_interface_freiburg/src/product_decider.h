@@ -61,6 +61,10 @@ public:
 		{
 			choose_next_c1_c2(potential_products, max_products, chosen_products);
 		}
+		else if (config_ == "no_c0")
+		{
+			choose_next_no_c0(potential_products, max_products, chosen_products);
+		}
 		while (chosen_products.size() > max_products)
 		{
 			chosen_products.pop_back();
@@ -93,6 +97,24 @@ public:
 		for (const auto& p: potential_products)
 		{
 			if (p->complexity() > 0 && p->complexity() < 3)
+			{
+				chosen_products.push_back(p);
+				if (chosen_products.size() == max_products)
+				{
+					return;
+				}
+			}
+		}
+	}
+
+	void choose_next_no_c0(
+			const std::set<Product::ConstPtr>& potential_products,
+			int max_products,
+			std::vector<Product::ConstPtr>& chosen_products)
+	{
+		for (const auto& p: potential_products)
+		{
+			if (p->complexity() > 0)
 			{
 				chosen_products.push_back(p);
 				if (chosen_products.size() == max_products)
