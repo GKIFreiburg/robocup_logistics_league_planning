@@ -330,7 +330,7 @@
 		)
 	)
 
-	(:durative-action transport-product
+	(:durative-action transport-product-recovery
 		:parameters (?r - robot ?p - product ?o - output ?om - machine ?i - input ?m - machine ?s1 ?s2 - step)
 		:duration (= ?duration (path-length ?o ?i))
 		:condition (and
@@ -345,7 +345,6 @@
 			(at start (output-location ?o ?om))
 			(at start (not (step-completed ?s2)))
 			(at start (robot-at ?r ?o))
-			(at start (not (robot-holding-something ?r)))
 			(over all (not (location-occupied ?i)))
 			(over all (not (conveyor-full ?m)))
 		)
