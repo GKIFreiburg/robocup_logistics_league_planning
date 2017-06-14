@@ -9,6 +9,7 @@
 #define SRC_PRODUCT_DECIDER_H_
 
 #include <ros/ros.h>
+#include <rcll_ros_msgs/GameState.h>
 
 struct Step
 {
@@ -45,7 +46,13 @@ public:
 {
 		ros::NodeHandle nh("~");
 		nh.getParam("decider_config", config_);
+		sub_game_state_ = ros::NodeHandle().subscribe("game_state", 10, &Decider::gameStateCB, this);
 }
+
+	void gameStateCB(const rcll_ros_msgs::GameState::ConstPtr& msg)
+	{
+		latest_game_info_ = msg;
+	}
 
 	void choose_next_product(
 			const std::set<Product::ConstPtr>& potential_products,
@@ -127,6 +134,8 @@ public:
 
 private:
 	std::string config_;
+	rcll_ros_msgs::GameState::ConstPtr latest_game_info_;
+	ros::Subscriber sub_game_state_;
 };
 
 

@@ -18,6 +18,8 @@ struct NumericalFluent
 	ArgumentList args;
 	double value;
 };
+typedef rosplan_knowledge_msgs::KnowledgeUpdateServiceArray Update;
+
 typedef std::list<ArgumentList> PredicateList;
 typedef std::map<std::string, PredicateList> PredicateMap;
 
@@ -33,24 +35,24 @@ void read_objects(ros::NodeHandle &n, std::string key, ObjectMap &elements)
 	n.getParam(key, value);
 	if (value.getType() != XmlRpc::XmlRpcValue::TypeStruct)
 	{
-		ROS_ERROR("[RP-IniSit] Invalid configuration, %s not a map", key.c_str());
+		ROS_ERROR("[Config] Invalid configuration, %s not a map", key.c_str());
 		throw std::runtime_error("Invalid configuration, objects not a map");
 	}
 
-	ROS_INFO("[RP-IniSit] Objects");
+	ROS_INFO("[Config] Objects");
 	for (auto &e : value)
 	{
 		ObjectInstanceList instance_list;
 		if (e.second.getType() == XmlRpc::XmlRpcValue::TypeString)
 		{
-			ROS_INFO("[RP-IniSit]   %s - %s", static_cast<std::string>(e.second).c_str(), e.first.c_str());
+			ROS_INFO("[Config]   %s - %s", static_cast<std::string>(e.second).c_str(), e.first.c_str());
 			instance_list.push_back(static_cast<std::string>(e.second));
 		}
 		else if (e.second.getType() == XmlRpc::XmlRpcValue::TypeArray)
 		{
 			for (int i = 0; i < e.second.size(); ++i)
 			{
-				ROS_INFO("[RP-IniSit]   %s - %s", static_cast<std::string>(e.second[i]).c_str(), e.first.c_str());
+				ROS_INFO("[Config]   %s - %s", static_cast<std::string>(e.second[i]).c_str(), e.first.c_str());
 				instance_list.push_back(static_cast<std::string>(e.second[i]));
 			}
 		}
@@ -85,15 +87,15 @@ void read_predicates(ros::NodeHandle &n, std::string key, PredicateMap &elements
 	n.getParam(key, value);
 	if (value.getType() != XmlRpc::XmlRpcValue::TypeStruct)
 	{
-		ROS_ERROR("[RP-IniSit] Invalid configuration, %s not a map", key.c_str());
+		ROS_ERROR("[Config] Invalid configuration, %s not a map", key.c_str());
 		throw std::runtime_error("Invalid configuration");
 	}
-	ROS_INFO("[RP-IniSit] Reading %s predicates", key.c_str());
+	ROS_INFO("[Config] Reading %s predicates", key.c_str());
 	for (auto &e : value)
 	{
 		if (e.second.getType() != XmlRpc::XmlRpcValue::TypeArray)
 		{
-			ROS_ERROR("[RP-IniSit] Invalid configuration, %s predicate %s not an array", key.c_str(), e.first.c_str());
+			ROS_ERROR("[Config] Invalid configuration, %s predicate %s not an array", key.c_str(), e.first.c_str());
 			throw std::runtime_error("Invalid configuration, invalid predicate, see log");
 		}
 		PredicateList predicate_list;
@@ -101,7 +103,7 @@ void read_predicates(ros::NodeHandle &n, std::string key, PredicateMap &elements
 		{
 			ArgumentList predarg_list;
 			std::string arg_string = read_arguments(e.second[i], predarg_list);
-			ROS_INFO("[RP-IniSit]   (%s%s)", e.first.c_str(), arg_string.c_str());
+			ROS_INFO("[Config]   (%s%s)", e.first.c_str(), arg_string.c_str());
 			predicate_list.push_back(predarg_list);
 		}
 		elements[e.first] = predicate_list;
@@ -114,15 +116,15 @@ void read_numericals(ros::NodeHandle &n, std::string key, NumericalFluentMap &el
 	n.getParam(key, value);
 	if (value.getType() != XmlRpc::XmlRpcValue::TypeStruct)
 	{
-		ROS_ERROR("[RP-IniSit] Invalid configuration, %s not a map", key.c_str());
+		ROS_ERROR("[Config] Invalid configuration, %s not a map", key.c_str());
 		throw std::runtime_error("Invalid configuration");
 	}
-	ROS_INFO("[RP-IniSit] Reading %s numerical fluents", key.c_str());
+	ROS_INFO("[Config] Reading %s numerical fluents", key.c_str());
 	for (auto &e : value)
 	{
 		if (e.second.getType() != XmlRpc::XmlRpcValue::TypeArray)
 		{
-			ROS_ERROR("[RP-IniSit] Invalid configuration, %s numerical fluents %s not an array", key.c_str(),
+			ROS_ERROR("[Config] Invalid configuration, %s numerical fluents %s not an array", key.c_str(),
 					e.first.c_str());
 			throw std::runtime_error("Invalid configuration, invalid numerical fluents, see log");
 		}
@@ -132,13 +134,13 @@ void read_numericals(ros::NodeHandle &n, std::string key, NumericalFluentMap &el
 			XmlRpc::XmlRpcValue& nf = e.second[i];
 			if (nf.getType() != XmlRpc::XmlRpcValue::TypeStruct)
 			{
-				ROS_ERROR("[RP-IniSit] Invalid configuration, %s numerical fluent entry %s not a struct", key.c_str(),
+				ROS_ERROR("[Config] Invalid configuration, %s numerical fluent entry %s not a struct", key.c_str(),
 						e.first.c_str());
 				throw std::runtime_error("Invalid configuration, invalid numerical fluents, see log");
 			}
 			if (!nf.hasMember("args") || !nf.hasMember("value"))
 			{
-				ROS_ERROR("[RP-IniSit] Invalid configuration, %s numerical fluent entry %s is missing args or value",
+				ROS_ERROR("[Config] Invalid configuration, %s numerical fluent entry %s is missing args or value",
 						key.c_str(), e.first.c_str());
 				throw std::runtime_error("Invalid configuration, invalid numerical fluent struct, see log");
 			}
@@ -153,17 +155,50 @@ void read_numericals(ros::NodeHandle &n, std::string key, NumericalFluentMap &el
 			}
 			else
 			{
-				ROS_ERROR("[RP-IniSit] Invalid configuration, %s numerical fluent %s value is not double or int", key.c_str(),
+				ROS_ERROR("[Config] Invalid configuration, %s numerical fluent %s value is not double or int", key.c_str(),
 						e.first.c_str());
 				throw std::runtime_error("Invalid configuration, invalid numerical fluent value, see log");
 			}
 			std::string arg_string = read_arguments(nf["args"], fluent.args);
-			ROS_INFO("[RP-IniSit]   (= (%s%s) %0.2f)", e.first.c_str(), arg_string.c_str(), fluent.value);
+			ROS_INFO("[Config]   (= (%s%s) %0.2f)", e.first.c_str(), arg_string.c_str(), fluent.value);
 			numericals_list.push_back(fluent);
 		}
 		elements[e.first] = numericals_list;
 	}
 }
+
+//void fill_update_srv(const PredicateMap &pmap, Update::Request& request)
+//{
+//	for (const auto &p : pmap)
+//	{
+//		// first: predicate type name, second: PredicateInstanceList
+//		for (const config::ArgumentList &i : p.second)
+//		{
+//			// each i: ArgumentList
+//			if (i.size() != predicates_[p.first].typed_parameters.size())
+//			{
+//				std::string param_str;
+//				std::for_each(i.begin(), i.end(), [&param_str](const auto &s)
+//				{	param_str += " '" + s + "'";});
+//				ROS_ERROR("[Config] Cannot add predicate instance (%s%s), "
+//						"got %zu parameters, expected %zu", p.first.c_str(), param_str.c_str(), i.size(),
+//						predicates_[p.first].typed_parameters.size());
+//				continue;
+//			}
+//			rosplan_knowledge_msgs::KnowledgeItem item;
+//			item.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
+//			item.attribute_name = p.first;
+//			for (int j = 0; j < i.size(); ++j)
+//			{
+//				diagnostic_msgs::KeyValue pair;
+//				pair.key = predicates_[p.first].typed_parameters[j].key;
+//				pair.value = i[j];
+//				item.values.push_back(pair);
+//			}
+//			request.knowledge.push_back(item);
+//		}
+//	}
+//}
 
 }
 

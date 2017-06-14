@@ -52,7 +52,7 @@
 typedef rosplan_knowledge_msgs::KnowledgeItem Item;
 typedef rosplan_knowledge_msgs::GetInstanceService Instances;
 typedef rosplan_knowledge_msgs::GetAttributeService Knowledge;
-typedef rosplan_knowledge_msgs::KnowledgeUpdateServiceArray Update;
+typedef config::Update Update;
 
 std::string toString(const Item& item)
 {
@@ -111,6 +111,8 @@ public:
 
 		GET_CONFIG(privn, n_, "robot_count", robot_count_);
 		GET_CONFIG(privn, n_, "max_active_products", max_active_products_);
+		GET_CONFIG(privn, n_, "skip_first_step_goal", skip_first_step_goal_);
+		GET_CONFIG(privn, n_, "plan_ahead_step_count", plan_ahead_step_count_);
 
 		GET_CONFIG(privn, n_, "trigger_replanning", trigger_replanning_);
 		GET_CONFIG(privn, n_, "cancel_command", cancel_command_.data);
@@ -151,6 +153,7 @@ public:
 			{	rcll_ros_msgs::ProductColor::CAP_GREY, "cs1"}};
 
 		config::read_predicates(privn, "default_goals", default_goals_);
+//		config::fill_update_srv(default_goals_, default_goal_predicates_.request);
 
 		planning_command_pub_ = n.advertise<std_msgs::String>("/kcl_rosplan/planning_commands", 10, false);
 
@@ -192,14 +195,24 @@ public:
 		svc_current_goals_.waitForExistence();
 	}
 
-	void create_product_goals(Product::ConstPtr& product, Update::Request& request, ItemSet& already_known)
+	void create_product_goals(Product::ConstPtr& product, Update::Request& request, ItemSet& already_achieved)
 	{
 		for (const auto& step: product->steps)
 		{
-			// is this step already in the knowledge base?
-			if (! std::all_of(already_known.begin(), already_known.end(), [step](const Item& goal)
-							{	return goal.values.front().value != step.name;}))
+			if (skip_first_step_goal_)
 			{
+				// do not create a goal for the base step
+				if(step.name.find("base") != std::string::npos)
+				{
+					continue;
+				}
+			}
+			// is this step already in the knowledge base?
+			const auto& it = std::find_if(already_achieved.begin(), already_achieved.end(), [step](const Item& goal)
+							{	return goal.values.front().value != step.name;});
+			if (it != already_achieved.end())
+			{
+				// this one is already achieved, no need to add as a goal
 				continue;
 			}
 			// (step-completed ?s - step)
@@ -211,6 +224,11 @@ public:
 			kv.value = step.name;
 			item.values.push_back(kv);
 			request.knowledge.push_back(item);
+		}
+
+		while (request.knowledge.size() > plan_ahead_step_count_)
+		{
+			request.knowledge.pop_back();
 		}
 	}
 
@@ -459,13 +477,16 @@ public:
 				}
 				potential_products.insert(name_product.second);
 			}
-			std::vector<Product::ConstPtr> chosen_products;
-			decider_->choose_next_product(potential_products, new_slots, chosen_products);
-			for (const auto& p: chosen_products)
+			if (! potential_products.empty())
 			{
-				incomplete_products.insert(p->name);
-				create_product_facts(p, new_product_facts.request);
-				new_names += p->name+" ";
+				std::vector<Product::ConstPtr> chosen_products;
+				decider_->choose_next_product(potential_products, new_slots, chosen_products);
+				for (const auto& p: chosen_products)
+				{
+					incomplete_products.insert(p->name);
+					create_product_facts(p, new_product_facts.request);
+					new_names += p->name+" ";
+				}
 			}
 		}
 		if (! new_product_facts.request.knowledge.empty())
@@ -485,7 +506,7 @@ public:
 		for(const auto& incomplete_name: incomplete_products)
 		{
 			Product::ConstPtr& p = available_products_[incomplete_name];
-			create_product_goals(p, new_goals.request, goals);
+			create_product_goals(p, new_goals.request, current);
 		}
 
 		if (goals.empty() && new_goals.request.knowledge.empty())
@@ -508,6 +529,7 @@ public:
 		if (!new_goals.request.knowledge.empty() && trigger_replanning_)
 		{
 			// replan
+			// FIXME: investigate how predicates get lost in rosplan knowledge base
 			planning_command_pub_.publish(cancel_command_);
 		}
 	}
@@ -735,8 +757,11 @@ private:
 	std::string gate_prefix_;
 
 	bool trigger_replanning_;
+	bool skip_first_step_goal_;
+	int plan_ahead_step_count_;
 	std_msgs::String cancel_command_;
 	config::PredicateMap default_goals_;
+	Update default_goal_predicates_;
 
 	std::shared_ptr<Decider> decider_;
 

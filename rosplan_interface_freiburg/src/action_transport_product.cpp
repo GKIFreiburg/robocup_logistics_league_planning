@@ -54,7 +54,7 @@ public:
 	ActionTransportProduct()
 	{
 		ros::NodeHandle nh;
-
+		log_prefix_ = "[TransportP] ";
 		skiller_client_ = std::make_shared<SkillerClient>(nh, "skiller", /* spin thread */true);
 		std::string log_prefix_ = "[TransportProduct] ";
 		parameter_not_found_ = "PARAMETER_NOT_FOUND";
