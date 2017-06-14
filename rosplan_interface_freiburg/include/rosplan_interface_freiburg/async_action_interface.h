@@ -68,6 +68,8 @@ public:
 
 	bool lookupNumericalValue(rosplan_knowledge_msgs::KnowledgeItem& num);
 	bool updateNumericalValue(rosplan_knowledge_msgs::KnowledgeItem& num);
+	bool updatePredicates(std::vector<rosplan_knowledge_msgs::KnowledgeItem>& facts,
+			UpdateRequest::_update_type_type operation);
 	bool updateEffects(const std::vector<rosplan_knowledge_msgs::DomainFormula>& effects,
 			UpdateRequest::_update_type_type operation);
 
