@@ -1,4 +1,7 @@
 max_active_products: 2
-#config: only_c0
-#config: c1_c2
-config: no_c0
+plan_ahead_step_count: 10
+skip_first_step_goal: True
+
+decider_config: only_c0
+#decider_config: c1_c2
+#decider_config: no_c0
