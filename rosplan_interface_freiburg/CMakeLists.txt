@@ -162,6 +162,8 @@ add_executable(action_move_in src/action_move_in.cpp)
 add_executable(action_insert_cap src/action_insert_cap.cpp)
 add_executable(action_transport_product src/action_transport_product.cpp)
 add_executable(action_transport_material src/action_transport_material.cpp)
+add_executable(action_insert_product src/action_insert_product.cpp)
+add_executable(action_insert_material src/action_insert_material.cpp)
 
 
 
@@ -228,6 +230,18 @@ target_link_libraries(action_transport_material
   ${catkin_LIBRARIES}
 )
 
+target_link_libraries(action_insert_product
+  action_interface
+  machine_interface
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(action_insert_material
+  action_interface
+  machine_interface
+  ${catkin_LIBRARIES}
+)
+
+
 #############
 ## Install ##
 #############
@@ -262,6 +276,8 @@ install(TARGETS
   action_insert_cap
   action_transport_product
   action_transport_material
+  action_insert_product
+  action_insert_material
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
