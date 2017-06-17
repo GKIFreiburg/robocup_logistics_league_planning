@@ -151,8 +151,8 @@ public:
 		rs.value = "bs"; // bs
 		conveyor.values.push_back(rs);
 
-		predicates.push_back(item);
-		updatePredicates(predicates, UpdateRequest::REMOVE_KNOWLEDGE);
+//		predicates.push_back(item);
+//		updatePredicates(predicates, UpdateRequest::REMOVE_KNOWLEDGE);
 
 		/// TODO
 
