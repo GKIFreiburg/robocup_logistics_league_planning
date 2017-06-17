@@ -82,7 +82,7 @@
 	)
 
 	(:functions
-		(material-stored ?m - ring_station) - number
+		(material-stored ?m - machine) - number
 		(material-required ?s - step) - number
 		; paths
 		(path-length ?l1 ?l2 - location) - number
@@ -124,13 +124,15 @@
 	)
 
 	(:durative-action mount-ring
-		:parameters (?m - ring_station ?p - product ?s - step ?i - rs_input ?o - rs_output)
+		:parameters (?m - ring_station ?p - product ?s1 ?s - step ?i - rs_input ?o - rs_output)
 		:duration (= ?duration 1)
 		:condition (and
 			(at start (product-at ?p ?i))
 			(at start (has-step ?p ?s))
 			(at start (step-at-machine ?s ?m))
 			(at start (not (step-completed ?s)))
+			(at start (step-completed ?s1))
+			(at start (step-precedes ?s1 ?s))
 			(at start (input-location ?i ?m))
 			(at start (output-location ?o ?m))
 			(at start (not (processing ?m)))
@@ -243,9 +245,28 @@
 		)
 	)
 
+;	(:durative-action drop-material
+;		:parameters (?r - robot ?o - cs_output ?om - cap_station)
+;		:duration (= ?duration 15)
+;		:condition (and
+;			(at start (not (robot-processing ?r)))
+;			(at start (output-location ?o ?om))
+;			(at start (robot-at ?r ?o))
+;			(at start (material-at ?o))
+;			(at start (not (robot-holding-something ?r)))
+;		)
+;		:effect (and
+;			(at start (robot-processing ?r))
+;			(at start (not (material-at ?o)))
+;			(at start (not (conveyor-full ?om)))
+;			(at end (not (robot-processing ?r)))
+;			(at end (not (robot-recently-moved ?r)))
+;		)
+;	)
+
 	(:durative-action transport-material
 		:parameters (?r - robot ?o - output ?om - machine ?i - rs_input ?m - ring_station)
-		:duration (= ?duration (path-length ?o ?i))
+		:duration (= ?duration (+ 30 (path-length ?o ?i)))
 		:condition (and
 			(at start (not (robot-processing ?r)))
 			(at start (input-location ?i ?m))
@@ -272,7 +293,7 @@
 
 	(:durative-action transport-product
 		:parameters (?r - robot ?p - product ?o - output ?om - machine ?i - input ?m - machine ?s1 ?s2 - step)
-		:duration (= ?duration (path-length ?o ?i))
+		:duration (= ?duration (+ 30 (path-length ?o ?i)))
 		:condition (and
 			(at start (not (robot-processing ?r)))
 			(at start (product-at ?p ?o))
@@ -281,13 +302,14 @@
 			(at start (step-at-machine ?s2 ?m))
 			(at start (step-precedes ?s1 ?s2))
 			(at start (step-completed ?s1))
+			(at start (not (step-completed ?s2)))
 			(at start (input-location ?i ?m))
 			(at start (output-location ?o ?om))
-			(at start (not (step-completed ?s2)))
 			(at start (robot-at ?r ?o))
 			(at start (not (robot-holding-something ?r)))
 			(over all (not (location-occupied ?i)))
 			(over all (not (conveyor-full ?m)))
+			(over all (>= (material-stored ?m) (material-required ?s2)))
 		)
 		:effect (and
 			(at start (not (robot-at ?r ?o)))

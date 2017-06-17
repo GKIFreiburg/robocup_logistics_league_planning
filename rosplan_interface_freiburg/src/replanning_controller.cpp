@@ -89,12 +89,15 @@ public:
 	{
 		if (msg->status == enabled_status_)
 		{
+			ROS_INFO_STREAM(log_prefix_<<"started action id "<<msg->action_id);
 			enabled_actions_[msg->action_id] = msg;
 		}
 		if (msg->status == achieved_status_ || msg->status == failed_status_)
 		{
+			ROS_INFO_STREAM(log_prefix_<<"finished action id "<<msg->action_id);
 			enabled_actions_.erase(msg->action_id);
 		}
+		ROS_INFO_STREAM(log_prefix_<<"running actinos "<<enabled_actions_.size());
 	}
 
 	void planningStateCB(const std_msgs::String::ConstPtr& msg)

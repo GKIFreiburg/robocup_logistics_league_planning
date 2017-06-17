@@ -12,7 +12,7 @@ step_at_machine_predicate: step-at-machine
 step_completed_predicate: step-completed
 material_required_function: material-required
 
-trigger_replanning: false
+trigger_replanning: true
 cancel_command: cancel
 
 gate_prefix: gate

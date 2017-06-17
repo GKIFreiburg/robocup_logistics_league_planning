@@ -3,6 +3,7 @@
 <launch>
 	<arg name="num_robots" default="$(optenv NUM_ROBOTS 1)" />
 	<group ns="robot1/rcll">
+	<!-- 
 		<node name="updater_production_steps" pkg="rosplan_interface_freiburg"
 			type="updater_production_steps" respawn="false" output="screen">
 			<rosparam command="load"
@@ -10,6 +11,13 @@
 			<rosparam command="load"
 				file="$(find rcll_freiburg)/config/product_decider.yaml" />
 			<param name="robot_count" value="$(arg num_robots)"/>
+		</node>
+	 -->
+
+		<node name="replanning_controller" pkg="rosplan_interface_freiburg"
+			type="replanning_controller" respawn="false" output="screen">
+			<rosparam command="load"
+				file="$(find rcll_freiburg)/config/mission_control.yaml" />
 		</node>
 	</group>
 

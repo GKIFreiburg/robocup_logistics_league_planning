@@ -1,34 +1,26 @@
 module plan:
-input SOURCE, a0_complete, a1_complete, a2_complete
-output SINK, a0_dispatch, a1_dispatch, a2_dispatch
-signal e0, e0, e1, e2 in
-run action0_buffer-cap
- || action0_buffer-cap
- || action1_transport-product
- || action2_deliver
+input SOURCE, a0_complete, a1_complete
+output SINK, a0_dispatch, a1_dispatch
+signal e0, e0, e1 in
+run action0_transport-product
+ || action0_transport-product
+ || action1_mount-ring
 end
 end module
 
-module action0_buffer-cap:
+module action0_transport-product:
 output e0;
   emit a0_dispatch;
   await a0_complete;
 emit e0;
 end module
 
-module action1_transport-product:
+module action1_mount-ring:
+input e0;
 output e1;
+  await e0;
   emit a1_dispatch;
   await a1_complete;
 emit e1;
-end module
-
-module action2_deliver:
-input e1;
-output e2;
-  await e1;
-  emit a2_dispatch;
-  await a2_complete;
-emit e2;
 end module
 

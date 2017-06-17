@@ -5,6 +5,6 @@ planning_state: Planning
 dispatching_state: Dispatching
 start_command: plan
 cancel_command: cancel
-achieved_status: achieved
-failed_status: failed
-enabled_status: enabled
+achieved_status: action achieved
+failed_status: action failed
+enabled_status: action enabled
