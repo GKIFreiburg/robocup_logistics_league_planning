@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+	<arg name="output_file" default="$(find rcll_freiburg)/data/action_timings.out" />
+	<node name="timekeeper" pkg="rcll_freiburg" type="timekeeper.py" respawn="false" output="screen"
+		args="$(arg output_file)" />
+</launch>
