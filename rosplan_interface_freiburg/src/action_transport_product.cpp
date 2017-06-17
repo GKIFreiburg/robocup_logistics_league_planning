@@ -138,6 +138,28 @@ public:
 		return true;
 	}
 
+	void createPickupEffects()
+	{
+		std::vector<rosplan_knowledge_msgs::KnowledgeItem> predicates;
+		// update conveyor-stored numerical fluent
+		//		(conveyor-full ?m - machine)
+		rosplan_knowledge_msgs::KnowledgeItem conveyor;
+		conveyor.knowledge_type = conveyor.FACT;
+		conveyor.attribute_name = "conveyor-full";
+		diagnostic_msgs::KeyValue rs;
+		rs.key = "m";
+		rs.value = "bs"; // bs
+		conveyor.values.push_back(rs);
+
+//		predicates.push_back(item);
+//		updatePredicates(predicates, UpdateRequest::REMOVE_KNOWLEDGE);
+
+		/// TODO
+
+
+		updatePredicates(predicates, UpdateRequest::REMOVE_KNOWLEDGE);
+	}
+
 	virtual bool concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg)
 	{
 		const std::string& name_out = boundParameters["om"];
