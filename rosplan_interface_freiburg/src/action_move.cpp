@@ -42,7 +42,7 @@ public:
 		ros::NodeHandle nh;
 
 		skiller_client_ = std::make_shared<SkillerClient>(nh, "skiller", /* spin thread */true);
-		std::string log_prefix_ = "[Move] ";
+		log_prefix_ = "[Move] ";
 		param_not_found_ = "PARAM_NOT_FOUND";
 		dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionMove::dispatchCB, this);
 

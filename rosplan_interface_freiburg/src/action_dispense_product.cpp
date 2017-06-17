@@ -51,7 +51,7 @@ public:
 	{
 		ros::NodeHandle nh;
 
-		std::string log_prefix_ = "[DispenseProduct] ";
+		log_prefix_ = "[DispenseP] ";
 		machine_ = std::make_shared<MachineInterface>("BS", log_prefix_);
 		dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionDispenseProduct::dispatchCB, this);
 

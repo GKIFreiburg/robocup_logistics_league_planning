@@ -7,7 +7,7 @@ lazy_evaluation: true
 cyclic_cg_heuristic: true
 cyclic_cg_heuristic_preferred_operators: true
 makespan_heuristic: false
-makespan_heuristic_preferred_operators: true
+makespan_heuristic_preferred_operators: false
 no_heuristic: false
 #g_values: timestamp
 g_values: makespan

@@ -291,7 +291,7 @@
 		)
 	)
 
-	(:durative-action transport-material-recovery
+	(:durative-action insert-material
 		:parameters (?r - robot ?o - output ?om - machine ?i - rs_input ?m - ring_station)
 		:duration (= ?duration (path-length ?o ?i))
 		:condition (and
@@ -352,7 +352,7 @@
 		)
 	)
 
-	(:durative-action transport-product-recovery
+	(:durative-action insert-product
 		:parameters (?r - robot ?p - product ?o - output ?om - machine ?i - input ?m - machine ?s1 ?s2 - step)
 		:duration (= ?duration (path-length ?o ?i))
 		:condition (and
@@ -369,6 +369,7 @@
 			(at start (robot-at ?r ?o))
 			(over all (not (location-occupied ?i)))
 			(over all (not (conveyor-full ?m)))
+			(over all (>= (material-stored ?m) (material-required ?s2)))
 		)
 		:effect (and
 			(at start (not (robot-at ?r ?o)))

@@ -81,7 +81,7 @@ public:
 		ros::NodeHandle nh;
 
 		skiller_client_ = std::make_shared<SkillerClient>(nh, "skiller", /* spin thread */ true);
-                std::string log_prefix_ = "[InsertCap] ";
+		log_prefix_ = "[InsertCap] ";
 		machine_not_found_ = "MACHINE_NOT_FOUND";
 		machines_["cs1"] = std::make_shared<MachineInterface>("cs1", log_prefix_);
 		machines_["cs2"] = std::make_shared<MachineInterface>("cs2", log_prefix_);

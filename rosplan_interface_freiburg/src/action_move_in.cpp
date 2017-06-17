@@ -40,7 +40,7 @@ public:
 		ros::NodeHandle nh;
 
 		skiller_client_ = std::make_shared<SkillerClient>(nh, "skiller", /* spin thread */true);
-		std::string log_prefix_ = "[MoveIn] ";
+		log_prefix_ = "[MoveIn] ";
 		dispatch_subscriber_ = nh.subscribe("/kcl_rosplan/action_dispatch", 10, &ActionMoveIn::dispatchCB, this);
 
 		ros::NodeHandle nhpriv("~");
