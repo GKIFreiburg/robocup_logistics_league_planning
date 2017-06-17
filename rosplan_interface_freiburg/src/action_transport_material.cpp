@@ -113,6 +113,41 @@ public:
 				return false;
 			}
 			ROS_INFO_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" succeeded");
+
+                        //send predicate robot holding material ADD
+                        rosplan_knowledge_msgs::KnowledgeItem effect;
+                        effect.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
+                        effect.attribute_name = "robot-holding-material";
+
+                        diagnostic_msgs::KeyValue rs;
+                        rs.key = "r";
+                        rs.value = robot_name_;
+                        effect.values.push_back(rs);
+
+                        sendEffectADD(effect);
+
+                        //send predicate robot-holding-something ADD
+                        rosplan_knowledge_msgs::KnowledgeItem holding;
+                        holding.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
+                        holding.attribute_name = "robot-holding-something";
+
+
+                        rs.key = "r";
+                        rs.value = robot_name_;
+                        holding.values.push_back(rs);
+
+                        sendEffectADD(holding);
+
+                        //send predicate conveyor-full REMOVE
+                        rosplan_knowledge_msgs::KnowledgeItem conveyor;
+                        conveyor.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
+                        conveyor.attribute_name = "conveyor-full";
+
+                        rs.key = "m";
+                        rs.value = name_out;
+                        conveyor.values.push_back(rs);
+
+                        sendEffectREMOVE(conveyor);
 		}
 
 		const std::string& name = boundParameters["m"];
@@ -156,6 +191,40 @@ public:
 				ROS_ERROR_STREAM(log_prefix_<<"Skill "<<goal.skillstring<<" did not succeed. state: "<<state.toString());
 				return false;
 			}
+                        //send predicate robot holding material REMOVE
+                        rosplan_knowledge_msgs::KnowledgeItem effect;
+                        effect.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
+                        effect.attribute_name = "robot-holding-material";
+
+                        diagnostic_msgs::KeyValue rs;
+                        rs.key = "r";
+                        rs.value = robot_name_;
+                        effect.values.push_back(rs);
+
+                        sendEffectREMOVE(effect);
+
+                        //send predicate robot-holding-something REMOVE
+                        rosplan_knowledge_msgs::KnowledgeItem holding;
+                        holding.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
+                        holding.attribute_name = "robot-holding-something";
+
+                        rs.key = "r";
+                        rs.value = robot_name_;
+                        holding.values.push_back(rs);
+
+                        sendEffectREMOVE(holding);
+
+                        //send predicate conveyor-full ADD
+                        rosplan_knowledge_msgs::KnowledgeItem conveyor;
+                        conveyor.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
+                        conveyor.attribute_name = "conveyor-full";
+
+                        const std::string& machine_name = boundParameters["m"];
+                        rs.key = "m";
+                        rs.value = machine_name;
+                        conveyor.values.push_back(rs);
+
+                        sendEffectADD(conveyor);
 		}
 
 		// update material-stored numerical fluent

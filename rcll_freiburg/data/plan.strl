@@ -24,3 +24,7 @@ output e1;
 emit e1;
 end module
 
+input SOURCE
+output SINK
+end module
+

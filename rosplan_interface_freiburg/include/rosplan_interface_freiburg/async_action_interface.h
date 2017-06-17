@@ -73,6 +73,9 @@ public:
 	bool updateEffects(const std::vector<rosplan_knowledge_msgs::DomainFormula>& effects,
 			UpdateRequest::_update_type_type operation);
 
+        bool sendEffectADD(rosplan_knowledge_msgs::KnowledgeItem& item);
+        bool sendEffectREMOVE(rosplan_knowledge_msgs::KnowledgeItem& item);
+
 	virtual bool concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg) = 0;
 };
 }

@@ -299,6 +299,46 @@ bool AsyncActionInterface::updatePredicates(std::vector<rosplan_knowledge_msgs::
 	updatePredSrv.request.update_type = operation; //updatePredSrv.request.ADD_KNOWLEDGE
 }
 
+bool AsyncActionInterface::sendEffectADD(rosplan_knowledge_msgs::KnowledgeItem& item)
+{
+    rosplan_knowledge_msgs::KnowledgeUpdateServiceArray updatePredSrv;
+    updatePredSrv.request.update_type = updatePredSrv.request.ADD_KNOWLEDGE;
+    updatePredSrv.request.knowledge.push_back(item);
+
+
+    if (! updatePredSrv.request.knowledge.empty())
+    {
+            if (!update_knowledge_client.call(updatePredSrv))
+            {
+                    ROS_INFO_STREAM(log_prefix_<<"failed to update PDDL model in knowledge base.");
+                    return false;
+            }
+            //ROS_INFO_STREAM(log_prefix_<<"updated: "<<updatePredSrv.request);
+    }
+
+    return true;
+}
+
+bool AsyncActionInterface::sendEffectREMOVE(rosplan_knowledge_msgs::KnowledgeItem& item)
+{
+    rosplan_knowledge_msgs::KnowledgeUpdateServiceArray updatePredSrv;
+    updatePredSrv.request.update_type = updatePredSrv.request.REMOVE_KNOWLEDGE;
+    updatePredSrv.request.knowledge.push_back(item);
+
+
+    if (! updatePredSrv.request.knowledge.empty())
+    {
+            if (!update_knowledge_client.call(updatePredSrv))
+            {
+                    ROS_INFO_STREAM(log_prefix_<<"failed to update PDDL model in knowledge base.");
+                    return false;
+            }
+            //ROS_INFO_STREAM(log_prefix_<<"updated: "<<updatePredSrv.request);
+    }
+
+    return true;
+}
+
 bool AsyncActionInterface::updateEffects(const std::vector<rosplan_knowledge_msgs::DomainFormula>& effects,
 		UpdateRequest::_update_type_type operation)
 {
