@@ -174,7 +174,6 @@ public:
 	}
 
 private:
-	std::string log_prefix_;
 	std::string robot_name_;
 	std::string initial_machine_state_;
 	std::string desired_machine_state_;

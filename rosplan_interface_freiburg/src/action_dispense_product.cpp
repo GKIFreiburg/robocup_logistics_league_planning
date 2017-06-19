@@ -114,7 +114,6 @@ public:
 private:
 	std::string initial_machine_state_;
 	std::string desired_machine_state_;
-	std::string log_prefix_;
 
 	ros::Subscriber dispatch_subscriber_;
 

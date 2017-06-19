@@ -46,6 +46,7 @@ public:
 {
 		ros::NodeHandle nh("~");
 		nh.getParam("decider_config", config_);
+		chosen_complexities_ = {0, 0, 0, 0};
 		sub_game_state_ = ros::NodeHandle().subscribe("game_state", 10, &Decider::gameStateCB, this);
 }
 
@@ -72,9 +73,17 @@ public:
 		{
 			choose_next_no_c0(potential_products, max_products, chosen_products);
 		}
+		else if (config_ == "first_c3_then_c0s")
+		{
+			choose_next_first_c3_then_c0s(potential_products, max_products, chosen_products);
+		}
 		while (chosen_products.size() > max_products)
 		{
 			chosen_products.pop_back();
+		}
+		for (const auto& p: chosen_products)
+		{
+			chosen_complexities_[p->complexity()] += 1;
 		}
 	}
 
@@ -114,6 +123,35 @@ public:
 		}
 	}
 
+	void choose_next_first_c3_then_c0s(
+			const std::set<Product::ConstPtr>& potential_products,
+			int max_products,
+			std::vector<Product::ConstPtr>& chosen_products)
+	{
+		if (chosen_complexities_[3] < 1)
+		{
+			for (const auto& p: potential_products)
+			{
+				if (p->complexity() == 3)
+				{
+					chosen_products.push_back(p);
+				}
+			}
+		}
+
+		for (const auto& p: potential_products)
+		{
+			if (chosen_products.size() >= max_products)
+			{
+				return;
+			}
+			if (p->complexity() == 0)
+			{
+				chosen_products.push_back(p);
+			}
+		}
+	}
+
 	void choose_next_no_c0(
 			const std::set<Product::ConstPtr>& potential_products,
 			int max_products,
@@ -136,6 +174,7 @@ private:
 	std::string config_;
 	rcll_ros_msgs::GameState::ConstPtr latest_game_info_;
 	ros::Subscriber sub_game_state_;
+	std::vector<int> chosen_complexities_;
 };
 
 

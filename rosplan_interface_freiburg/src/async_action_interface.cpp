@@ -54,9 +54,8 @@ void AsyncActionInterface::dispatchCallback(const rosplan_dispatch_msgs::ActionD
 	}
 }
 
-void AsyncActionInterface::initialize(const std::string& log_prefix)
+void AsyncActionInterface::initialize()
 {
-	log_prefix_ = log_prefix;
 	ros::NodeHandle nh("~");
 
 	execute_timeout_ = ros::Duration(300);
@@ -80,6 +79,7 @@ void AsyncActionInterface::initialize(const std::string& log_prefix)
 		ROS_ERROR_STREAM(log_prefix_<<"could not call Knowledge Base for operator details: "<<params.name);
 		return;
 	}
+	ROS_INFO_STREAM(log_prefix_<<op);
 
 	// collect predicates from operator description
 	std::set<std::string> predicateNames;
@@ -102,48 +102,51 @@ void AsyncActionInterface::initialize(const std::string& log_prefix)
 		predicateNames.insert(pit->name);
 
 	// simple conditions
-	pit = op.at_start_simple_condition.begin();
-	for (; pit != op.at_start_simple_condition.end(); pit++)
-		predicateNames.insert(pit->name);
-
-	pit = op.over_all_simple_condition.begin();
-	for (; pit != op.over_all_simple_condition.end(); pit++)
-		predicateNames.insert(pit->name);
-
-	pit = op.at_end_simple_condition.begin();
-	for (; pit != op.at_end_simple_condition.end(); pit++)
-		predicateNames.insert(pit->name);
-
-	// negative conditions
-	pit = op.at_start_neg_condition.begin();
-	for (; pit != op.at_start_neg_condition.end(); pit++)
-		predicateNames.insert(pit->name);
-
-	pit = op.over_all_neg_condition.begin();
-	for (; pit != op.over_all_neg_condition.end(); pit++)
-		predicateNames.insert(pit->name);
-
-	pit = op.at_end_neg_condition.begin();
-	for (; pit != op.at_end_neg_condition.end(); pit++)
-		predicateNames.insert(pit->name);
+//	pit = op.at_start_simple_condition.begin();
+//	for (; pit != op.at_start_simple_condition.end(); pit++)
+//		predicateNames.insert(pit->name);
+//
+//	pit = op.over_all_simple_condition.begin();
+//	for (; pit != op.over_all_simple_condition.end(); pit++)
+//		predicateNames.insert(pit->name);
+//
+//	pit = op.at_end_simple_condition.begin();
+//	for (; pit != op.at_end_simple_condition.end(); pit++)
+//		predicateNames.insert(pit->name);
+//
+//	// negative conditions
+//	pit = op.at_start_neg_condition.begin();
+//	for (; pit != op.at_start_neg_condition.end(); pit++)
+//		predicateNames.insert(pit->name);
+//
+//	pit = op.over_all_neg_condition.begin();
+//	for (; pit != op.over_all_neg_condition.end(); pit++)
+//		predicateNames.insert(pit->name);
+//
+//	pit = op.at_end_neg_condition.begin();
+//	for (; pit != op.at_end_neg_condition.end(); pit++)
+//		predicateNames.insert(pit->name);
 
 	// fetch and store predicate details
 	ros::service::waitForService("/kcl_rosplan/get_domain_predicate_details", ros::Duration(20));
 	ros::ServiceClient predClient = nh.serviceClient<rosplan_knowledge_msgs::GetDomainPredicateDetailsService>(
 			"/kcl_rosplan/get_domain_predicate_details");
-	std::set<std::string>::iterator nit = predicateNames.begin();
 	for (const auto& name : predicateNames)
 	{
 		if (name == "=")
 		{
 			continue;
 		}
-		if (predicates.find(name) != predicates.end())
-			continue;
+//		if (predicates.find(name) != predicates.end())
+//		{
+//			ROS_ERROR_STREAM(log_prefix_<<"");
+//			continue;
+//		}
 		rosplan_knowledge_msgs::GetDomainPredicateDetailsService predSrv;
 		predSrv.request.name = name;
 		if (predClient.call(predSrv))
 		{
+			ROS_INFO_STREAM(log_prefix_<<"predicate details: "<<name);
 			predicates.insert(
 					std::pair<std::string, rosplan_knowledge_msgs::DomainFormula>(name, predSrv.response.predicate));
 		}
@@ -282,12 +285,7 @@ bool AsyncActionInterface::updateNumericalValue(rosplan_knowledge_msgs::Knowledg
 	rosplan_knowledge_msgs::KnowledgeUpdateServiceArray srv;
 	srv.request.update_type = srv.request.ADD_KNOWLEDGE;
 	srv.request.knowledge.push_back(num);
-	if (!update_knowledge_client.call(srv))
-	{
-		ROS_ERROR_STREAM("could not update numerical value "<<num.attribute_name);
-		return false;
-	}
-	return true;
+	return publishUpdate(srv);
 }
 
 bool AsyncActionInterface::updatePredicates(const PredicateList& add_facts, const PredicateList& delete_facts)
@@ -295,28 +293,13 @@ bool AsyncActionInterface::updatePredicates(const PredicateList& add_facts, cons
 	rosplan_knowledge_msgs::KnowledgeUpdateServiceArray srv;
 	srv.request.update_type = srv.request.ADD_KNOWLEDGE;
 	srv.request.knowledge = add_facts;
-	if (! srv.request.knowledge.empty())
+	if (! publishUpdate(srv))
 	{
-		if (!update_knowledge_client.call(srv))
-		{
-			ROS_WARN_STREAM(log_prefix_<<"failed to update PDDL model in knowledge base.");
-			return false;
-		}
-		//ROS_INFO_STREAM(log_prefix_<<"updated: "<<updatePredSrv.request);
+		return false;
 	}
-
 	srv.request.update_type = srv.request.REMOVE_KNOWLEDGE;
 	srv.request.knowledge = delete_facts;
-	if (! srv.request.knowledge.empty())
-	{
-		if (!update_knowledge_client.call(srv))
-		{
-			ROS_WARN_STREAM(log_prefix_<<"failed to update PDDL model in knowledge base.");
-			return false;
-		}
-		//ROS_INFO_STREAM(log_prefix_<<"updated: "<<updatePredSrv.request);
-	}
-	return true;
+	return publishUpdate(srv);
 }
 
 //bool AsyncActionInterface::sendEffectADD(rosplan_knowledge_msgs::KnowledgeItem& item)
@@ -383,14 +366,19 @@ bool AsyncActionInterface::updateEffects(const std::vector<rosplan_knowledge_msg
 		}
 		updatePredSrv.request.knowledge.push_back(item);
 	}
-	if (! updatePredSrv.request.knowledge.empty())
+	return publishUpdate(updatePredSrv);
+}
+
+bool AsyncActionInterface::publishUpdate(rosplan_knowledge_msgs::KnowledgeUpdateServiceArray srv)
+{
+	if (! srv.request.knowledge.empty())
 	{
-		if (!update_knowledge_client.call(updatePredSrv))
+		if (!update_knowledge_client.call(srv))
 		{
-			ROS_WARN_STREAM(log_prefix_<<"failed to update PDDL model in knowledge base.");
+			ROS_WARN_STREAM(log_prefix_<<"failed to update PDDL model in knowledge base: "<<srv.request);
 			return false;
 		}
-		//ROS_INFO_STREAM(log_prefix_<<"updated: "<<updatePredSrv.request);
+		//ROS_INFO_STREAM(log_prefix_<<"updated: "<<srv.request);
 	}
 	return true;
 }

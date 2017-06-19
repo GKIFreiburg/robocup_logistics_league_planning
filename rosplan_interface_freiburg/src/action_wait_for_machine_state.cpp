@@ -96,7 +96,6 @@ public:
 
 private:
 	std::string desired_machine_state_;
-	std::string log_prefix_;
 
 	ros::Subscriber dispatch_subscriber_;
 	std::map<std::string, MachineInterface::Ptr> machines_;

@@ -100,7 +100,6 @@ public:
 	}
 
 private:
-	std::string log_prefix_;
 	std::string robot_name_;
 	std::string team_color_;
 	std::string param_not_found_;

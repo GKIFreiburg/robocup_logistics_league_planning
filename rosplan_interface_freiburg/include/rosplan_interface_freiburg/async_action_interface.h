@@ -57,7 +57,7 @@ public:
 	/* listen to and process action_dispatch topic */
 	void dispatchCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg);
 
-	void initialize(const std::string& log_prefix = "[Action] ");
+	void initialize();
 
 	bool isAcceptable(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg);
 	void sendStartEffects();
@@ -72,6 +72,7 @@ public:
 	bool updatePredicates(const PredicateList& add_facts, const PredicateList& delete_facts);
 	bool updateEffects(const std::vector<rosplan_knowledge_msgs::DomainFormula>& effects,
 			UpdateRequest::_update_type_type operation);
+	bool publishUpdate(rosplan_knowledge_msgs::KnowledgeUpdateServiceArray srv);
 
 	virtual bool concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg) = 0;
 };

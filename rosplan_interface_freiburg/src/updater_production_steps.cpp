@@ -111,7 +111,6 @@ public:
 
 		GET_CONFIG(privn, n_, "robot_count", robot_count_);
 		GET_CONFIG(privn, n_, "max_active_products", max_active_products_);
-		GET_CONFIG(privn, n_, "skip_first_step_goal", skip_first_step_goal_);
 		GET_CONFIG(privn, n_, "plan_ahead_step_count", plan_ahead_step_count_);
 
 		GET_CONFIG(privn, n_, "trigger_replanning", trigger_replanning_);
@@ -195,26 +194,48 @@ public:
 		svc_current_goals_.waitForExistence();
 	}
 
-	void create_product_goals(Product::ConstPtr& product, Update::Request& request, ItemSet& already_achieved)
+	void create_product_goals(Product::ConstPtr& product, Update::Request& request, ItemSet& already_achieved,
+			ItemSet& already_posted)
 	{
+		int active_count = 0;
+		int achieved_count = 0;
+		int added_count = 0;
 		for (const auto& step: product->steps)
 		{
-			if (skip_first_step_goal_)
+			ROS_DEBUG_STREAM(log_prefix_<<"ach: "<<achieved_count<<" act: "<<active_count<<" add: "<<added_count);
+			if (added_count + active_count >= plan_ahead_step_count_)
 			{
-				// do not create a goal for the base step
-				if(step.name.find("base") != std::string::npos)
-				{
-					continue;
-				}
+				// we have all the steps we want to post for now
+				break;
+			}
+			ROS_DEBUG_STREAM(log_prefix_<<step.name);
+			if (step.name.find("base") != std::string::npos)
+			{
+				ROS_DEBUG_STREAM(log_prefix_<<" skipped");
+				continue;
 			}
 			// is this step already in the knowledge base?
 			const auto& it = std::find_if(already_achieved.begin(), already_achieved.end(), [step](const Item& goal)
-							{	return goal.values.front().value != step.name;});
+							{	return goal.values.front().value == step.name;});
 			if (it != already_achieved.end())
 			{
 				// this one is already achieved, no need to add as a goal
+				ROS_DEBUG_STREAM(log_prefix_<<" achieved");
+				achieved_count++;
 				continue;
 			}
+			const auto& it2 = std::find_if(already_posted.begin(), already_posted.end(), [step](const Item& goal)
+							{	return goal.values.front().value == step.name;});
+			if (it2 != already_posted.end())
+			{
+				// this one is already posted as a goal, no need to add twice
+				ROS_DEBUG_STREAM(log_prefix_<<" active");
+				active_count++;
+				continue;
+			}
+
+			added_count++;
+			ROS_DEBUG_STREAM(log_prefix_<<" added");
 			// (step-completed ?s - step)
 			Item item;
 			item.knowledge_type = Item::FACT;
@@ -224,11 +245,6 @@ public:
 			kv.value = step.name;
 			item.values.push_back(kv);
 			request.knowledge.push_back(item);
-		}
-
-		while (request.knowledge.size() > plan_ahead_step_count_)
-		{
-			request.knowledge.pop_back();
 		}
 	}
 
@@ -280,7 +296,8 @@ public:
 			request.knowledge.push_back(item);
 
 			// (= (material-required ?s - step) 2)
-			if (step.name.find("ring") != std::string::npos)
+			//if (step.name.find("ring") != std::string::npos)
+			// all steps now have default material-required = 0
 			{
 				item = Item();
 				item.knowledge_type = Item::FUNCTION;
@@ -340,7 +357,7 @@ public:
 		{
 			create_svc_update_knowledge();
 		}
-
+//		ROS_INFO_STREAM("**************************");
 		// get product and step instances
 		Instances instances;
 		instances.request.type_name = product_type_;
@@ -360,10 +377,12 @@ public:
 		std::map<std::string, std::set<std::string> > product_steps;
 		for (const auto& product: product_names)
 		{
+			//ROS_INFO_STREAM(log_prefix_<<product);
 			for (const auto& step: step_names)
 			{
 				if (step.find(product) != std::string::npos)
 				{
+					//ROS_INFO_STREAM(log_prefix_<<" "<<step);
 					product_steps[product].insert(step);
 				}
 			}
@@ -377,7 +396,11 @@ public:
 			ROS_ERROR_STREAM(log_prefix_<<"Failed to lookup current "<<knowledge.request.predicate_name);
 			return;
 		}
-		ItemSet current(knowledge.response.attributes.begin(), knowledge.response.attributes.end());
+		ItemSet current_steps_completed(knowledge.response.attributes.begin(), knowledge.response.attributes.end());
+		for (const auto& item: current_steps_completed)
+		{
+			ROS_DEBUG_STREAM(log_prefix_<<"achieved: "<<item.values.front().value);
+		}
 
 		// get step-completed goals
 		knowledge.request.predicate_name = step_completed_predicate_;
@@ -386,32 +409,38 @@ public:
 			ROS_ERROR_STREAM(log_prefix_<<"Failed to lookup goals "<<knowledge.request.predicate_name);
 			return;
 		}
-		ItemSet goals(knowledge.response.attributes.begin(), knowledge.response.attributes.end());
-
-		ItemSet completed_goals;
-		std::set_intersection(goals.begin(), goals.end(), current.begin(), current.end(),
-				std::inserter(completed_goals, completed_goals.begin()), ItemComparator());
-
-		// find completed products and incomplete goals
-		std::set<std::string> completed_steps;
-		for(const auto& goal: completed_goals)
+		ItemSet goals_steps_completed(knowledge.response.attributes.begin(), knowledge.response.attributes.end());
+		for (const auto& item: goals_steps_completed)
 		{
-			completed_steps.insert(goal.values.front().value);
+			ROS_DEBUG_STREAM(log_prefix_<<"active: "<<item.values.front().value);
+		}
+
+		ItemSet unachieved_goals;
+		std::set_difference(goals_steps_completed.begin(), goals_steps_completed.end(), current_steps_completed.begin(), current_steps_completed.end(),
+				std::inserter(unachieved_goals, unachieved_goals.begin()), ItemComparator());
+
+		// find completed products
+		std::set<std::string> achieved_steps;
+		for(const auto& current_step: current_steps_completed)
+		{
+			achieved_steps.insert(current_step.values.front().value);
 		}
 		std::set<std::string> completed_products;
 		std::set<std::string> incomplete_products;
 		for (const auto& product: product_steps)
 		{
 			const auto& steps = product.second;
-			if (std::all_of(steps.begin(), steps.end(), [completed_steps](const auto& step)
+			if (std::all_of(steps.begin(), steps.end(), [achieved_steps](const auto& step)
 							{
-								return completed_steps.find(step) != completed_steps.end();
+								return achieved_steps.find(step) != achieved_steps.end();
 							}))
 			{
+				//ROS_INFO_STREAM(log_prefix_<<"completed: "<<product.first);
 				completed_products.insert(product.first);
 			}
 			else
 			{
+				//ROS_INFO_STREAM(log_prefix_<<"incomplete: "<<product.first);
 				incomplete_products.insert(product.first);
 			}
 		}
@@ -506,10 +535,10 @@ public:
 		for(const auto& incomplete_name: incomplete_products)
 		{
 			Product::ConstPtr& p = available_products_[incomplete_name];
-			create_product_goals(p, new_goals.request, current);
+			create_product_goals(p, new_goals.request, current_steps_completed, unachieved_goals);
 		}
 
-		if (goals.empty() && new_goals.request.knowledge.empty())
+		if (goals_steps_completed.empty() && new_goals.request.knowledge.empty())
 		{
 			// TODO: fallback goals if no product available
 		}
@@ -518,7 +547,12 @@ public:
 		{
 			if (svc_update_knowledge_.call(new_goals))
 			{
-				ROS_INFO_STREAM(log_prefix_<<"Adding new goals");
+				std::string goal_string;
+				for (const auto& item: new_goals.request.knowledge)
+				{
+					goal_string+=" "+item.values.front().value;
+				}
+				ROS_INFO_STREAM(log_prefix_<<"Adding new goals:"<<goal_string);
 			}
 			else
 			{
@@ -529,7 +563,6 @@ public:
 		if (!new_goals.request.knowledge.empty() && trigger_replanning_)
 		{
 			// replan
-			// FIXME: investigate how predicates get lost in rosplan knowledge base
 			planning_command_pub_.publish(cancel_command_);
 		}
 	}
@@ -757,7 +790,6 @@ private:
 	std::string gate_prefix_;
 
 	bool trigger_replanning_;
-	bool skip_first_step_goal_;
 	int plan_ahead_step_count_;
 	std_msgs::String cancel_command_;
 	config::PredicateMap default_goals_;

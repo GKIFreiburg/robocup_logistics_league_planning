@@ -1,30 +1,112 @@
 module plan:
-input SOURCE, a0_complete, a1_complete
-output SINK, a0_dispatch, a1_dispatch
-signal e0, e0, e1 in
-run action0_transport-product
- || action0_transport-product
- || action1_mount-ring
+input SOURCE, a0_complete, a1_complete, a2_complete, a3_complete, a4_complete, a5_complete, a6_complete, a7_complete, a8_complete, a9_complete, a10_complete
+output SINK, a0_dispatch, a1_dispatch, a2_dispatch, a3_dispatch, a4_dispatch, a5_dispatch, a6_dispatch, a7_dispatch, a8_dispatch, a9_dispatch, a10_dispatch
+signal e0, e0, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10 in
+run action0_move
+ || action0_move
+ || action1_dispense-product
+ || action2_move
+ || action3_insert-cap
+ || action4_buffer-cap
+ || action5_transport-material
+ || action6_move
+ || action7_transport-product
+ || action8_mount-cap
+ || action9_transport-product
+ || action10_deliver
 end
 end module
 
-module action0_transport-product:
+module action0_move:
 output e0;
   emit a0_dispatch;
   await a0_complete;
 emit e0;
 end module
 
-module action1_mount-ring:
-input e0;
+module action1_dispense-product:
 output e1;
-  await e0;
   emit a1_dispatch;
   await a1_complete;
 emit e1;
 end module
 
-input SOURCE
-output SINK
+module action2_move:
+output e2;
+  emit a2_dispatch;
+  await a2_complete;
+emit e2;
+end module
+
+module action3_insert-cap:
+input e2;
+output e3;
+  await e2;
+  emit a3_dispatch;
+  await a3_complete;
+emit e3;
+end module
+
+module action4_buffer-cap:
+input e3;
+output e4;
+  await e3;
+  emit a4_dispatch;
+  await a4_complete;
+emit e4;
+end module
+
+module action5_transport-material:
+input e4;
+output e5;
+  await e4;
+  emit a5_dispatch;
+  await a5_complete;
+emit e5;
+end module
+
+module action6_move:
+input e4;
+output e6;
+  await e4;
+  emit a6_dispatch;
+  await a6_complete;
+emit e6;
+end module
+
+module action7_transport-product:
+input e4;
+output e7;
+  await e4;
+  emit a7_dispatch;
+  await a7_complete;
+emit e7;
+end module
+
+module action8_mount-cap:
+input e7;
+output e8;
+  await e7;
+  emit a8_dispatch;
+  await a8_complete;
+emit e8;
+end module
+
+module action9_transport-product:
+input e8;
+output e9;
+  await e8;
+  emit a9_dispatch;
+  await a9_complete;
+emit e9;
+end module
+
+module action10_deliver:
+input e9;
+output e10;
+  await e9;
+  emit a10_dispatch;
+  await a10_complete;
+emit e10;
 end module
 

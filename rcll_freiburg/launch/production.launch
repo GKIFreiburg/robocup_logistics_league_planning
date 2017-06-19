@@ -81,7 +81,7 @@
 				file="$(find rcll_freiburg)/config/product_decider.yaml" />
 			<param name="robot_count" value="$(arg num_robots)"/>
 		</node>
-		
+
 		<node name="replanning_controller" pkg="rosplan_interface_freiburg"
 			type="replanning_controller" respawn="false" output="screen">
 			<rosparam command="load"

@@ -40,6 +40,18 @@ init_numerical:
    - 
      args: [rs2]
      value: 0
+   - 
+     args: [cs1]
+     value: 0
+   - 
+     args: [cs2]
+     value: 0
+   - 
+     args: [ds]
+     value: 0
+   - 
+     args: [bs]
+     value: 0
 #  path-length:
 #   - 
 #     args: [START, bs_in]
@@ -74,10 +86,10 @@ init_numerical:
   #   - [o1, CAP_GREY]
 
 # To set a fixed goal uncomment:
-goal:
-  cap-buffered: 
-  - [cs1]
-  - [cs2]
+#goal:
+#  cap-buffered: 
+#  - [cs1]
+#  - [cs2]
 
 #goal_numerical:
 #  material-stored:
