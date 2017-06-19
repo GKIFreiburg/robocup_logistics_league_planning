@@ -79,7 +79,7 @@ void AsyncActionInterface::initialize()
 		ROS_ERROR_STREAM(log_prefix_<<"could not call Knowledge Base for operator details: "<<params.name);
 		return;
 	}
-	ROS_INFO_STREAM(log_prefix_<<op);
+	//ROS_INFO_STREAM(log_prefix_<<op);
 
 	// collect predicates from operator description
 	std::set<std::string> predicateNames;

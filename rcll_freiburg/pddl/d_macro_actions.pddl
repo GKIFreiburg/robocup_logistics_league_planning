@@ -76,6 +76,8 @@
 		(robot-holding-something ?r - robot)
 		(robot-recently-moved ?r - robot)
 		(robot-processing ?r - robot)
+		(robot-assigned-machine ?r - robot ?m - machine)
+		(robot-assigned-product-handling ?r - robot)
 		
 		; locations
 		(location-occupied ?l - location)
@@ -228,6 +230,7 @@
 		:parameters (?r - robot ?m - cap_station ?i - cs_input)
 		:duration (= ?duration 30)
 		:condition (and
+			(over all (robot-assigned-machine ?r ?m))
 			(over all (not (processing ?m)))
 			(over all (robot-at ?r ?i))
 			(at start (not (robot-processing ?r)))
@@ -245,29 +248,33 @@
 		)
 	)
 
-;	(:durative-action drop-material
-;		:parameters (?r - robot ?o - cs_output ?om - cap_station)
-;		:duration (= ?duration 15)
-;		:condition (and
-;			(at start (not (robot-processing ?r)))
-;			(at start (output-location ?o ?om))
-;			(at start (robot-at ?r ?o))
-;			(at start (material-at ?o))
-;			(at start (not (robot-holding-something ?r)))
-;		)
-;		:effect (and
-;			(at start (robot-processing ?r))
-;			(at start (not (material-at ?o)))
-;			(at start (not (conveyor-full ?om)))
-;			(at end (not (robot-processing ?r)))
-;			(at end (not (robot-recently-moved ?r)))
-;		)
-;	)
+	(:durative-action drop-material
+		:parameters (?r - robot ?o - cs_output ?om - cap_station)
+		:duration (= ?duration 15)
+		:condition (and
+			(over all (robot-assigned-machine ?r ?om))
+			(at start (not (robot-processing ?r)))
+			(at start (output-location ?o ?om))
+			(at start (robot-at ?r ?o))
+			(at start (material-at ?o))
+			(at start (not (robot-holding-something ?r)))
+		)
+		:effect (and
+			(at start (robot-processing ?r))
+			(at start (not (material-at ?o)))
+			(at start (not (conveyor-full ?om)))
+			(at end (not (robot-holding-material ?r)))
+			(at end (not (robot-holding-something ?r)))
+			(at end (not (robot-processing ?r)))
+			(at end (not (robot-recently-moved ?r)))
+		)
+	)
 
 	(:durative-action transport-material
 		:parameters (?r - robot ?o - output ?om - machine ?i - rs_input ?m - ring_station)
 		:duration (= ?duration (+ 30 (path-length ?o ?i)))
 		:condition (and
+			(at start (robot-assigned-machine ?r ?om))
 			(at start (not (robot-processing ?r)))
 			(at start (input-location ?i ?m))
 			(at start (output-location ?o ?om))
@@ -325,6 +332,7 @@
 		:parameters (?r - robot ?p - product ?o - output ?om - machine ?i - input ?m - machine ?s1 ?s2 - step)
 		:duration (= ?duration (+ 30 (path-length ?o ?i)))
 		:condition (and
+			(at start (robot-assigned-machine ?r ?om))
 			(at start (not (robot-processing ?r)))
 			(at start (product-at ?p ?o))
 			(at start (has-step ?p ?s1))

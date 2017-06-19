@@ -32,6 +32,11 @@
 			<param name="desired_machine_state" value="PREPARED" />
 		</node>
 
+		<node name="action_drop_material" pkg="rosplan_interface_freiburg"
+			type="action_drop_material" respawn="false" output="screen">
+			<param name="pddl_action_name" value="drop-material" />
+		</node>
+
 		<node name="action_insert_cap" pkg="rosplan_interface_freiburg"
 			type="action_insert_cap" respawn="false" output="screen">
 			<param name="pddl_action_name" value="insert-cap" />
