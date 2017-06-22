@@ -33,12 +33,10 @@ init:
     - [bs_in, bs]
   robot-assigned-machine:
     - [r1, cs1]
-    - [r2, cs2]
+    - [r1, cs2]
     - [r1, rs1]
-    - [r2, rs2]
+    - [r1, rs2]
     - [r1, bs]
-    - [r2, bs]
-    - [r3, bs]
 
 init_numerical:
   material-stored:

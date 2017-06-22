@@ -1,3 +1,12 @@
 # enable all three robots
 init:    
   robot-at-init: [r1, r2, r3]
+  robot-assigned-machine:
+    - [r1, cs1]
+    - [r2, cs2]
+    - [r1, rs1]
+    - [r2, rs2]
+    - [r1, bs]
+    - [r2, bs]
+    - [r3, bs]
+  
