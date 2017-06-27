@@ -42,7 +42,7 @@
 		ds_in - ds_input
 
 		; materials
-		zero one two tree - material_counter
+		zero one two three - material_counter
 	)
 
 	(:predicates
@@ -53,7 +53,7 @@
 		
 		; ring stations
 		(material-required ?s - step ?r - material_counter)
-		(material-stored ?m - ring_station ?r - material_counter)
+		(material-stored ?m - machine ?r - material_counter)
 		(subtract ?minuend ?subtrahend ?difference - material_counter)
 		(add-one ?summand ?sum - material_counter)
 
@@ -76,6 +76,7 @@
 		; robots
 		(robot-at ?r - robot ?l - location)
 		(robot-at-init ?r - robot)
+		(first-robot ?r - robot)
 		(robot-precedes ?r1 ?r2 - robot)
 		(robot-holding-material ?r - robot)
 		(robot-holding-product ?r - robot ?p - product)
@@ -98,7 +99,7 @@
 
 	(:action dispense-material
 		:parameters (?m - base_station ?o - bs_output)
-		:condition (and
+		:precondition (and
 			(not (conveyor-full ?m))
 		)
 		:effect (and
@@ -110,7 +111,7 @@
 
 	(:action dispense-product
 		:parameters (?p - product ?s - step ?m - base_station ?o - bs_output)
-		:condition (and
+		:precondition (and
 			(has-step ?p ?s)
 			(step-at-machine ?s ?m)
 			(initial-step ?s)
@@ -127,7 +128,7 @@
 
 	(:action mount-ring
 		:parameters (?m - ring_station ?p - product ?s1 ?s - step ?i - rs_input ?o - rs_output ?mi ?mr ?mf - material_counter)
-		:condition (and
+		:precondition (and
 			(product-at ?p ?i)
 			(has-step ?p ?s)
 			(step-at-machine ?s ?m)
@@ -154,7 +155,7 @@
 
 	(:action buffer-cap
 		:parameters (?m - cap_station ?i - cs_input ?o - cs_output)
-		:condition (and
+		:precondition (and
 			(input-location ?i ?m)
 			(output-location ?o ?m)
 			(material-at ?i)
@@ -170,7 +171,7 @@
 
 	(:action mount-cap
 		:parameters (?m - cap_station ?p - product ?s - step ?i - cs_input ?o - cs_output)
-		:condition (and
+		:precondition (and
 			(product-at ?p ?i)
 			(has-step ?p ?s)
 			(step-at-machine ?s ?m)
@@ -190,7 +191,7 @@
 
 	(:action deliver
 		:parameters (?p - product ?s - step ?m - delivery_station ?i - ds_input)
-		:condition (and
+		:precondition (and
 			(product-at ?p ?i)
 			(has-step ?p ?s)
 			(step-at-machine ?s ?m)
@@ -206,7 +207,7 @@
 
 	(:action discard-material
 		:parameters (?m - delivery_station ?i - ds_input)
-		:condition (and
+		:precondition (and
 			(material-at ?i)
 		)
 		:effect (and
@@ -218,7 +219,7 @@
 
 	(:action insert-cap
 		:parameters (?r - robot ?m - cap_station ?i - cs_input)
-		:condition (and
+		:precondition (and
 			(robot-assigned-machine ?r ?m)
 			(robot-at ?r ?i)
 			(not (conveyor-full ?m))
@@ -236,7 +237,7 @@
 
 	(:action pickup-material
 		:parameters (?r - robot ?o - output ?m - machine)
-		:condition (and
+		:precondition (and
 			(robot-assigned-machine ?r ?m)
 			(robot-at ?r ?o)
 			(not (robot-holding-something ?r))
@@ -255,7 +256,7 @@
 
 	(:action pickup-product
 		:parameters (?r - robot ?o - output ?p - product ?m - machine)
-		:condition (and
+		:precondition (and
 			(robot-assigned-machine ?r ?m)
 			(robot-at ?r ?o)
 			(output-location ?o ?m)
@@ -274,7 +275,7 @@
 
 	(:action insert-product
 		:parameters (?r - robot ?i - input ?p - product ?m - machine)
-		:condition (and
+		:precondition (and
 			(robot-at ?r ?i)
 			(input-location ?i ?m)
 			(robot-holding-product ?r ?p)
@@ -292,7 +293,7 @@
 
 	(:action insert-material
 		:parameters (?r - robot ?i - rs_input ?m - ring_station ?mi ?mf - material_counter)
-		:condition (and
+		:precondition (and
 			(robot-at ?r ?i)
 			(input-location ?i ?m)
 			(robot-holding-material ?r)
@@ -313,7 +314,7 @@
 
 	(:action drop-material
 		:parameters (?r - robot)
-		:condition (and
+		:precondition (and
 			(robot-holding-material ?r)
 		)
 		:effect (and
@@ -326,7 +327,7 @@
 
 	(:action transport-material
 		:parameters (?r - robot ?o - output ?i - rs_input ?m - ring_station)
-		:condition (and
+		:precondition (and
 			(input-location ?i ?m)
 			(robot-at ?r ?o)
 			(not (robot-recently-moved ?r))
@@ -346,7 +347,7 @@
 
 	(:action transport-product
 		:parameters (?r - robot ?p - product ?o - output ?i - input ?m - machine ?s1 ?s2 - step)
-		:condition (and
+		:precondition (and
 			(robot-holding-product ?r ?p)
 			(has-step ?p ?s1)
 			(has-step ?p ?s2)
@@ -371,7 +372,7 @@
 
 	(:action move
 		:parameters (?r - robot ?l1 ?l2 - location)
-		:condition (and
+		:precondition (and
 			(robot-at ?r ?l1)
 			(not (robot-holding-something ?r))
 			(not (robot-recently-moved ?r))
@@ -387,11 +388,27 @@
 		)
 	)
 
-	(:action move-in
+	(:action move-in-first
 		:parameters (?r - robot ?l - s_location)
-		:condition (and
+		:precondition (and
 			(robot-at-init ?r)
-			(not (exists (?_r - robot) (and (robot-precedes ?_r ?r) (robot-at-init ?_r))))
+			(first-robot ?r)
+			(not (location-occupied ?l))
+		)
+		:effect (and
+			(not (robot-at-init ?r))
+			(location-occupied ?l)
+			(robot-at ?r ?l)
+			(increase (total-cost) 10)
+		)
+	)
+
+	(:action move-in
+		:parameters (?r ?r2 - robot ?l - s_location)
+		:precondition (and
+			(robot-at-init ?r)
+			(robot-precedes ?r2 ?r) 
+			(not (robot-at-init ?r2))
 			(not (location-occupied ?l))
 		)
 		:effect (and

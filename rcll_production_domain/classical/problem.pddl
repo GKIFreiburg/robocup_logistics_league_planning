@@ -44,6 +44,7 @@
 	(robot-at-init r1)
 	(robot-at-init r2)
 	(robot-at-init r3)
+	(first-robot r1)
 	(robot-precedes r1 r2)
 	(robot-precedes r1 r3)
 	(robot-precedes r2 r3)
