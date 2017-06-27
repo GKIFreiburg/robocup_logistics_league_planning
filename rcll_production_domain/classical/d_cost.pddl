@@ -42,7 +42,7 @@
 		ds_in - ds_input
 
 		; materials
-		m0 m1 m2 m3 - material_counter
+		zero one two tree - material_counter
 	)
 
 	(:predicates
