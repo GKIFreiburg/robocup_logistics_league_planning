@@ -76,6 +76,7 @@
 		(robot-holding-something ?r - robot)
 		(robot-recently-moved ?r - robot)
 		(robot-processing ?r - robot)
+		(robot-assigned-machine ?r - robot ?m - machine)
 		
 		; locations
 		(location-occupied ?l - location)
@@ -124,13 +125,15 @@
 	)
 
 	(:durative-action mount-ring
-		:parameters (?m - ring_station ?p - product ?s - step ?i - rs_input ?o - rs_output)
+		:parameters (?m - ring_station ?p - product ?s1 ?s - step ?i - rs_input ?o - rs_output)
 		:duration (= ?duration 1)
 		:condition (and
 			(at start (product-at ?p ?i))
 			(at start (has-step ?p ?s))
 			(at start (step-at-machine ?s ?m))
 			(at start (not (step-completed ?s)))
+			(at start (step-completed ?s1))
+			(at start (step-precedes ?s1 ?s))
 			(at start (input-location ?i ?m))
 			(at start (output-location ?o ?m))
 			(at start (not (processing ?m)))
@@ -226,6 +229,7 @@
 		:parameters (?r - robot ?m - cap_station ?i - cs_input)
 		:duration (= ?duration 30)
 		:condition (and
+			(over all (robot-assigned-machine ?r ?m))
 			(over all (not (processing ?m)))
 			(over all (robot-at ?r ?i))
 			(over all (not (conveyor-full ?m)))
@@ -247,6 +251,7 @@
 		:parameters (?r - robot ?o - output ?m - machine)
 		:duration (= ?duration 15)
 		:condition (and
+			(over all (robot-assigned-machine ?r ?om))
 			(over all (robot-at ?r ?o))
 			(at start (not (processing ?m)))
 			(at start (not (robot-processing ?r)))
@@ -269,6 +274,7 @@
 		:parameters (?r - robot ?o - output ?p - product ?m - machine)
 		:duration (= ?duration 15)
 		:condition (and
+			(over all (robot-assigned-machine ?r ?om))
 			(over all (not (processing ?m)))
 			(over all (robot-at ?r ?o))
 			(at start (not (robot-processing ?r)))

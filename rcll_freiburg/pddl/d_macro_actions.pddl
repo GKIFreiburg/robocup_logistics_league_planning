@@ -77,7 +77,6 @@
 		(robot-recently-moved ?r - robot)
 		(robot-processing ?r - robot)
 		(robot-assigned-machine ?r - robot ?m - machine)
-		(robot-assigned-product-handling ?r - robot)
 		
 		; locations
 		(location-occupied ?l - location)
