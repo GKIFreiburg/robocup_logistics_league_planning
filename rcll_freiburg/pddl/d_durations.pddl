@@ -251,7 +251,7 @@
 		:parameters (?r - robot ?o - output ?m - machine)
 		:duration (= ?duration 15)
 		:condition (and
-			(over all (robot-assigned-machine ?r ?om))
+			(over all (robot-assigned-machine ?r ?m))
 			(over all (robot-at ?r ?o))
 			(at start (not (processing ?m)))
 			(at start (not (robot-processing ?r)))
@@ -274,7 +274,7 @@
 		:parameters (?r - robot ?o - output ?p - product ?m - machine)
 		:duration (= ?duration 15)
 		:condition (and
-			(over all (robot-assigned-machine ?r ?om))
+			(over all (robot-assigned-machine ?r ?m))
 			(over all (not (processing ?m)))
 			(over all (robot-at ?r ?o))
 			(at start (not (robot-processing ?r)))
@@ -336,6 +336,22 @@
 		)
 	)
 
+	(:durative-action drop-material
+		:parameters (?r - robot)
+		:duration (= ?duration 1)
+		:condition (and
+			(at start (not (robot-processing ?r)))
+			(at start (robot-holding-material ?r))
+		)
+		:effect (and
+			(at start (robot-processing ?r))
+			(at end (not (robot-holding-material ?r)))
+			(at end (not (robot-holding-something ?r)))
+			(at end (not (robot-processing ?r)))
+			(at end (not (robot-recently-moved ?r)))
+		)
+	)
+
 	(:durative-action transport-material
 		:parameters (?r - robot ?o - output ?i - rs_input ?m - ring_station)
 		:duration (= ?duration (path-length ?o ?i))
@@ -377,6 +393,7 @@
 			(at start (robot-at ?r ?o))
 			(at start (not (robot-recently-moved ?r)))
 			(over all (not (location-occupied ?i)))
+			(over all (>= (material-stored ?m) (material-required ?s2)))
 		)
 		:effect (and
 			(at start (not (robot-at ?r ?o)))
