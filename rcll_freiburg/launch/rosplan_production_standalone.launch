@@ -20,5 +20,7 @@
 -->
 	</include>
 	<include file="$(find rcll_freiburg)/launch/rosplan_gui.launch" />
+	<!-- 
 	<include file="$(find rcll_freiburg)/launch/timekeeping.launch" />
+	 -->
 </launch>
