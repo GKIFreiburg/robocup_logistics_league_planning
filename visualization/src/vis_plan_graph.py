@@ -47,7 +47,7 @@ class Visualization:
         index2 = substring.find("style=") + index
 
         self.dotcode = self.dotcode[:index2] + 'color=red ' + self.dotcode[index2:]
-        print(self.dotcode)
+        #print(self.dotcode)
 
 
 
