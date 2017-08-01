@@ -16,6 +16,7 @@
 		s_location - location
 		machine - object
 		base_station ring_station cap_station delivery_station - machine
+		machine_state - object
 		product - object
 		step - object
 	)
@@ -42,6 +43,15 @@
 		cs2_in - cs_input
 		cs2_out - cs_output
 		ds_in - ds_input
+		
+		; machine states
+		busy - machine_state
+		down - machine_state
+		broken - machine_state
+		ready_at_output - machine_state
+		prepared - machine_state
+		processing - machine_state
+		idle - machine_state
 	)
 
 	(:predicates
@@ -87,6 +97,7 @@
 		(material-required ?s - step) - number
 		; paths
 		(path-length ?l1 ?l2 - location) - number
+		(machine-state ?m - machine) - machine_state
 	)
 
 	(:durative-action dispense-material
@@ -428,7 +439,7 @@
 		:condition (and
 			(at start (not (robot-processing ?r)))
 			(at start (robot-at-init ?r))
-			(at start (not (exists (?_r - robot) (and (robot-precedes ?_r ?r) (robot-at-init ?_r)))))
+			(at start (not (exists (?r2 - robot) (and (robot-precedes ?r2 ?r) (robot-at-init ?r2)))))
 			(over all (not (location-occupied ?l)))
 		)
 		:effect (and
