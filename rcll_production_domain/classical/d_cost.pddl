@@ -82,7 +82,6 @@
 		(robot-holding-product ?r - robot ?p - product)
 		(robot-holding-something ?r - robot)
 		(robot-recently-moved ?r - robot)
-		(robot-assigned-machine ?r - robot ?m - machine)
 		
 		; locations
 		(location-occupied ?l - location)
@@ -137,7 +136,6 @@
 			(step-precedes ?s1 ?s)
 			(input-location ?i ?m)
 			(output-location ?o ?m)
-			;(>= (material-stored ?m) (material-required ?s))
 			(material-required ?s ?mr)
 			(material-stored ?m ?mi)
 			(subtract ?mi ?mr ?mf)
@@ -146,7 +144,6 @@
 			(not (product-at ?p ?i))
 			(product-at ?p ?o)
 			(step-completed ?s)
-			;(decrease (material-stored ?m) (material-required ?s))
 			(not (material-stored ?m ?mi))
 			(material-stored ?m ?mf)
 			(increase (total-cost) 1)
