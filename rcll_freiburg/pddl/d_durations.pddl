@@ -433,7 +433,7 @@
 		:condition (and
 			(at start (not (robot-processing ?r)))
 			(at start (robot-at-init ?r))
-			(at start (not (exists (?_r - robot) (and (robot-precedes ?_r ?r) (robot-at-init ?_r)))))
+			(at start (not (exists (?r2 - robot) (and (robot-precedes ?r2 ?r) (robot-at-init ?r2)))))
 			(over all (not (location-occupied ?l)))
 		)
 		:effect (and

@@ -16,7 +16,6 @@
 		s_location - location
 		machine - object
 		base_station ring_station cap_station delivery_station - machine
-		machine_state - object
 		product - object
 		step - object
 	)
@@ -43,15 +42,6 @@
 		cs2_in - cs_input
 		cs2_out - cs_output
 		ds_in - ds_input
-		
-		; machine states
-		busy - machine_state
-		down - machine_state
-		broken - machine_state
-		ready_at_output - machine_state
-		prepared - machine_state
-		processing - machine_state
-		idle - machine_state
 	)
 
 	(:predicates
@@ -87,6 +77,7 @@
 		(robot-recently-moved ?r - robot)
 		(robot-processing ?r - robot)
 		(robot-assigned-machine ?r - robot ?m - machine)
+		(robot-assigned-product-handling ?r - robot)
 		
 		; locations
 		(location-occupied ?l - location)
@@ -97,7 +88,6 @@
 		(material-required ?s - step) - number
 		; paths
 		(path-length ?l1 ?l2 - location) - number
-		(machine-state ?m - machine) - machine_state
 	)
 
 	(:durative-action dispense-material
