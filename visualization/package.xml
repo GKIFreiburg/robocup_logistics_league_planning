@@ -41,8 +41,7 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <run_depend>python-rospkg</run_depend>
-  <run_depend>rosbag</run_depend>
-  <run_depend>rosgraph_msgs</run_depend>
+  <run_depend>message_filters</run_depend>
   <run_depend>roslib</run_depend>
   <run_depend>rospy</run_depend>
   

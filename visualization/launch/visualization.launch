@@ -1,4 +1,8 @@
 <launch>
-   <rosparam param="/color_words">['r1', 'move']</rosparam>
-   <node name="visualization" pkg="visualization" type="vis_plan_graph.py" />
+	<node name="vis_test" pkg="visualization" type="vis_plan_graph2.py">
+		<rosparam command="load"
+			file="$(find visualization)/config/graph_style.yaml" />
+		<rosparam command="load"
+			file="$(find visualization)/config/highlight_keywords.yaml" />
+	</node>
 </launch>

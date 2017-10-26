@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   rqt_gui
   rqt_gui_py
   rqt_gui_cpp
+  message_filters
 )
 
 

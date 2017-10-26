@@ -1,0 +1,28 @@
+show_only_highlighted: True
+colorize_highlighted: True
+highlight_keywords:
+#robots
+- r1
+- r2
+- r3
+# machines
+- bs
+- rs1
+- rs2
+- cs1
+- cs2
+- ds
+# products
+- p10
+- p20
+- p21
+- p30
+- p31
+- p40
+- p41
+- p50
+- p51
+- p60
+- p61
+- p70
+- p80

@@ -6,285 +6,136 @@ sys.path.append('/usr/lib/pyshared/python2.6')
 import argparse
 
 import rospy
-from std_msgs.msg import String
+import colorsys
 
 from graphviz import Source
 
+from rosplan_dispatch_msgs.msg import CompletePlan
+from std_msgs.msg import String
 from rosplan_dispatch_msgs.msg import ActionDispatch
 from rosplan_dispatch_msgs.msg import ActionFeedback
 
-
 class Visualization:
-
-    def __init__(self):
-        self.graph_subscriber = rospy.Subscriber('/kcl_rosplan/plan_graph', String, self.graph_callback)
-        self.action_feed_back_subscriber = rospy.Subscriber('/kcl_rosplan/action_feedback', ActionFeedback, self.action_feedback_callback)
-
-        self.dotcode = ""
-        self.actions = list()
-
-        self.enabled_actions = list()#[]
-        self.failed_actions = list()#[]
-        self.succeeded_actions = list()#[]
-
-        self.succeeded_color = 'color=chartreuse2 penwidth=2.0 '
-        self.enabled_color = 'color=darkgoldenrod1 penwidth=2.0 '
-        self.failed_color = 'color=firebrick3 penwidth=2.0 '
-
-        self.color_words =  rospy.get_param("/color_words")
-        self.colors = list()
-
-    def calculate_colors(self):
-        self.colors = list()
-        self.color_words =  rospy.get_param("/color_words")
-
-        number = len(self.color_words)
-
-        if number > 6:
-            divider = 360.0 / 6
-        else:
-            divider = 360.0 / (number)
-
-        for i in range(0,number):
-
-            if i >= 6:
-                i = i-6
-                h =float(i * divider + 30)
-            else:
-                h = float(i * divider)
-
-            h = h/360
-            s = 1.0
-            v = 0.6
-            print h
-            self.colors.append(str(h)+' '+str(s)+' '+str(v))
-
-
-    def new_graph(self, new_dotcode):
-        self.actions = list()
-
-        counter = 0
-        index = 0
-        while index >= 0:
-            find = str(counter) + '[ '
-            index = self.dotcode.find(find)
-            counter = counter +1
-
-        for i in range (0, (counter-1)):
-            find = str(i) + '[ '
-            index = self.dotcode.find(find)
-            if index > -1:
-                substring = self.dotcode[index:]
-
-                index2 = substring.find("label=") + index + 7
-                substring = self.dotcode[index2:]
-
-                index3 = substring.find("style=") + index2
-                substring2 = self.dotcode[index2:(index3-2)]
-
-                self.actions.append(substring2)
-
-        new_actions = list()
-        counter = 0
-        index = 0
-        while index >= 0:
-            find = str(counter) + '[ '
-            index = new_dotcode.find(find)
-            counter = counter + 1
-
-        if not((counter-1) == len(self.actions)):
-            return True
-
-        for i in range (0, (counter-1)):
-            find = str(i) + '[ '
-            index = new_dotcode.find(find)
-            if index > -1:
-                substring = new_dotcode[index:]
-
-                index2 = substring.find("label=") + index + 7
-                substring = new_dotcode[index2:]
-
-                index3 = substring.find("style=") + index2
-                substring2 = new_dotcode[index2:(index3-2)]
-                new_actions.append(substring2)
-
-        for i in range (0, len(self.actions)):
-            if not(self.actions[i] == new_actions[i]):
-                return True
-
-        return False
-
-    def set_font_color(self):
-
-        self.calculate_colors()
-
-        graph = self.dotcode
-
-        counter = 0
-        index = 0
-        while index >= 0:
-            find = str(counter) + '[ '
-            index = graph.find(find)
-            counter = counter +1
-
-        for i in range (0, (counter-1)):
-            find = str(i) + '[ '
-            index = graph.find(find)
-
-            if index > -1:
-                substring = graph[index:]
-
-                index2 = substring.find("label=") + index + 7
-                substring = graph[index2:]
-
-                index3 = substring.find("style=") + index2
-                old_label = graph[index2:(index3-2)]
-                tmp = old_label
-
-
-                part1 = graph[:(index2-1)]
-                part2 = graph[(index3-1):]
-
-                number = old_label.count("\n")
-
-                new_label = "<"
-                last_index = 0
-                for j in range(0, (number+1)):
-
-                    index = old_label.find("\n")
-
-                    if j == number:
-                        find_label = old_label
-
-                    else:
-                        find_label = old_label[:index]
-
-
-                    if (find_label in self.color_words):
-
-                        color_index = self.color_words.index(find_label)
-
-                        if (color_index >= 0):
-                            color = str(self.colors[color_index])
-                            color = '"'+str(color)+'"'
-
-                            if j == number:
-                                new_label = new_label + """<FONT color="""+color+""">""" + old_label + """</FONT> <br/> """
-                            else:
-                                new_label = new_label + """<FONT color="""+color+""">""" + old_label[:index] + """</FONT> <br/> """
-
-                    else:
-                        if j == number:
-                            new_label = new_label + """<FONT color="grey42">""" + old_label + """</FONT> <br/> """
-                        else:
-                            new_label = new_label + """<FONT color="grey42">""" + old_label[:index] + """</FONT> <br/> """
-
-                    old_label = old_label[(index+1):]
-
-                new_label = new_label + ">"
-                index = tmp.find("\n")
-
-                graph = part1 + new_label + part2
-
-        return graph
-
-
-
-
-    def graph_callback(self, data):
-
-        set = self.new_graph(data.data)
-
-        if set:
-
-            self.dotcode = data.data
-
-            self.enabled_actions = list()
-            self.failed_actions = list()
-            self.succeeded_actions = list()
-
-            self.set_color()
-
-
-    def action_feedback_callback(self, data):
-
-        action_id = int(data.action_id)
-
-        if 'enabled' in data.status:
-            self.enabled_actions.append(action_id)
-            self.enabled_actions = list(set(self.enabled_actions))
-
-            if data.action_id in self.failed_actions:
-                self.failed_actions.remove(data.action_id)
-
-            if data.action_id in self.succeeded_actions:
-                self.succeeded_actions.remove(data.action_id)
-
-        elif 'achieved' in data.status:
-            self.succeeded_actions.append(action_id)
-            self.succeeded_actions = list(set(self.succeeded_actions))
-
-            if data.action_id in self.enabled_actions:
-                self.enabled_actions.remove(data.action_id)
-
-            if data.action_id in self.failed_actions:
-                self.failed_actions.remove(data.action_id)
-
-        elif 'failed' in data.status:
-            self.failed_actions.append(action_id)
-            self.failed_actions = list(set(self.failed_actions))
-
-            if data.action_id in self.enabled_actions:
-                self.enabled_actions.remove(data.action_id)
-
-            if data.action_id in self.succeeded_actions:
-                self.succeeded_actions.remove(data.action_id)
-
-        self.set_color()
-
-
-
-    def set_color(self):
-
-        graph = self.dotcode
-
-        graph = self.set_font_color()
-
-        for action in self.enabled_actions:
-            id = str(action) + '[ '
-            index = graph.find(id)
-            if index > -1:
-                substring = graph[index:]
-                index2 = substring.find("style=") + index
-                graph = graph[:index2] + self.enabled_color + graph[index2:]
-
-        for action in self.failed_actions:
-            id = str(action) + '[ '
-            index = graph.find(id)
-            if index > -1:
-                substring = graph[index:]
-                index2 = substring.find("style=") + index
-                graph = graph[:index2] + self.failed_color + graph[index2:]
-
-        for action in self.succeeded_actions:
-            id = str(action) + '[ '
-            index = graph.find(id)
-            if index > -1:
-                substring = graph[index:]
-                index2 = substring.find("style=") + index
-                graph = graph[:index2] + self.succeeded_color + graph[index2:]
-
-        src = Source(graph)
-        src.render('test-output/holy-grenade.gv', view=True)
-
+	def __init__(self):
+		self.plan = []  # ActionDispatch[]
+		self.graph = None  # string
+		
+		
+		self.achieved_action_ids = set()
+		self.enabled_action_ids = set()
+		self.failed_action_ids = set()
+		
+		self.color_table = {}
+		self.update_params()
+		
+		self.plan_subscriber = rospy.Subscriber(
+			'/kcl_rosplan/plan', CompletePlan, self.plan_callback)
+		self.graph_subscriber = rospy.Subscriber(
+			'/kcl_rosplan/plan_graph', String, self.graph_callback)
+		self.action_feed_back_subscriber = rospy.Subscriber(
+			'/kcl_rosplan/action_feedback', ActionFeedback, self.action_feedback_callback)
+		
+		#rospy.sleep(0.3)
+		#self.render_graph()
+		self.timer = rospy.Timer(period=rospy.Duration(0.3), callback=self.schedule_update, oneshot=True)
+
+	def plan_callback(self, msg):
+		rospy.loginfo('plan')
+		self.plan = msg.plan
+		self.achieved_action_ids.clear()
+		self.enabled_action_ids.clear()
+		self.failed_action_ids.clear()
+		self.timer = rospy.Timer(period=rospy.Duration(0.1), callback=self.schedule_update, oneshot=True)
+
+	def graph_callback(self, msg):
+		rospy.loginfo('graph')
+		self.graph = msg.data
+		
+	def action_feedback_callback(self, msg):
+		if msg.action_id >= len(self.plan):
+			self.achieved_action_ids.clear()
+			self.enabled_action_ids.clear()
+			self.failed_action_ids.clear()
+			return
+
+		if msg.status == 'action enabled':
+			self.enabled_action_ids.add(msg.action_id)
+		elif msg.status == 'action achieved':
+			if msg.action_id in self.enabled_action_ids:
+				self.enabled_action_ids.remove(msg.action_id)
+			self.achieved_action_ids.add(msg.action_id)
+		elif msg.status == 'action failed':
+			if msg.action_id in self.enabled_action_ids:
+				self.enabled_action_ids.remove(msg.action_id)
+			self.failed_action_ids.add(msg.action_id)
+		else:
+			rospy.logwarn('unknown action feedback status: {}'.format(msg.status))
+		self.timer = rospy.Timer(period=rospy.Duration(0.1), callback=self.schedule_update, oneshot=True)
+		
+	def schedule_update(self, event):
+		self.update_params()
+		self.render_graph()
+		
+	def update_params(self):
+		param_names = ['graph_template', 'node_template',
+									'arg_template', 'highlight_keywords', 'show_only_highlighted']
+		for param in param_names:
+			self.__dict__[param] = rospy.get_param('~{}'.format(param))
+		
+		# update color tables
+		for keyword in self.highlight_keywords:
+			if keyword not in self.color_table:
+				#color = colorsys.hsv_to_rgb(h=self.calculate_color_hue(len(self.color_table)), s=1.0, v=0.8)
+				#self.color_table[keyword] = '{} {} {}'.format(color[0], color[1], color[2])
+				self.color_table[keyword] = '{} {} {}'.format(self.calculate_color_hue(len(self.color_table)), 1.0, 0.8)
+			
+	def calculate_color_hue(self, index):
+		return (29*float(index)%360.0)/360.0
+			
+	def render_graph(self):
+		if not self.graph or not self.plan:
+			return
+		rospy.loginfo('start render graph')
+		
+		# action status subgraphs
+		enabled = ' '.join(str(i) for i in self.enabled_action_ids)
+		achieved = ' '.join(str(i) for i in self.achieved_action_ids)
+		failed = ' '.join(str(i) for i in self.failed_action_ids)
+		
+		# actions with highlighted key words
+		node_list = []
+		for action in self.plan:
+			arg_list = []
+			if self.highlight_keywords and len(self.highlight_keywords) > 0:
+				for kv in action.parameters:
+					if kv.value in self.highlight_keywords:
+						arg_list.append(self.arg_template.format(color=self.color_table[kv.value], arg=kv.value))
+					elif not self.show_only_highlighted:
+						arg_list.append(kv.value)
+			else:
+				arg_list = [kv.value for kv in action.parameters]
+			args = ' '.join(arg_list)
+			node = self.node_template.format(id=action.action_id, name=action.name, args=args)
+			node_list.append(node)
+		nodes = '\n'.join(node_list)
+		
+		# graph connections
+		e_start = self.graph.find('"0"')
+		e_end = self.graph.rfind('"')
+		edges = self.graph[e_start:e_end+1]
+
+		graph = self.graph_template.format(
+			enabled=enabled, achieved=achieved, failed=failed, nodes=nodes, edges=edges)
+		rospy.loginfo(graph)
+		src = Source(graph)
+		src.render('plan.gv', view=True)
 
 def main(args):
-    '''Initializes and cleanup ros node'''
-    ic = Visualization()
-    rospy.init_node('vis_plan_graph', anonymous=True)
-    rospy.spin()
+	rospy.init_node('vis_plan_graph', anonymous=True)
+	ic = Visualization()
+	rospy.spin()
 
 
 if __name__ == '__main__':
 
-    main(sys.argv)
+	main(sys.argv)

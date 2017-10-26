@@ -1,0 +1,21 @@
+graph_template: |
+  digraph plan {{
+    node [shape=Mrecord];
+    subgraph achieved {{
+      node [color=grey penwidth=1.0]
+      {achieved};
+    }}
+    subgraph enabled {{
+      node [color=darkgoldenrod1 penwidth=2.0]
+      {enabled};
+    }}
+    subgraph failed {{
+      node [color=firebrick3 penwidth=3.0]
+      {failed};
+    }}
+  {nodes}
+  {edges}
+  }}
+
+node_template: '  {id}[label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0"><TR><TD>{name}</TD></TR><TR><TD>{args}</TD></TR></TABLE>>];'
+color_text_template: '<FONT COLOR="{color}">{arg}</FONT>'
