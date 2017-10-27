@@ -419,7 +419,7 @@
 			(at end (location-occupied ?l2))
 			(at end (not (robot-processing ?r)))
 			(at end (robot-at ?r ?l2))
-			;(at end (robot-recently-moved ?r))
+			(at end (robot-recently-moved ?r))
 		)
 	)
 

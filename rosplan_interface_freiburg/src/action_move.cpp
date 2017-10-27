@@ -96,6 +96,16 @@ public:
 			}
 		}
 
+		// HACK: do not set robot-recently-moved effect. Can produce deadlock situation!
+		std::vector<rosplan_knowledge_msgs::DomainFormula>::iterator pit = op.at_end_add_effects.begin();
+		for (; pit != op.at_end_add_effects.end(); pit++)
+		{
+			if (pit->name == "robot-recently-moved")
+			{
+				pit = op.at_end_add_effects.erase(pit);
+			}
+		}
+
 		return true;
 	}
 
