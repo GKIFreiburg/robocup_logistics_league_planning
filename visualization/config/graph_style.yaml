@@ -1,17 +1,17 @@
 graph_template: |
   digraph plan {{
     node [shape=Mrecord];
-    subgraph achieved {{
-      node [color=grey penwidth=1.0]
-      {achieved};
+    subgraph failed {{
+      node [color=firebrick3 penwidth=3.0]
+      {failed};
     }}
     subgraph enabled {{
       node [color=darkgoldenrod1 penwidth=2.0]
       {enabled};
     }}
-    subgraph failed {{
-      node [color=firebrick3 penwidth=3.0]
-      {failed};
+    subgraph achieved {{
+      node [color=grey penwidth=1.0]
+      {achieved};
     }}
   {nodes}
   {edges}
