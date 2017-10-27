@@ -193,7 +193,7 @@
 	)
 
 	(:durative-action deliver
-		:parameters (?p - product ?s - step ?m - delivery_station ?i - ds_input)
+		:parameters (?m - delivery_station ?p - product ?s - step ?i - ds_input)
 		:duration (= ?duration 1)
 		:condition (and
 			(at start (product-at ?p ?i))
@@ -419,7 +419,7 @@
 			(at end (location-occupied ?l2))
 			(at end (not (robot-processing ?r)))
 			(at end (robot-at ?r ?l2))
-			(at end (robot-recently-moved ?r))
+			;(at end (robot-recently-moved ?r))
 		)
 	)
 
