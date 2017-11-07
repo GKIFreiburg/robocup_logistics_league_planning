@@ -9,10 +9,9 @@
 )
 (:init
     ; r1 moving to cs1
-    ;(at 20 (and (robot-at r1 cs1_in) (not (robot-at-init r1))))
+    (at 20 (and (robot-at r1 cs1_in) (not (robot-at-init r1))))
     ; r1 insert cap to cs1
-    ;(at 50 (and (conveyor-full cs1) (material-at cs1_in))))
-    ;(at 15 (robot-at-init r1))
+    (at 50 (and (conveyor-full cs1) (material-at cs1_in)))
     
     (has-step p10 silver_base_p10)
     (has-step p10 grey_cap_p10)
@@ -198,12 +197,14 @@
     (step-completed silver_base_p10)
     (step-completed grey_cap_p10)
     (step-completed gate2_delivery_p10)
-    (step-completed silver_base_p70)
-    (step-completed blue_ring_p70)
-    (step-completed orange_ring_p70)
-    (step-completed yellow_ring_p70)
-    (step-completed black_cap_p70)
-    (step-completed gate2_delivery_p70)
+    
+    ;(step-completed silver_base_p70)
+    ;(step-completed blue_ring_p70)
+    ;(step-completed orange_ring_p70)
+    ;(step-completed yellow_ring_p70)
+    ;(step-completed black_cap_p70)
+    ;(step-completed gate2_delivery_p70)
+   
     ;(cap-buffered cs1)
     ;(cap-buffered cs2)
     ;(not (material-at cs2_out))

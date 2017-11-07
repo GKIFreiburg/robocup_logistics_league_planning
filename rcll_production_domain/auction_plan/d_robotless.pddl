@@ -193,7 +193,7 @@
 		)
 	)
 
-	(:durative-action discard-material
+	(:durative-action someone-discard-material
 		:parameters (?m - delivery_station ?i - ds_input)
 		:duration (= ?duration 1)
 		:condition (and
@@ -208,7 +208,7 @@
 		)
 	)
 
-	(:durative-action insert-cap
+	(:durative-action someone-insert-cap
 		:parameters (?m - cap_station ?i - cs_input)
 		:duration (= ?duration 30)
 		:condition (and
@@ -223,7 +223,7 @@
 		)
 	)
 
-	(:durative-action drop-material
+	(:durative-action someone-drop-material
 		:parameters (?o - cs_output ?om - cap_station)
 		:duration (= ?duration 15)
 		:condition (and
@@ -236,7 +236,7 @@
 		)
 	)
 
-	(:durative-action transport-material
+	(:durative-action someone-transport-material
 		:parameters (?o - output ?om - machine ?i - rs_input ?m - ring_station)
 		:duration (= ?duration (+ 30 (path-length ?o ?i)))
 		:condition (and
@@ -252,7 +252,7 @@
 		)
 	)
 
-	(:durative-action transport-product
+	(:durative-action someone-transport-product
 		:parameters (?p - product ?o - output ?om - machine ?i - input ?m - machine ?s1 ?s2 - step)
 		:duration (= ?duration (+ 30 (path-length ?o ?i)))
 		:condition (and
