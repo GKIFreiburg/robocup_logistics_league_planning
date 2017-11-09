@@ -1,8 +1,8 @@
 <launch>
-	<node name="vis_test" pkg="visualization" type="vis_plan_graph.py">
+	<node name="plan_vis" pkg="plangraph_visualization" type="vis_plan_graph.py">
 		<rosparam command="load"
-			file="$(find visualization)/config/graph_style.yaml" />
+			file="$(find plangraph_visualization)/config/graph_style.yaml" />
 		<rosparam command="load"
-			file="$(find visualization)/config/highlight_keywords.yaml" />
+			file="$(find plangraph_visualization)/config/highlight_keywords.yaml" />
 	</node>
 </launch>

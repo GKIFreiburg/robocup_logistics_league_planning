@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>visualization</name>
+  <name>plangraph_visualization</name>
   <version>0.0.0</version>
-  <description>The visualization package</description>
+  <description>The plangraph_visualization package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
