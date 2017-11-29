@@ -215,11 +215,9 @@
 		)
 	)
 
-	(:action insert-cap
-		:parameters (?r - robot ?m - cap_station ?i - cs_input)
+	(:action someone-insert-cap
+		:parameters (?m - cap_station ?i - cs_input)
 		:precondition (and
-			;(robot-assigned-machine ?r ?m)
-			(robot-at ?r ?i)
 			(not (conveyor-full ?m))
 			(not (robot-holding-something ?r))
 			(input-location ?i ?m)
@@ -310,7 +308,7 @@
 		)
 	)
 
-	(:action drop-material
+	(:action someone-drop-material
 		:parameters (?r - robot)
 		:precondition (and
 			(robot-holding-material ?r)
