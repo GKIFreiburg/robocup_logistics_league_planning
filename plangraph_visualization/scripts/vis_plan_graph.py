@@ -1,25 +1,27 @@
 #!/usr/bin/env python
 import sys
+from jsonschema._validators import dependencies
 
 sys.path.append('/usr/lib/pyshared/python2.6')
 
 import argparse
+import re
 
 import rospy
 import colorsys
+import numpy as np
 
 from graphviz import Source
 
 from rosplan_dispatch_msgs.msg import CompletePlan
-from std_msgs.msg import String
 from rosplan_dispatch_msgs.msg import ActionDispatch
 from rosplan_dispatch_msgs.msg import ActionFeedback
+from diagnostic_msgs.msg import KeyValue
+from std_msgs.msg import String
 
 class Visualization:
 	def __init__(self):
 		self.plan = []  # ActionDispatch[]
-		self.graph = None  # string
-		
 		
 		self.achieved_action_ids = set()
 		self.enabled_action_ids = set()
@@ -27,15 +29,6 @@ class Visualization:
 		
 		self.color_table = {}
 		self.update_params()
-		
-		self.plan_subscriber = rospy.Subscriber(
-			'/kcl_rosplan/plan', CompletePlan, self.plan_callback)
-		self.graph_subscriber = rospy.Subscriber(
-			'/kcl_rosplan/plan_graph', String, self.graph_callback)
-		self.action_feed_back_subscriber = rospy.Subscriber(
-			'/kcl_rosplan/action_feedback', ActionFeedback, self.action_feedback_callback)
-		
-		self.timer = rospy.Timer(period=rospy.Duration(0.3), callback=self.schedule_update, oneshot=True)
 
 	def plan_callback(self, msg):
 		rospy.loginfo('plan')
@@ -45,10 +38,6 @@ class Visualization:
 		self.failed_action_ids.clear()
 		self.timer = rospy.Timer(period=rospy.Duration(0.1), callback=self.schedule_update, oneshot=True)
 
-	def graph_callback(self, msg):
-		rospy.loginfo('graph')
-		self.graph = msg.data
-		
 	def action_feedback_callback(self, msg):
 		if msg.action_id >= len(self.plan):
 			self.achieved_action_ids.clear()
@@ -69,9 +58,36 @@ class Visualization:
 		else:
 			rospy.logwarn('unknown action feedback status: {}'.format(msg.status))
 		self.timer = rospy.Timer(period=rospy.Duration(0.1), callback=self.schedule_update, oneshot=True)
-		
+
+	def deduce_action_dependencies(self):
+		# dependency graph in matrix representation
+		action_count = len(self.plan)
+		dependency_matrix = np.zeros(shape=(action_count, action_count))
+
+		for action in self.plan:
+			parameter_values = set(param.value for param in action.parameters)
+			# for each parameter find latest action dependency of earlier actions
+			for other_action in self.plan:
+				other_end_time = other_action.dispatch_time + other_action.duration
+				if action.dispatch_time < other_end_time:
+					continue
+				other_parameter_values = set(param.value for param in other_action.parameters)
+				if len(parameter_values & other_parameter_values) > 0:
+					dependency_matrix[action.action_id, other_action.action_id] = 1
+
+		# transitive reduction
+		for j in range(action_count):
+			for i in range(action_count):
+				if dependency_matrix[i, j]:
+					for k in range(action_count):
+						if dependency_matrix[j, k]:
+							dependency_matrix[i, k] = 0
+
+		self.dependency_matrix = dependency_matrix
+
 	def schedule_update(self, event):
 		self.update_params()
+		self.deduce_action_dependencies()
 		self.render_graph()
 		
 	def update_params(self):
@@ -104,7 +120,7 @@ class Visualization:
 				
 	
 	def render_graph(self):
-		if not self.graph or not self.plan:
+		if not self.plan:
 			return
 		
 		# action status subgraphs
@@ -116,24 +132,18 @@ class Visualization:
 		node_list = []
 		for action in self.plan:
 			arg_list = [self.colorize_text(kv.value) for kv in action.parameters]
-			
-# 			if self.highlight_keywords and len(self.highlight_keywords) > 0:
-# 				for kv in action.parameters:
-# 					if kv.value in self.highlight_keywords:
-# 						arg_list.append(self.arg_template.format(color=self.color_table[kv.value], arg=kv.value))
-# 					elif not self.show_only_highlighted:
-# 						arg_list.append(kv.value)
-# 			else:
-# 				arg_list = [kv.value for kv in action.parameters]
 			args = ' '.join(arg_list)
 			node = self.node_template.format(id=action.action_id, name=action.name, args=args)
 			node_list.append(node)
 		nodes = '\n'.join(node_list)
 		
-		# graph connections, a bit hacky...
-		e_start = self.graph.find('"0"')
-		e_end = self.graph.rfind('"')
-		edges = self.graph[e_start:e_end+1]
+		# add graph connections
+		edge_list = []
+		for a1 in range(len(self.plan)):
+			for a2 in range(len(self.plan)):
+				if self.dependency_matrix[a1, a2]:
+					edge_list.append('"{}" -> "{}"'.format(a2, a1))
+		edges = '\n'.join(edge_list)
 
 		graph = self.graph_template.format(
 			enabled=enabled, achieved=achieved, failed=failed, nodes=nodes, edges=edges)
@@ -141,9 +151,43 @@ class Visualization:
 		src = Source(graph)
 		src.render('plan.gv', view=True)
 
+def parse_temporal_plan(plan_file):
+	raw_plan = []
+	with open(plan_file) as f:
+		raw_plan = f.read()
+		
+	# typical PDDL raw_plan action
+	# 193.02530000: (transport-product r3 p70 bs_out bs rs2_in rs2 silver_base_p70 blue_ring_p70) [58.66200000]
+	action_re = "([0-9]*\\.?[0-9]+).*: *\\((.+)\\) *\\[([0-9]*\\.?[0-9]+)\\]"
+	matches = re.findall(action_re, raw_plan)
+	plan = CompletePlan()
+	for match in matches:
+		action = ActionDispatch()
+		action.action_id = len(plan.plan)
+		action.dispatch_time = float(match[0])
+		action.duration = float(match[2])
+		action_parts = match[1].split()
+		action.name = action_parts[0]
+		for parameter in action_parts[1:]:
+			kv = KeyValue()
+			kv.value = parameter
+			action.parameters.append(kv)
+		plan.plan.append(action)
+	return plan
+
 def main(args):
 	rospy.init_node('vis_plan_graph', anonymous=True)
-	ic = Visualization()
+	vis = Visualization()
+	if len(args) > 1:
+		rospy.loginfo('visualizing offline plan: {}'.format(args[1]))
+		vis.plan_callback(parse_temporal_plan(args[1]))
+	else:
+		rospy.loginfo('visualizing plans from rosplan live...')
+		plan_subscriber = rospy.Subscriber(
+			'/kcl_rosplan/plan', CompletePlan, vis.plan_callback)
+		action_feedback_subscriber = rospy.Subscriber(
+			'/kcl_rosplan/action_feedback', ActionFeedback, vis.action_feedback_callback)
+		pass
 	rospy.spin()
 
 

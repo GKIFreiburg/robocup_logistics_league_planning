@@ -1,5 +1,6 @@
 <launch>
-	<node name="plan_vis" pkg="plangraph_visualization" type="vis_plan_graph.py">
+	<arg name="plan_file" default=""/>
+	<node name="plan_vis" pkg="plangraph_visualization" type="vis_plan_graph.py" args="$(arg plan_file)">
 		<rosparam command="load"
 			file="$(find plangraph_visualization)/config/graph_style.yaml" />
 		<rosparam command="load"
