@@ -1,4 +1,4 @@
-show_only_highlighted: True
+show_only_highlighted: False
 colorize_highlighted: True
 highlight_keywords:
 #robots
@@ -26,3 +26,7 @@ highlight_keywords:
 - p61
 - p70
 - p80
+# trucks
+- truck-1
+- truck-2
+- truck-3

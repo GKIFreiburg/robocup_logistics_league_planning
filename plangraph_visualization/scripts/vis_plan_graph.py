@@ -66,10 +66,10 @@ class Visualization:
 
 		for action in self.plan:
 			parameter_values = set(param.value for param in action.parameters)
-			# for each parameter find latest action dependency of earlier actions
+			# find action dependency on earlier actions
 			for other_action in self.plan:
 				other_end_time = other_action.dispatch_time + other_action.duration
-				if action.dispatch_time < other_end_time:
+				if action.dispatch_time + 0.0001 < other_end_time:
 					continue
 				other_parameter_values = set(param.value for param in other_action.parameters)
 				if len(parameter_values & other_parameter_values) > 0:
