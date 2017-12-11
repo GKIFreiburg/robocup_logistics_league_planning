@@ -175,14 +175,15 @@ def parse_temporal_plan(plan_file):
 		plan.plan.append(action)
 	return plan
 
-def main(args):
-	rospy.init_node('vis_plan_graph', anonymous=True)
+if __name__ == '__main__':
+	rospy.init_node('vis_plan_graph', argv=sys.argv, anonymous=True)
 	vis = Visualization()
-	if len(args) > 1:
-		rospy.loginfo('visualizing offline plan: {}'.format(args[1]))
-		vis.plan_callback(parse_temporal_plan(args[1]))
+	
+	if len(sys.argv) > 1 and sys.argv[1][0:2] != '__':
+		rospy.loginfo('visualizing offline plan: {}'.format(sys.argv[1]))
+		vis.plan_callback(parse_temporal_plan(sys.argv[1]))
 	else:
-		rospy.loginfo('visualizing plans from rosplan live...')
+		rospy.loginfo('visualizing plans from rosplan topic')
 		plan_subscriber = rospy.Subscriber(
 			'/kcl_rosplan/plan', CompletePlan, vis.plan_callback)
 		action_feedback_subscriber = rospy.Subscriber(
@@ -190,7 +191,3 @@ def main(args):
 		pass
 	rospy.spin()
 
-
-if __name__ == '__main__':
-
-	main(sys.argv)
