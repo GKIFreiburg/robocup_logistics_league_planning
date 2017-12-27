@@ -241,7 +241,7 @@ public:
 		rcll_ros_msgs::SendPrepareMachine srv;
 		setupPrepareRequest(boundParameters["s2"], srv.request);
 		ROS_INFO_STREAM(
-				log_prefix_<<"sending prepare request, wait for initial state: "<<initial_machine_state_<<", wait for desired state: "<<desired_machine_state_);
+				log_prefix_<<"sending prepare request to "<<name<<", wait for initial state: "<<initial_machine_state_<<", wait for desired state: "<<desired_machine_state_);
 		bool success = machine->sendPrepare(srv, initial_machine_state_, desired_machine_state_);
 		if (! success)
 		{

@@ -71,6 +71,8 @@ private:
 	std::string full_name_;
 	std::string error_state_;
 	std::string log_prefix_;
+
+	ros::NodeHandle* nh;
 };
 
 #endif /* SRC_MACHINEINTERFACE_H_ */

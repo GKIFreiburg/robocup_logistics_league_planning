@@ -65,6 +65,7 @@ const std::string& MachineInterface::getMachineState()
 
 bool MachineInterface::waitForState(const std::string& state, ros::Duration timeout)
 {
+	ROS_INFO_STREAM(log_prefix_<<"waiting for state "<<state);
 	ros::Time start = ros::Time::now();
 	while(ros::ok() && start+timeout>ros::Time::now())
 	{
@@ -73,11 +74,13 @@ bool MachineInterface::waitForState(const std::string& state, ros::Duration time
 		{
 			if (getMachineState() == state)
 			{
+				ROS_INFO_STREAM(log_prefix_<<full_name_<<" now in state "<<state);
 				return true;
 			}
 		}
 		ros::Rate(1).sleep();
 	}
+	ROS_ERROR_STREAM(log_prefix_<<full_name_<<" did not switch to state "<<state);
 	return false;
 }
 
@@ -87,7 +90,9 @@ bool MachineInterface::sendPrepare(rcll_ros_msgs::SendPrepareMachine& srv, const
 	waitForState(initial_state);
 	srv.request.machine = full_name_;
 	srv.request.wait = true;
+	ROS_INFO_STREAM(log_prefix_<<"connecting to prepare service for "<<full_name_);
 	connect_service_prepare_machine();
+	ROS_INFO_STREAM(log_prefix_<<"sending prepare to "<<full_name_);
 	refbox_prepare_machine_.call(srv);
 	if (! srv.response.ok)
 	{
