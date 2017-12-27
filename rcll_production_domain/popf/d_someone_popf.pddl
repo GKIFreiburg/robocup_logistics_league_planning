@@ -245,9 +245,6 @@
 		:duration (= ?duration 1)
 		:condition (and
 			(at start (material-at ?i))
-			(at start (has-step ?p ?s))
-			(at start (step-at-station ?s ?m))
-			(at start (step-incomplete ?s))
 			(at start (input-location ?i ?m))
 			(at start (station-idle ?m))
 		)
