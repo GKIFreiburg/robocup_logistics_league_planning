@@ -94,6 +94,7 @@
 		:parameters (?m - base_station ?o - bs_output)
 		:duration (= ?duration 1)
 		:condition (and
+			(at start (output-location ?o ?m))
 			(at start (not (conveyor-full ?m)))
 			(at start (not (processing ?m)))
 		)
@@ -109,6 +110,7 @@
 		:parameters (?p - product ?s - step ?m - base_station ?o - bs_output)
 		:duration (= ?duration 1)
 		:condition (and
+			(at start (output-location ?o ?m))
 			(at start (has-step ?p ?s))
 			(at start (step-at-machine ?s ?m))
 			(at start (initial-step ?s))
