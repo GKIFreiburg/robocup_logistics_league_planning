@@ -88,16 +88,12 @@
 		(material-at ?l - location)
 		
 		; robots
+		(robot-idle ?r - robot)
+		(robot-outside ?r - robot)
 		(robot-at ?r - robot ?l - location)
-		(robot-at-init ?r - robot)
-		(robot-not-at-init ?r - robot)
-		(first-robot ?r - robot)
-		(robot-precedes ?r1 ?r2 - robot)
 		(robot-holding-material ?r - robot)
 		(robot-holding-product ?r - robot ?p - product)
 		(robot-gripper-free ?r - robot)
-		(robot-can-move ?r - robot)
-		(robot-idle ?r - robot)
 		
 		; locations
 		(location-free ?l - location)
@@ -405,7 +401,6 @@
 			(at start (not (robot-idle ?r)))
 			(at end (robot-idle ?r))
 			(at end (material-at ?i))
-			(at end (robot-can-move ?r))
 		)
 	)
 
@@ -473,21 +468,6 @@
 		)
 	)
 
-;	(:durative-action drop-material
-;		:parameters (?r - robot)
-;		:duration (= ?duration 1)
-;		:condition (and
-;			(at start (robot-idle ?r))
-;			(at start (robot-holding-material ?r))
-;		)
-;		:effect (and
-;			(at start (not (robot-idle ?r)))
-;			(at end (robot-idle ?r))
-;			(at end (not (robot-holding-material ?r)))
-;			(at end (robot-gripper-free ?r))
-;		)
-;	)
-
 	(:durative-action transport-material
 		:parameters (?r - robot ?o - output ?i - input ?m - station)
 		:duration (= ?duration (path-length ?o ?i))
@@ -496,13 +476,10 @@
 			(at start (input-location ?i ?m))
 			(at start (robot-at ?r ?o))
 			(at start (robot-holding-material ?r))
-			(over all (location-free ?i))
 		)
 		:effect (and
 			(at start (not (robot-idle ?r)))
 			(at start (not (robot-at ?r ?o)))
-			(at start (location-free ?o))
-			(at end (not (location-free ?i)))
 			(at end (robot-idle ?r))
 			(at end (robot-at ?r ?i))
 		)
@@ -566,13 +543,10 @@
 			(at start (step-incomplete ?s2))
 			(at start (input-location ?i ?m))
 			(at start (robot-at ?r ?o))
-			(over all (location-free ?i))
 		)
 		:effect (and
 			(at start (not (robot-at ?r ?o)))
 			(at start (not (robot-idle ?r)))
-			(at start (location-free ?o))
-			(at end (not (location-free ?i)))
 			(at end (robot-idle ?r))
 			(at end (robot-at ?r ?i))
 		)
@@ -585,55 +559,42 @@
 			(at start (robot-idle ?r))
 			(at start (robot-at ?r ?l1))
 			(at start (robot-gripper-free ?r))
-			(at start (robot-can-move ?r))
-			(over all (location-free ?l2))
 		)
 		:effect (and
 			(at start (not (robot-at ?r ?l1)))
 			(at start (not (robot-idle ?r)))
-			(at start (location-free ?l1))
-			(at end (not (location-free ?l2)))
 			(at end (robot-idle ?r))
 			(at end (robot-at ?r ?l2))
-			;(at end (not (robot-can-move ?r)))
-		)
-	)
-
-	(:durative-action move-in-first
-		:parameters (?r - robot ?l - s_location)
-		:duration (= ?duration 10)
-		:condition (and
-			(at start (robot-idle ?r))
-			(at start (robot-at-init ?r))
-			(at start (first-robot ?r))
-			(over all (location-free ?l))
-		)
-		:effect (and
-			(at start (not (robot-idle ?r)))
-			(at end (not (robot-at-init ?r)))
-			(at end (robot-not-at-init ?r))
-			(at end (robot-idle ?r))
-			(at end (not (location-free ?l)))
-			(at end (robot-at ?r ?l))
 		)
 	)
 
 	(:durative-action move-in
-		:parameters (?r ?r2 - robot ?l - s_location)
+		:parameters (?r - robot ?l - s_location)
 		:duration (= ?duration 10)
 		:condition (and
 			(at start (robot-idle ?r))
-			(at start (robot-at-init ?r))
-			(at start (robot-precedes ?r2 ?r))
-			(at start (robot-not-at-init ?r2))
-			(over all (location-free ?l))
+			(at start (robot-outside ?r))
 		)
 		:effect (and
-			(at end (not (robot-at-init ?r)))
 			(at start (not (robot-idle ?r)))
+			(at end (not (robot-outside ?r)))
 			(at end (robot-idle ?r))
-			(at end (not (location-free ?l)))
 			(at end (robot-at ?r ?l))
+		)
+	)
+
+	(:durative-action move-out
+		:parameters (?r - robot ?l - s_location)
+		:duration (= ?duration 10)
+		:condition (and
+			(at start (robot-idle ?r))
+			(at start (robot-at ?r ?l))
+		)
+		:effect (and
+			(at start (not (robot-idle ?r)))
+			(at start (not (robot-at ?r ?l)))
+			(at end (robot-idle ?r))
+			(at end (robot-outside ?r))
 		)
 	)
 )

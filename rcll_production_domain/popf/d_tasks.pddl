@@ -11,7 +11,7 @@
 		robot - object
 		location - object
 		input output - location
-	location - location
+		s_location - location
 		station - object
 		base_station ring_station cap_station delivery_station - station
 		product - object
@@ -27,9 +27,9 @@
 		cs1 - cap_station
 		cs2 - cap_station
 		ds - delivery_station
-
+		
 		; locations
-		start -location
+		start - s_location
 		bs_in - output
 		bs_out - output
 		rs1_in - input
@@ -88,16 +88,12 @@
 		(material-at ?l - location)
 		
 		; robots
+		(robot-idle ?r - robot)
+		(robot-outside ?r - robot)
 		(robot-at ?r - robot ?l - location)
-		(robot-at-init ?r - robot)
-		(robot-not-at-init ?r - robot)
-		(first-robot ?r - robot)
-		(robot-precedes ?r1 ?r2 - robot)
 		(robot-holding-material ?r - robot)
 		(robot-holding-product ?r - robot ?p - product)
 		(robot-gripper-free ?r - robot)
-		(robot-can-move ?r - robot)
-		(robot-idle ?r - robot)
 		
 		; locations
 		(location-free ?l - location)
@@ -272,7 +268,7 @@
 		)
 	)
 
-	(:durative-action someone-insert-cap
+	(:durative-action task-insert-cap
 		:parameters (?m - cap_station ?i - input)
 		:duration (= ?duration 30)
 		:condition (and
@@ -287,20 +283,7 @@
 		)
 	)
 
-;	(:durative-action someone-drop-material
-;		:parameters (?o - output ?om - cap_station)
-;		:duration (= ?duration 15)
-;		:condition (and
-;			(at start (output-location ?o ?om))
-;			(at start (material-at ?o))
-;		)
-;		:effect (and
-;			(at start (not (material-at ?o)))
-;			(at start (conveyor-empty ?om))
-;		)
-;	)
-
-	(:durative-action someone-transport-material-discard
+	(:durative-action task-transport-material-discard
 		:parameters (?o - output ?om - station ?i - input ?m - delivery_station)
 		:duration (= ?duration (+ 30 (path-length ?o ?i)))
 		:condition (and
@@ -317,7 +300,7 @@
 		)
 	)
 
-	(:durative-action someone-transport-material
+	(:durative-action task-transport-material
 		:parameters (?o - output ?om - station ?i - input ?m - ring_station ?mi ?mf - material_counter)
 		:duration (= ?duration (+ 30 (path-length ?o ?i)))
 		:condition (and
@@ -335,7 +318,7 @@
 		)
 	)
 
-	(:durative-action someone-transport-product
+	(:durative-action task-transport-product
 		:parameters (?p - product ?o - output ?om - station ?i - input ?m - station ?s1 ?s2 - step)
 		:duration (= ?duration (+ 30 (path-length ?o ?i)))
 		:condition (and
