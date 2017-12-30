@@ -94,9 +94,6 @@
 		(robot-holding-material ?r - robot)
 		(robot-holding-product ?r - robot ?p - product)
 		(robot-gripper-free ?r - robot)
-		
-		; locations
-		(location-free ?l - location)
 	)
 
 	(:functions
