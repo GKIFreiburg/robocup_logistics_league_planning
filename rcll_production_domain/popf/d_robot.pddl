@@ -277,7 +277,7 @@
 			(at start (not (station-prepared-for-step ?m ?s)))
 			(at start (not (product-at ?p ?i)))
 			(at start (not (material-stored ?m ?mi)))
-			(at start (material-stored ?m ?mf))
+			(at end (material-stored ?m ?mf))
 			(at end (station-output-ready ?m))
 			(at end (product-at ?p ?o))
 			(at end (not (step-incomplete ?s)))

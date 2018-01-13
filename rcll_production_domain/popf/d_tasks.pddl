@@ -157,13 +157,12 @@
 		:effect (and
 			(at start (not (station-idle ?m)))
 			(at start (not (product-at ?p ?i)))
+			(at start (not (material-stored ?m ?mi)))
+			(at end (material-stored ?m ?mf))
 			(at end (station-idle ?m))
 			(at end (product-at ?p ?o))
 			(at end (not (step-incomplete ?s)))
 			(at end (step-completed ?s))
-			;(at end (decrease (material-stored ?m) (material-required ?s)))
-			(at start (not (material-stored ?m ?mi)))
-			(at start (material-stored ?m ?mf))
 		)
 	)
 

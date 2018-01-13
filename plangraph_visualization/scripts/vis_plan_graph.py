@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 import sys
-from jsonschema._validators import dependencies
-
 sys.path.append('/usr/lib/pyshared/python2.6')
 
 import argparse
