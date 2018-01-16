@@ -243,7 +243,7 @@
 (:goal (and
     ;(step-completed silver_base_p10)
     ;(step-completed grey_cap_p10)
-    (step-completed gate2_delivery_p10)
+    ;(step-completed gate2_delivery_p10)
     
     ;(step-completed silver_base_p70)
     ;(step-completed blue_ring_p70)

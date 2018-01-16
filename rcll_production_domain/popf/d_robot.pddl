@@ -101,26 +101,12 @@
 		(path-length ?l1 ?l2 - location) - number
 	)
 
-	(:durative-action prepare-dispense-material
-		:parameters (?m - base_station ?o - output)
-		:duration (= ?duration 0.01)
-		:condition (and
-			(at start (conveyor-empty ?m))
-			(at start (station-idle ?m))
-      (at start (output-location ?o ?m))
-		)
-		:effect (and
-			(at start (not (station-idle ?m)))
-			(at end (station-prepared-for-dispense ?m))
-			(at end (prepared-dispense-output ?o))
-		)
-	)
-
 	(:durative-action dispense-material
 		:parameters (?m - base_station ?o - output)
 		:duration (= ?duration 1)
 		:condition (and
 			(at start (conveyor-empty ?m))
+			(at start (output-location ?o ?m))
 			(at start (station-prepared-for-dispense ?m))
 			(at start (prepared-dispense-output ?o))
 		)
@@ -133,109 +119,6 @@
 		)
 	)
 
-	(:durative-action prepare-mount-cap
-		:parameters (?r - robot ?p - product ?s2 ?s - step ?m - cap_station ?i - input)
-		:duration (= ?duration 0.01)
-		:condition (and
-			(at start (conveyor-empty ?m))
-			(at start (station-idle ?m))
-      (at start (input-location ?i ?m))
-      (at start (robot-at ?r ?i))
-      (at start (step-incomplete ?s))
-      (at start (step-precedes ?s2 ?s))
-      (at start (step-completed ?s2))
-      (at start (has-step ?p ?s2))
-      (at start (has-step ?p ?s))
-			(at start (step-at-station ?s ?m))
-      (at start (robot-holding-product ?r ?p))
-			(at start (cap-buffered ?m))
-		)
-		:effect (and
-			(at start (not (station-idle ?m)))
-			(at end (station-prepared-for-step ?m ?s))
-		)
-	)
-
-	(:durative-action prepare-mount-ring
-		:parameters (?r - robot ?p - product ?s2 ?s - step ?m - ring_station ?i - input ?c1 ?c2 - material_counter)
-		:duration (= ?duration 0.01)
-		:condition (and
-			(at start (conveyor-empty ?m))
-			(at start (station-idle ?m))
-      (at start (input-location ?i ?m))
-      (at start (robot-at ?r ?i))
-      (at start (step-incomplete ?s))
-      (at start (step-precedes ?s2 ?s))
-      (at start (step-completed ?s2))
-      (at start (has-step ?p ?s2))
-      (at start (has-step ?p ?s))
-			(at start (step-at-station ?s ?m))
-      (at start (robot-holding-product ?r ?p))
-			(at start (material-stored ?m ?c2))
-			(at start (material-required ?s ?c1))
-			(at start (less-or-equal ?c1 ?c2))
-		)
-		:effect (and
-			(at start (not (station-idle ?m)))
-			(at end (station-prepared-for-step ?m ?s))
-		)
-	)
-
-	(:durative-action prepare-dispense-product
-		:parameters (?s - step ?m - base_station ?o - output)
-		:duration (= ?duration 0.01)
-		:condition (and
-			(at start (conveyor-empty ?m))
-			(at start (station-idle ?m))
-      (at start (output-location ?o ?m))
-      (at start (step-incomplete ?s))
-      (at start (initial-step ?s))
-			(at start (step-at-station ?s ?m))
-		)
-		:effect (and
-			(at start (not (station-idle ?m)))
-			(at end (station-prepared-for-step ?m ?s))
-		)
-	)
-
-	(:durative-action prepare-discard
-		:parameters (?r - robot ?m - delivery_station ?i - input)
-		:duration (= ?duration 0.01)
-		:condition (and
-			(at start (conveyor-empty ?m))
-			(at start (station-idle ?m))
-      (at start (input-location ?i ?m))
-      (at start (robot-at ?r ?i))
-      (at start (robot-holding-material ?r))
-		)
-		:effect (and
-			(at start (not (station-idle ?m)))
-			(at end (station-prepared-for-discard ?m))
-		)
-	)
-
-	(:durative-action prepare-delivery
-		:parameters (?r - robot ?p - product ?s2 ?s - step ?m - delivery_station ?i - input)
-		:duration (= ?duration 0.01)
-		:condition (and
-			(at start (conveyor-empty ?m))
-			(at start (station-idle ?m))
-      (at start (input-location ?i ?m))
-      (at start (robot-at ?r ?i))
-      (at start (robot-holding-product ?r ?p))
-      (at start (step-incomplete ?s))
-      (at start (step-precedes ?s2 ?s))
-      (at start (step-completed ?s2))
-      (at start (has-step ?p ?s2))
-      (at start (has-step ?p ?s))
-			(at start (step-at-station ?s ?m))
-		)
-		:effect (and
-			(at start (not (station-idle ?m)))
-			(at end (station-prepared-for-step ?m ?s))
-		)
-	)
-
 	(:durative-action dispense-product
 		:parameters (?p - product ?s - step ?m - base_station ?o - output)
 		:duration (= ?duration 1)
@@ -245,8 +128,8 @@
 			(at start (initial-step ?s))
 			(at start (step-incomplete ?s))
 			(at start (conveyor-empty ?m))
+			(at start (output-location ?o ?m))
 			(at start (station-prepared-for-step ?m ?s))
-      (at start (output-location ?o ?m))
 		)
 		:effect (and
 			(at start (not (station-prepared-for-step ?m ?s)))
@@ -282,21 +165,6 @@
 			(at end (product-at ?p ?o))
 			(at end (not (step-incomplete ?s)))
 			(at end (step-completed ?s))
-		)
-	)
-
-	(:durative-action prepare-buffer-cap
-		:parameters (?r - robot ?m - cap_station ?i - input)
-		:duration (= ?duration 0.01)
-		:condition (and
-			(at start (station-idle ?m))
-			(at start (cap-buffer-empty ?m))
-			(at start (input-location ?i ?m))
-			(at start (robot-at ?r ?i))
-		)
-		:effect (and
-			(at start (not (station-idle ?m)))
-			(at end (station-prepared-for-cap ?m))
 		)
 	)
 
@@ -382,6 +250,145 @@
 		)
 	)
 
+	(:durative-action prepare-dispense-material
+		:parameters (?r - robot ?m - base_station ?o - output)
+		:duration (= ?duration 0.01)
+		:condition (and
+			(at start (conveyor-empty ?m))
+			(at start (station-idle ?m))
+			(at start (output-location ?o ?m))
+			(at start (robot-at ?r ?o))
+			(at start (robot-gripper-free ?r))
+		)
+		:effect (and
+			(at start (not (station-idle ?m)))
+			(at end (station-prepared-for-dispense ?m))
+			(at end (prepared-dispense-output ?o))
+		)
+	)
+
+	(:durative-action prepare-dispense-product
+		:parameters (?r - robot ?s - step ?m - base_station ?o - output)
+		:duration (= ?duration 0.01)
+		:condition (and
+			(at start (conveyor-empty ?m))
+			(at start (station-idle ?m))
+			(at start (output-location ?o ?m))
+			(at start (step-incomplete ?s))
+			(at start (initial-step ?s))
+			(at start (step-at-station ?s ?m))
+			(at start (robot-at ?r ?o))
+			(at start (robot-gripper-free ?r))
+		)
+		:effect (and
+			(at start (not (station-idle ?m)))
+			(at end (station-prepared-for-step ?m ?s))
+			(at end (prepared-dispense-output ?o))
+		)
+	)
+
+	(:durative-action prepare-buffer-cap
+		:parameters (?r - robot ?m - cap_station ?i - input)
+		:duration (= ?duration 0.01)
+		:condition (and
+			(at start (station-idle ?m))
+			(at start (cap-buffer-empty ?m))
+			(at start (input-location ?i ?m))
+			(at start (conveyor-empty ?m))
+			(at start (robot-at ?r ?i))
+		)
+		:effect (and
+			(at start (not (station-idle ?m)))
+			(at end (station-prepared-for-cap ?m))
+		)
+	)
+
+	(:durative-action prepare-mount-cap
+		:parameters (?r - robot ?p - product ?s2 ?s - step ?m - cap_station ?i - input)
+		:duration (= ?duration 0.01)
+		:condition (and
+			(at start (conveyor-empty ?m))
+			(at start (station-idle ?m))
+      (at start (input-location ?i ?m))
+      (at start (robot-at ?r ?i))
+      (at start (step-incomplete ?s))
+      (at start (step-precedes ?s2 ?s))
+      (at start (step-completed ?s2))
+      (at start (has-step ?p ?s2))
+      (at start (has-step ?p ?s))
+			(at start (step-at-station ?s ?m))
+      (at start (robot-holding-product ?r ?p))
+			(at start (cap-buffered ?m))
+		)
+		:effect (and
+			(at start (not (station-idle ?m)))
+			(at end (station-prepared-for-step ?m ?s))
+		)
+	)
+
+	(:durative-action prepare-mount-ring
+		:parameters (?r - robot ?p - product ?s2 ?s - step ?m - ring_station ?i - input ?c1 ?c2 - material_counter)
+		:duration (= ?duration 0.01)
+		:condition (and
+			(at start (conveyor-empty ?m))
+			(at start (station-idle ?m))
+      (at start (input-location ?i ?m))
+      (at start (robot-at ?r ?i))
+      (at start (step-incomplete ?s))
+      (at start (step-precedes ?s2 ?s))
+      (at start (step-completed ?s2))
+      (at start (has-step ?p ?s2))
+      (at start (has-step ?p ?s))
+			(at start (step-at-station ?s ?m))
+      (at start (robot-holding-product ?r ?p))
+			(at start (material-stored ?m ?c2))
+			(at start (material-required ?s ?c1))
+			(at start (less-or-equal ?c1 ?c2))
+		)
+		:effect (and
+			(at start (not (station-idle ?m)))
+			(at end (station-prepared-for-step ?m ?s))
+		)
+	)
+
+	(:durative-action prepare-discard
+		:parameters (?r - robot ?m - delivery_station ?i - input)
+		:duration (= ?duration 0.01)
+		:condition (and
+			(at start (conveyor-empty ?m))
+			(at start (station-idle ?m))
+      (at start (input-location ?i ?m))
+      (at start (robot-at ?r ?i))
+      (at start (robot-holding-material ?r))
+		)
+		:effect (and
+			(at start (not (station-idle ?m)))
+			(at end (station-prepared-for-discard ?m))
+		)
+	)
+
+	(:durative-action prepare-delivery
+		:parameters (?r - robot ?p - product ?s2 ?s - step ?m - delivery_station ?i - input)
+		:duration (= ?duration 0.01)
+		:condition (and
+			(at start (conveyor-empty ?m))
+			(at start (station-idle ?m))
+      (at start (input-location ?i ?m))
+      (at start (robot-at ?r ?i))
+      (at start (robot-holding-product ?r ?p))
+      (at start (step-incomplete ?s))
+      (at start (step-precedes ?s2 ?s))
+      (at start (step-completed ?s2))
+      (at start (has-step ?p ?s2))
+      (at start (has-step ?p ?s))
+			(at start (step-at-station ?s ?m))
+		)
+		:effect (and
+			(at start (not (station-idle ?m)))
+			(at end (station-prepared-for-step ?m ?s))
+		)
+	)
+
 	(:durative-action insert-cap
 		:parameters (?r - robot ?m - cap_station ?i - input)
 		:duration (= ?duration 30)
@@ -407,15 +414,15 @@
 		:condition (and
 			(at start (robot-idle ?r))
 			(at start (output-location ?o ?om))
-			(at start (robot-at ?r ?o))
 			(at start (material-at ?o))
-			(at start (robot-gripper-free ?r))
 			(at start (station-output-ready ?om))
+			(at start (robot-at ?r ?o))
+			(at start (robot-gripper-free ?r))
 		)
 		:effect (and
 			(at start (not (robot-idle ?r)))
 			(at start (not (material-at ?o)))
-			(at end (not (station-output-ready ?om)))
+			(at start (not (station-output-ready ?om)))
 			(at end (station-idle ?om))
 			(at end (conveyor-empty ?om))
 			(at end (robot-holding-material ?r))
@@ -425,18 +432,18 @@
 	)
 
 	(:durative-action insert-material
-		:parameters (?r - robot ?i - input ?im - delivery_station)
+		:parameters (?r - robot ?i - input ?m - delivery_station)
 		:duration (= ?duration 15)
 		:condition (and
 			(at start (robot-idle ?r))
-			(at start (input-location ?i ?im))
+			(at start (input-location ?i ?m))
 			(at start (robot-at ?r ?i))
 			(at start (robot-holding-material ?r))
-			(at start (station-prepared-for-discard ?im))
+			(at start (station-prepared-for-discard ?m))
 		)
 		:effect (and
 			(at start (not (robot-idle ?r)))
-			(at start (not (conveyor-empty ?im)))
+			(at start (not (conveyor-empty ?m)))
 			(at end (material-at ?i))
 			(at end (not (robot-holding-material ?r)))
 			(at end (robot-gripper-free ?r))
@@ -445,23 +452,23 @@
 	)
 
 	(:durative-action insert-material-slide
-		:parameters (?r - robot ?i - input ?im - ring_station ?mi ?mf - material_counter)
+		:parameters (?r - robot ?i - input ?m - ring_station ?mi ?mf - material_counter)
 		:duration (= ?duration 15)
 		:condition (and
 			(at start (robot-idle ?r))
-			(at start (input-location ?i ?im))
+			(at start (input-location ?i ?m))
 			(at start (robot-at ?r ?i))
 			(at start (robot-holding-material ?r))
-			(over all (material-stored ?im ?mi))
-			(over all (add-one ?mi ?mf))
+			(at start (material-stored ?m ?mi))
+			(at start (add-one ?mi ?mf))
 		)
 		:effect (and
 			(at start (not (robot-idle ?r)))
+			(at start (not (material-stored ?m ?mi)))
 			(at end (not (robot-holding-material ?r)))
 			(at end (robot-gripper-free ?r))
 			(at end (robot-idle ?r))
-			(at end (not (material-stored ?im ?mi)))
-			(at end (material-stored ?im ?mf))
+			(at end (material-stored ?m ?mf))
 		)
 	)
 
