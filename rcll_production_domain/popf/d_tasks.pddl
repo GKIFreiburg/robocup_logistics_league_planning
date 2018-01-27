@@ -2,9 +2,8 @@
 	(:requirements 
 		:durative-actions
 		:numeric-fluents
-		:object-fluents
 		:typing
-		:adl
+		:timed-initial-literals
 	)
 
 	(:types
@@ -94,16 +93,18 @@
 		(robot-holding-material ?r - robot)
 		(robot-holding-product ?r - robot ?p - product)
 		(robot-gripper-free ?r - robot)
+		(robot-can-move ?r - robot)
 	)
 
 	(:functions
 		; paths
 		(path-length ?l1 ?l2 - location) - number
+		(station-process-duration ?m - station) - number
 	)
 
 	(:durative-action dispense-material
 		:parameters (?m - base_station ?o - output)
-		:duration (= ?duration 1)
+		:duration (= ?duration (station-process-duration ?m))
 		:condition (and
 			(at start (conveyor-empty ?m))
 			(at start (output-location ?o ?m))
@@ -121,7 +122,7 @@
 
 	(:durative-action dispense-product
 		:parameters (?p - product ?s - step ?m - base_station ?o - output)
-		:duration (= ?duration 1)
+		:duration (= ?duration (station-process-duration ?m))
 		:condition (and
 			(at start (has-step ?p ?s))
 			(at start (step-at-station ?s ?m))
@@ -143,7 +144,7 @@
 
 	(:durative-action mount-ring
 		:parameters (?m - ring_station ?p - product ?s - step ?i - input ?o - output ?mi ?mr ?mf - material_counter)
-		:duration (= ?duration 1)
+		:duration (= ?duration (station-process-duration ?m))
 		:condition (and
 			(at start (product-at ?p ?i))
 			(at start (has-step ?p ?s))
@@ -170,7 +171,7 @@
 
 	(:durative-action buffer-cap
 		:parameters (?m - cap_station ?i - input ?o - output)
-		:duration (= ?duration 1)
+		:duration (= ?duration (station-process-duration ?m))
 		:condition (and
 			(at start (input-location ?i ?m))
 			(at start (output-location ?o ?m))
@@ -190,7 +191,7 @@
 
 	(:durative-action mount-cap
 		:parameters (?m - cap_station ?p - product ?s - step ?i - input ?o - output)
-		:duration (= ?duration 1)
+		:duration (= ?duration (station-process-duration ?m))
 		:condition (and
 			(at start (product-at ?p ?i))
 			(at start (has-step ?p ?s))
@@ -215,7 +216,7 @@
 
 	(:durative-action deliver
 		:parameters (?m - delivery_station ?p - product ?s - step ?i - input)
-		:duration (= ?duration 1)
+		:duration (= ?duration (station-process-duration ?m))
 		:condition (and
 			(at start (product-at ?p ?i))
 			(at start (has-step ?p ?s))
@@ -236,7 +237,7 @@
 
 	(:durative-action discard-material
 		:parameters (?m - delivery_station ?i - input)
-		:duration (= ?duration 1)
+		:duration (= ?duration (station-process-duration ?m))
 		:condition (and
 			(at start (material-at ?i))
 			(at start (input-location ?i ?m))
@@ -250,11 +251,10 @@
 		)
 	)
 
-	(:durative-action task-dispense-material
+	(:durative-action prepare-dispense-material
 		:parameters (?m - base_station ?o - output)
-		:duration (= ?duration 0.01)
+		:duration (= ?duration 1)
 		:condition (and
-			(at start (conveyor-empty ?m))
 			(at start (station-idle ?m))
 			(at start (output-location ?o ?m))
 		)
@@ -265,11 +265,10 @@
 		)
 	)
 
-	(:durative-action task-dispense-product
+	(:durative-action prepare-dispense-product
 		:parameters (?s - step ?m - base_station ?o - output)
-		:duration (= ?duration 0.01)
+		:duration (= ?duration 1)
 		:condition (and
-			(at start (conveyor-empty ?m))
 			(at start (station-idle ?m))
 			(at start (output-location ?o ?m))
 			(at start (step-incomplete ?s))
@@ -343,8 +342,8 @@
 		)
 	)
 
-	(:durative-action task-transport-product
-		:parameters (?p - product ?o - output ?om - station ?i - input ?m - station ?s1 ?s2 - step)
+	(:durative-action task-transport-product-to-cap
+		:parameters (?p - product ?s1 ?s2 - step ?o - output ?om - station ?i - input ?m - cap_station)
 		:duration (= ?duration (+ 30 (path-length ?o ?i)))
 		:condition (and
 			(at start (product-at ?p ?o))
@@ -357,8 +356,70 @@
 			(at start (input-location ?i ?m))
 			(at start (output-location ?o ?om))
 			(at start (station-output-ready ?om))
-			(at end (conveyor-empty ?m))
-			(at end (station-idle ?m))
+			(over all (cap-buffered ?m))
+			(over all (conveyor-empty ?m))
+			(over all (station-idle ?m))
+		)
+		:effect (and
+			(at start (not (product-at ?p ?o)))
+			(at start (conveyor-empty ?om))
+			(at start (not (station-output-ready ?om)))
+			(at start (station-idle ?om))
+			(at end (product-at ?p ?i))
+			(at end (not (conveyor-empty ?m)))
+			(at end (not (station-idle ?m)))
+			(at end (station-prepared-for-step ?m ?s2))
+		)
+	)
+
+	(:durative-action task-transport-product-to-ring
+		:parameters (?p - product ?s1 ?s2 - step ?o - output ?om - station ?i - input ?m - ring_station ?c1 ?c2 - material_counter)
+		:duration (= ?duration (+ 30 (path-length ?o ?i)))
+		:condition (and
+			(at start (product-at ?p ?o))
+			(at start (has-step ?p ?s1))
+			(at start (has-step ?p ?s2))
+			(at start (step-at-station ?s2 ?m))
+			(at start (step-precedes ?s1 ?s2))
+			(at start (step-completed ?s1))
+			(at start (step-incomplete ?s2))
+			(at start (input-location ?i ?m))
+			(at start (output-location ?o ?om))
+			(at start (station-output-ready ?om))
+			(at start (material-stored ?m ?c2))
+			(at start (material-required ?s2 ?c1))
+			(at start (less-or-equal ?c1 ?c2))
+			(over all (conveyor-empty ?m))
+			(over all (station-idle ?m))
+		)
+		:effect (and
+			(at start (not (product-at ?p ?o)))
+			(at start (conveyor-empty ?om))
+			(at start (not (station-output-ready ?om)))
+			(at start (station-idle ?om))
+			(at end (product-at ?p ?i))
+			(at end (not (conveyor-empty ?m)))
+			(at end (not (station-idle ?m)))
+			(at end (station-prepared-for-step ?m ?s2))
+		)
+	)
+
+	(:durative-action task-transport-product-to-delivery
+		:parameters (?p - product ?s1 ?s2 - step ?o - output ?om - station ?i - input ?m - delivery_station)
+		:duration (= ?duration (+ 30 (path-length ?o ?i)))
+		:condition (and
+			(at start (product-at ?p ?o))
+			(at start (has-step ?p ?s1))
+			(at start (has-step ?p ?s2))
+			(at start (step-at-station ?s2 ?m))
+			(at start (step-precedes ?s1 ?s2))
+			(at start (step-completed ?s1))
+			(at start (step-incomplete ?s2))
+			(at start (input-location ?i ?m))
+			(at start (output-location ?o ?om))
+			(at start (station-output-ready ?om))
+			(over all (conveyor-empty ?m))
+			(over all (station-idle ?m))
 		)
 		:effect (and
 			(at start (not (product-at ?p ?o)))

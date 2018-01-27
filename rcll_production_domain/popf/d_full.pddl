@@ -102,6 +102,186 @@
 		(station-process-duration ?m - station) - number
 	)
 
+	(:durative-action dispense-material
+		:parameters (?m - base_station ?o - output)
+		:duration (= ?duration (station-process-duration ?m))
+		:condition (and
+			(at start (conveyor-empty ?m))
+			(at start (output-location ?o ?m))
+			(at start (station-prepared-for-dispense ?m))
+			(at start (prepared-dispense-output ?o))
+		)
+		:effect (and
+			(at start (not (station-prepared-for-dispense ?m)))
+			(at start (not (prepared-dispense-output ?o)))
+			(at start (not (conveyor-empty ?m)))
+			(at end (station-output-ready ?m))
+			(at end (material-at ?o))
+		)
+	)
+
+	(:durative-action dispense-product
+		:parameters (?p - product ?s - step ?m - base_station ?o - output)
+		:duration (= ?duration (station-process-duration ?m))
+		:condition (and
+			(at start (has-step ?p ?s))
+			(at start (step-at-station ?s ?m))
+			(at start (initial-step ?s))
+			(at start (step-incomplete ?s))
+			(at start (conveyor-empty ?m))
+			(at start (output-location ?o ?m))
+			(at start (station-prepared-for-step ?m ?s))
+		)
+		:effect (and
+			(at start (not (station-prepared-for-step ?m ?s)))
+			(at start (not (conveyor-empty ?m)))
+			(at end (station-output-ready ?m))
+			(at end (product-at ?p ?o))
+			(at end (not (step-incomplete ?s)))
+			(at end (step-completed ?s))
+		)
+	)
+
+	(:durative-action mount-ring
+		:parameters (?m - ring_station ?p - product ?s - step ?i - input ?o - output ?mi ?mr ?mf - material_counter)
+		:duration (= ?duration (station-process-duration ?m))
+		:condition (and
+			(at start (product-at ?p ?i))
+			(at start (has-step ?p ?s))
+			(at start (step-at-station ?s ?m))
+			(at start (step-incomplete ?s))
+			(at start (input-location ?i ?m))
+			(at start (output-location ?o ?m))
+			(at start (station-prepared-for-step ?m ?s))
+			(at start (material-required ?s ?mr))
+			(at start (material-stored ?m ?mi))
+			(at start (subtract ?mi ?mr ?mf))
+		)
+		:effect (and
+			(at start (not (station-prepared-for-step ?m ?s)))
+			(at start (not (product-at ?p ?i)))
+			(at start (not (material-stored ?m ?mi)))
+			(at end (material-stored ?m ?mf))
+			(at end (station-output-ready ?m))
+			(at end (product-at ?p ?o))
+			(at end (not (step-incomplete ?s)))
+			(at end (step-completed ?s))
+		)
+	)
+
+	(:durative-action buffer-cap
+		:parameters (?m - cap_station ?i - input ?o - output)
+		:duration (= ?duration (station-process-duration ?m))
+		:condition (and
+			(at start (input-location ?i ?m))
+			(at start (output-location ?o ?m))
+			(at start (material-at ?i))
+			(at start (station-prepared-for-cap ?m))
+			(at start (cap-buffer-empty ?m))
+		)
+		:effect (and
+			(at start (not (station-prepared-for-cap ?m)))
+			(at start (not (material-at ?i)))
+			(at end (station-output-ready ?m))
+			(at end (material-at ?o))
+			(at end (not (cap-buffer-empty ?m)))
+			(at end (cap-buffered ?m))
+		)
+	)
+
+	(:durative-action mount-cap
+		:parameters (?m - cap_station ?p - product ?s - step ?i - input ?o - output)
+		:duration (= ?duration (station-process-duration ?m))
+		:condition (and
+			(at start (product-at ?p ?i))
+			(at start (has-step ?p ?s))
+			(at start (step-at-station ?s ?m))
+			(at start (step-incomplete ?s))
+			(at start (input-location ?i ?m))
+			(at start (output-location ?o ?m))
+			(at start (station-prepared-for-step ?m ?s))
+			(at start (cap-buffered ?m))
+		)
+		:effect (and
+			(at start (not (station-prepared-for-step ?m ?s)))
+			(at start (not (product-at ?p ?i)))
+			(at end (station-output-ready ?m))
+			(at end (product-at ?p ?o))
+			(at end (not (cap-buffered ?m)))
+			(at end (cap-buffer-empty ?m))
+			(at end (step-completed ?s))
+			(at end (not (step-incomplete ?s)))
+		)
+	)
+
+	(:durative-action deliver
+		:parameters (?m - delivery_station ?p - product ?s - step ?i - input)
+		:duration (= ?duration (station-process-duration ?m))
+		:condition (and
+			(at start (product-at ?p ?i))
+			(at start (has-step ?p ?s))
+			(at start (step-at-station ?s ?m))
+			(at start (step-incomplete ?s))
+			(at start (input-location ?i ?m))
+			(at start (station-prepared-for-step ?m ?s))
+		)
+		:effect (and
+			(at start (not (station-prepared-for-step ?m ?s)))
+			(at start (not (product-at ?p ?i)))
+			(at end (station-idle ?m))
+			(at end (conveyor-empty ?m))
+			(at end (step-completed ?s))
+			(at end (not (step-incomplete ?s)))
+		)
+	)
+
+	(:durative-action discard-material
+		:parameters (?m - delivery_station ?i - input)
+		:duration (= ?duration (station-process-duration ?m))
+		:condition (and
+			(at start (material-at ?i))
+			(at start (input-location ?i ?m))
+			(at start (station-prepared-for-discard ?m))
+		)
+		:effect (and
+			(at start (not (station-prepared-for-discard ?m)))
+			(at end (station-idle ?m))
+			(at end (not (material-at ?i)))
+			(at end (conveyor-empty ?m))
+		)
+	)
+
+	(:durative-action prepare-dispense-material
+		:parameters (?m - base_station ?o - output)
+		:duration (= ?duration 1)
+		:condition (and
+			(at start (station-idle ?m))
+			(at start (output-location ?o ?m))
+		)
+		:effect (and
+			(at start (not (station-idle ?m)))
+			(at end (station-prepared-for-dispense ?m))
+			(at end (prepared-dispense-output ?o))
+		)
+	)
+
+	(:durative-action prepare-dispense-product
+		:parameters (?s - step ?m - base_station ?o - output)
+		:duration (= ?duration 1)
+		:condition (and
+			(at start (station-idle ?m))
+			(at start (output-location ?o ?m))
+			(at start (step-incomplete ?s))
+			(at start (initial-step ?s))
+			(at start (step-at-station ?s ?m))
+		)
+		:effect (and
+			(at start (not (station-idle ?m)))
+			(at end (station-prepared-for-step ?m ?s))
+			(at end (prepared-dispense-output ?o))
+		)
+	)
+
 	(:durative-action prepare-buffer-cap
 		:parameters (?r - robot ?i - input ?m - cap_station)
 		:duration (= ?duration 1)

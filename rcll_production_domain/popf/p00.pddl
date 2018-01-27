@@ -235,6 +235,12 @@
     (= (path-length rs1_out start) 27.4246)
     (= (path-length rs2_in start) 26.6464)
     (= (path-length rs2_out start) 16.9367)
+    (= (station-process-duration bs) 10.0)
+    (= (station-process-duration cs1) 20.0)
+    (= (station-process-duration cs2) 20.0)
+    (= (station-process-duration rs1) 40.0)
+    (= (station-process-duration rs2) 40.0)
+    (= (station-process-duration ds) 15.0)
 
     (robot-outside r1 )
     ;(robot-outside r2 )
@@ -243,7 +249,7 @@
 (:goal (and
     ;(step-completed silver_base_p10)
     ;(step-completed grey_cap_p10)
-    ;(step-completed gate2_delivery_p10)
+    (step-completed gate2_delivery_p10)
     
     ;(step-completed silver_base_p70)
     ;(step-completed blue_ring_p70)
