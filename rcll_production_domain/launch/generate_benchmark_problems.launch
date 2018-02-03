@@ -1,0 +1,13 @@
+<launch>
+	<arg name="output_path" default="$(find rcll_production_domain)/benchmark_popf" />
+	<arg name="max_robot_count" default="3" />
+	<arg name="max_product_count" default="5" />
+
+	<node name="problem_generator_popf" pkg="rcll_production_domain" type="problem_generator_popf.py" required="true">
+		<rosparam command="load" file="$(find rcll_production_domain)/config/problem_generator_popf.yaml"/>
+		<param name="output_path" value="$(arg output_path)"/>
+		<param name="max_robot_count" value="$(arg max_robot_count)"/>
+		<param name="max_product_count" value="$(arg max_product_count)"/>
+		<param name="problem_template_path" value="$(find rcll_production_domain)/popf/problem_template.txt"/>
+	</node>
+</launch>

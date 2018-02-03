@@ -1,0 +1,67 @@
+base_colors:
+  - red
+  - silver
+  - black
+
+ring_colors:
+  - blue
+  - green
+  - orange
+  - yellow
+
+rings_at_station:
+  yellow: rs1
+  green: rs1
+  blue: rs2
+  orange: rs2
+
+cap_colors:
+  - grey
+  - black
+  
+caps_at_station:
+  grey: cs1
+  black: cs2
+
+delivery_gates:
+  - gate1
+  - gate2
+  - gate3
+
+material_costs:
+  orange: 0
+  green: 0
+  blue: 1
+  yellow: 2
+
+material_cost_values: [zero, one, two]
+
+operation_at_station:
+  base: bs
+  ring: rs
+  cap: cs
+  delivery: ds
+
+robot:
+  type: robot
+  name_pattern: "robot{index}"
+
+robot_facts: "    (robot-idle {name})
+    (robot-gripper-free {name})
+    (robot-outside {name})"
+
+product:
+  type: product
+  name_pattern: "p{index:02}"
+
+step:
+  type: step
+  name_pattern: "{detail}_{operation}_{product}"
+
+product_step: "    (has-step {product} {step})"
+initial_step: "    (initial-step {step})"
+step_precedence: "    (step-precedes {prev} {step})"
+step_material: "    (material-required {step} {cost})"
+step_station: "    (step-at-station {step} {station})"
+step_incomplete: "    (step-incomplete {step})"
+step_goal: "    (step-completed {step})"
