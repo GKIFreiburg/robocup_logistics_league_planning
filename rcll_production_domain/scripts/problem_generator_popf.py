@@ -43,6 +43,7 @@ class Problem:
 			self.initial_facts.append(params['initial_step'].format(step=name))
 		else:
 			self.initial_facts.append(params['step_precedence'].format(prev=self.product_steps[product][-1], step=name))
+			self.product_steps[product].append(name)
 		if operation == 'ring':
 			cost = int(params['material_costs'][detail])
 			self.total_material_cost += cost
